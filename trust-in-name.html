@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trust in name only — The Ledger</title>
+<meta name="description" content="OCC Interpretive Letter 1176 established that national trust banks can do anything a state trust company can do. A 2028 corporate decision letter applied that logic to lending. The analysts decoded the anonymous applicant in 125 minutes." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Inconsolata:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root{--navy:#0F2A44;--navy-deep:#081A2D;--navy-soft:#1F3D5C;--gold:#C8A44D;--gold-deep:#A88534;--gold-soft:#E5C87A;--cream:#F5EFE1;--cream-deep:#EBE2CE;--ink:#1A1814;--rule:#D9CFB8;--muted:#6B6354;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--cream);color:var(--ink);font-family:Georgia,"EB Garamond",serif;}
+  ::selection{background:var(--gold);color:var(--navy);}
+  input[type="range"]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;}
+  input[type="range"]::-webkit-slider-runnable-track{height:2px;background:var(--rule);}
+  input[type="range"]::-moz-range-track{height:2px;background:var(--rule);}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold-deep);margin-top:-8px;border:2px solid var(--cream);box-shadow:0 2px 6px rgba(15,42,68,.3);cursor:pointer;}
+  input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold-deep);border:2px solid var(--cream);box-shadow:0 2px 6px rgba(15,42,68,.3);cursor:pointer;}
+  #root-loading{min-height:60vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;color:var(--navy);font-family:'Playfair Display',Georgia,serif;}
+  #root-loading .brand{font-size:32px;font-weight:900;letter-spacing:-0.02em;}
+  #root-loading .tag{font-family:'Inconsolata',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-deep);}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  #root-loading .dots::after{content:'●●●';letter-spacing:4px;animation:pulse 1.4s infinite;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes growL{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="root-loading">
+    <div class="brand">The Ledger</div>
+    <div class="tag">Loading interactive edition</div>
+    <div class="dots"></div>
+  </div>
+</div>
+
+<script type="text/babel-template" id="article-jsx">
+const { useState, useEffect, useRef } = React;
+const {
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Cell,
+} = Recharts;
+
+const NAVY="#0F2A44",NAVY_DEEP="#081A2D",NAVY_SOFT="#1F3D5C";
+const GOLD="#C8A44D",GOLD_DEEP="#A88534",GOLD_SOFT="#E5C87A";
+const CREAM="#F5EFE1",CREAM_DEEP="#EBE2CE";
+const INK="#1A1814",RULE="#D9CFB8",MUTED="#6B6354";
+const CRIMSON="#9A2A2A",GREEN="#4A7C59";
+
+// ── Utilities ──────────────────────────────────────────────────
+function useReveal(){
+  const ref=useRef(null);
+  const[v,setV]=useState(false);
+  useEffect(()=>{
+    if(!ref.current)return;
+    const o=new IntersectionObserver(([e])=>{if(e.isIntersecting){setV(true);o.disconnect();}},{threshold:.12});
+    o.observe(ref.current);return()=>o.disconnect();
+  },[]);
+  return[ref,v];
+}
+function Reveal({children,delay=0}){
+  const[ref,v]=useReveal();
+  return<div ref={ref} style={{opacity:v?1:0,transform:v?"translateY(0)":"translateY(20px)",transition:`opacity 900ms cubic-bezier(.2,.8,.2,1) ${delay}ms,transform 900ms cubic-bezier(.2,.8,.2,1) ${delay}ms`}}>{children}</div>;
+}
+function CountUp({value,prefix="",suffix="",decimals=0,duration=1600}){
+  const[ref,v]=useReveal();
+  const[n,setN]=useState(0);
+  useEffect(()=>{
+    if(!v)return;
+    const t0=performance.now();let raf;
+    const tick=t=>{const p=Math.min(1,(t-t0)/duration);setN(value*(1-Math.pow(1-p,3)));if(p<1)raf=requestAnimationFrame(tick);};
+    raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf);
+  },[v,value,duration]);
+  return<span ref={ref}>{prefix}{n.toLocaleString(undefined,{minimumFractionDigits:decimals,maximumFractionDigits:decimals})}{suffix}</span>;
+}
+
+// ── Shell ──────────────────────────────────────────────────────
+function Masthead(){
+  return(
+    <header style={{background:NAVY,color:CREAM,borderBottom:`3px solid ${GOLD}`,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",inset:0,backgroundImage:`repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(200,164,77,0.04) 80px,rgba(200,164,77,0.04) 81px)`,pointerEvents:"none"}}/>
+      <div style={{maxWidth:1180,margin:"0 auto",padding:"18px 28px 14px",position:"relative"}}>
+        <div style={{display:"flex",alignItems:"baseline",gap:14}}>
+          <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontWeight:900,fontSize:40,letterSpacing:"-0.02em",lineHeight:1,color:CREAM}}>The Ledger</div>
+          <div style={{fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.3em",textTransform:"uppercase",color:GOLD,borderLeft:`1px solid ${GOLD}`,paddingLeft:14,paddingBottom:4}}>Est. 2026 · Interactive Edition</div>
+        </div>
+      </div>
+    </header>
+  );
+}
+function Strip(){
+  return(
+    <div style={{background:NAVY_DEEP,color:CREAM,padding:"9px 0",fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase"}}>
+      <div style={{maxWidth:1180,margin:"0 auto",padding:"0 28px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{color:GOLD_SOFT}}>Banking regulation · OCC chartering authority</span>
+        <span style={{opacity:.6}}>Vol. VIII · № 09 · September 2028</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Editorial atoms ───────────────────────────────────────────
+function PQ({children,attr}){
+  return(
+    <Reveal>
+      <figure style={{margin:"52px 0",padding:"34px 0 28px",borderTop:`2px solid ${NAVY}`,borderBottom:`1px solid ${RULE}`,position:"relative"}}>
+        <div style={{position:"absolute",top:-22,left:0,background:CREAM,padding:"0 14px 0 0",fontFamily:'"Playfair Display",Georgia,serif',fontSize:60,lineHeight:1,color:GOLD,fontWeight:900}}>"</div>
+        <blockquote style={{margin:0,fontFamily:'"Playfair Display",Georgia,serif',fontSize:28,lineHeight:1.35,color:NAVY,fontStyle:"italic",fontWeight:500}}>{children}</blockquote>
+        {attr&&<figcaption style={{marginTop:18,fontFamily:'"Inconsolata",monospace',fontSize:12,letterSpacing:"0.18em",textTransform:"uppercase",color:MUTED}}>— {attr}</figcaption>}
+      </figure>
+    </Reveal>
+  );
+}
+function P({children,drop=false}){
+  const first=drop&&typeof children==="string"?children.charAt(0):"";
+  const rest=drop&&typeof children==="string"?children.slice(1):children;
+  return(
+    <p style={{fontFamily:'Georgia,"EB Garamond",serif',fontSize:18,lineHeight:1.65,color:INK,margin:"0 0 22px",textAlign:"justify",hyphens:"auto"}}>
+      {drop?(<><span style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:78,lineHeight:.9,fontWeight:900,float:"left",marginRight:12,marginTop:6,marginBottom:-8,color:NAVY,letterSpacing:"-0.03em"}}>{first}</span>{rest}</>):children}
+    </p>
+  );
+}
+function SC({children}){return<strong style={{fontFamily:'"Playfair Display",Georgia,serif',fontVariant:"small-caps",letterSpacing:"0.06em",fontWeight:700,color:NAVY}}>{children}</strong>;}
+function H2({children,kicker}){
+  return(
+    <Reveal>
+      <div style={{margin:"54px 0 26px"}}>
+        {kicker&&<div style={{fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.28em",textTransform:"uppercase",color:GOLD_DEEP,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:12}}><span style={{display:"inline-block",width:28,height:1,background:GOLD_DEEP}}/>{kicker}</div>}
+        <h2 style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:32,lineHeight:1.15,margin:0,color:NAVY,fontWeight:800,letterSpacing:"-0.02em",borderBottom:`2px solid ${NAVY}`,paddingBottom:12}}>{children}</h2>
+      </div>
+    </Reveal>
+  );
+}
+function Fig({ey,title,sub,src,children,dark=false}){
+  return(
+    <Reveal>
+      <figure style={{margin:"48px 0",padding:"28px 28px 22px",background:dark?NAVY:"white",color:dark?CREAM:INK,border:`1px solid ${dark?NAVY_DEEP:RULE}`,position:"relative",boxShadow:dark?"0 20px 40px -20px rgba(15,42,68,.5)":"0 10px 30px -18px rgba(15,42,68,.18)"}}>
+        <div style={{position:"absolute",top:0,left:0,width:60,height:5,background:GOLD}}/>
+        <div style={{fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",color:GOLD,fontWeight:700,marginTop:6,marginBottom:10}}>{ey}</div>
+        <h3 style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:25,lineHeight:1.2,margin:"0 0 6px",color:dark?CREAM:NAVY,fontWeight:700,letterSpacing:"-0.01em"}}>{title}</h3>
+        {sub&&<div style={{fontFamily:"Georgia,serif",fontSize:15,color:dark?"rgba(245,239,225,0.7)":MUTED,marginBottom:20,fontStyle:"italic"}}>{sub}</div>}
+        <div style={{marginTop:8}}>{children}</div>
+        {src&&<div style={{marginTop:16,paddingTop:12,borderTop:`1px solid ${dark?"rgba(245,239,225,0.15)":RULE}`,fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:dark?"rgba(245,239,225,0.55)":MUTED}}>Source: {src}</div>}
+      </figure>
+    </Reveal>
+  );
+}
+function Tabs({items,active,onSelect,label}){
+  return(
+    <div style={{display:"flex",gap:0,marginBottom:24,flexWrap:"wrap"}}>
+      {items.map((item,i)=>(
+        <button key={i} onClick={()=>onSelect(i)} style={{padding:"10px 14px",background:active===i?NAVY:"transparent",color:active===i?CREAM:INK,border:`1px solid ${active===i?GOLD:RULE}`,borderRight:i<items.length-1?"none":`1px solid ${active===i?GOLD:RULE}`,cursor:"pointer",fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",fontWeight:600,transition:"all 200ms"}}>
+          {label(item,i)}
+        </button>
+      ))}
+    </div>
+  );
+}
+function InfoBlock({head,body,tone="neutral",mono=false}){
+  const bc=tone==="warn"?CRIMSON:tone==="gold"?GOLD_DEEP:NAVY_SOFT;
+  return(
+    <div style={{padding:"14px 18px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${bc}`,marginBottom:10}}>
+      {head&&<div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:5}}>{head}</div>}
+      <div style={{fontFamily:mono?'"Inconsolata",monospace':"Georgia,serif",fontSize:mono?12:14,color:INK,lineHeight:1.65,background:mono?CREAM_DEEP:"transparent",padding:mono?"10px 12px":0}}>{body}</div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 1 — What IL 1176 actually says
+// (the 2021 letter, corrected, with the §27(a) mechanism explained)
+// ════════════════════════════════════════════════════════════════
+function IL1176Explained(){
+  const[tab,setTab]=useState(0);
+  const tabs=[
+    {label:"The holding",content:(
+      <div>
+        <div style={{padding:"20px 24px",background:CREAM_DEEP,border:`1px solid ${RULE}`,borderLeft:`4px solid ${NAVY}`,marginBottom:16,fontFamily:'"Inconsolata",monospace',fontSize:12,letterSpacing:"0.08em",color:INK,lineHeight:1.9}}>
+          <div style={{color:NAVY,fontWeight:700,marginBottom:8,fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase"}}>OCC Interpretive Letter #1176 · January 11, 2021</div>
+          <div style={{fontFamily:"Georgia,serif",fontSize:14,fontStyle:"italic",color:INK,lineHeight:1.75}}>
+            "12 U.S.C. § 27(a) recognizes the authority of the OCC to charter a bank that limits its operations to <strong style={{fontStyle:"normal"}}>those of a trust company and activities related thereto</strong>. Activities of a trust company include activities permissible for a state trust bank or company <strong style={{fontStyle:"normal"}}>even if those state authorized activities are not necessarily considered fiduciary in nature</strong> under 12 U.S.C. § 92a and 12 C.F.R. Part 9."
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div style={{padding:"18px",background:"white",border:`1px solid ${RULE}`,borderTop:`3px solid ${NAVY_SOFT}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:8}}>What §92a covers</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.65}}>The traditional fiduciary powers: trustee, executor, administrator, guardian, registrar. Tightly defined. Requires an OCC "special permit." Subject to 12 C.F.R. Part 9's stringent governance requirements.</div>
+          </div>
+          <div style={{padding:"18px",background:NAVY,color:CREAM,borderTop:`3px solid ${GOLD}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD,marginBottom:8}}>What §27(a) adds</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.65}}>Chartering authority for banks that limit themselves to "trust company activities." IL 1176 reads this phrase to include ANY activity a state trust company may conduct — fiduciary or not. Non-fiduciary trust company activities do not trigger Part 9's governance requirements.</div>
+          </div>
+          <div style={{gridColumn:"1/-1",padding:"14px 18px",background:CREAM_DEEP,border:`1px solid ${RULE}`,borderLeft:`4px solid ${GOLD_DEEP}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD_DEEP,marginBottom:6}}>The additional hook: §24 Seventh</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>IL 1176 also notes that under the OCC's four-factor business-of-banking test, one factor is "whether the activity is authorized for state-chartered banks." If state trust companies can do it, that alone is evidence that any national bank may do it under §24 Seventh — even without a trust charter. The letter explicitly states: "an activity permitted for state trust banks may be part of the business of banking under the authority of 12 U.S.C. § 24(Seventh)."</div>
+          </div>
+        </div>
+      </div>
+    )},
+    {label:"The §27(a) mechanism",content:(
+      <div>
+        <div style={{fontFamily:"Georgia,serif",fontSize:15,color:INK,lineHeight:1.7,marginBottom:20,fontStyle:"italic"}}>The mechanism IL 1176 established is a two-step referral. Step one: identify what state trust companies in the home state may do. Step two: national trust bank may do the same. The result is that the scope of a national trust bank's permissible activities is defined largely by the home state's trust company law — then amplified by federal incidental-powers authority.</div>
+        <div style={{display:"grid",gap:10}}>
+          {[
+            {n:"Step 1",head:"Identify the home state",body:'The national trust bank is chartered in a specific state — the state in whose law "trust company" is defined. IL 1176 grounds the §27(a) analysis in what that state permits its own trust companies to do.',color:NAVY_SOFT},
+            {n:"Step 2",head:"What does that state permit?",body:"The OCC looks to state law to define the activity set. If the home state permits its trust companies to engage in a non-fiduciary activity — say, consumer lending — that activity is within the scope of §27(a) for the national trust bank.",color:GOLD_DEEP},
+            {n:"Step 3",head:"Federal amplification via §24 Seventh",body:'IL 1176 notes that a national trust bank "may also engage in activities beyond those authorized under state law for a state trust company provided such activities are permitted for a national bank under other sources of authority such as 12 U.S.C. §§ 24(Seventh) or 92a." The federal incidental-powers authority is additive, not a ceiling.',color:GOLD},
+            {n:"Step 4",head:"Federal preemption takes over",body:"Once chartered nationally, the trust bank's activities are conducted under federal authority — not state authority. OCC preemption sweeps away state laws that would conflict with the national bank's operations, including state rate caps, state CRA equivalents, and state consumer protection rules. The state law is used to define the activity; federal preemption then governs how the activity is conducted.",color:CRIMSON},
+          ].map((s,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"80px 1fr",gap:0,border:`1px solid ${RULE}`,overflow:"hidden"}}>
+              <div style={{background:s.color,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px 10px",textAlign:"center"}}>
+                <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:22,fontWeight:900,color:"white",letterSpacing:"-0.02em"}}>{s.n}</div>
+              </div>
+              <div style={{padding:"14px 18px",background:i===3?CREAM_DEEP:"white"}}>
+                <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:5}}>{s.head}</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>{s.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )},
+    {label:"The bootstrapping problem",content:(
+      <div>
+        <div style={{padding:"18px 20px",background:NAVY,color:CREAM,marginBottom:16,fontFamily:"Georgia,serif",fontSize:15,fontStyle:"italic",lineHeight:1.65,borderLeft:`4px solid ${GOLD}`}}>
+          The most legally interesting tension in the IL 1176 framework is what CSBS calls the <strong style={{color:GOLD,fontStyle:"normal"}}>"bootstrap and discard"</strong> problem. The national trust bank invokes state law to claim the authority to lend, then invokes federal preemption to shed the state-law obligations that accompany that permission.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div style={{padding:"18px",background:CREAM_DEEP,border:`1px solid ${RULE}`,borderTop:`3px solid ${GOLD_DEEP}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:8}}>What the state law provides</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.65}}>South Dakota's trust company law permits trust companies to originate consumer loans. That permission comes with a package: South Dakota's rate caps, its consumer protection framework, its licensing and examination requirements, and any community-benefit obligations the state has enacted for trust company lenders.</div>
+          </div>
+          <div style={{padding:"18px",background:NAVY,color:CREAM,borderTop:`3px solid ${CRIMSON}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:"#FF8A8A",marginBottom:8}}>What preemption removes</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.65}}>Once Sony Financial Trust is a national trust bank conducting federally authorised lending activity, OCC preemption under the NBA sweeps away South Dakota's rate caps, consumer protection rules, and community-benefit obligations. The state law justified the activity; it does not govern how the activity is conducted.</div>
+          </div>
+          <div style={{gridColumn:"1/-1",padding:"16px 20px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${NAVY}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:7}}>The CSBS argument</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.65}}>CSBS argues that this cannot be the correct reading of §27(a). The provision authorises trust company activities — activities as a trust company conducts them, including under the regulatory regime that defines and constrains those activities. A trust company lending under South Dakota law is constrained by South Dakota law. A national trust bank that claims South Dakota lending authority but then operates free of South Dakota's constraints is not conducting a "trust company activity" — it is conducting a new kind of activity that no trust company, state or national, has ever conducted before. The §27(a) authority evaporates the moment preemption is invoked.</div>
+          </div>
+          <div style={{gridColumn:"1/-1",padding:"14px 18px",background:CREAM_DEEP,border:`1px solid ${RULE}`,borderLeft:`4px solid ${GOLD}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD_DEEP,marginBottom:5}}>Post-Loper Bright: courts decide</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>Under Chevron, courts would have deferred to the OCC's reading of §27(a) and the preemption doctrine. Post-Loper Bright (2024), a court will decide independently whether §27(a)'s "trust company activities" includes lending divorced from the state regulatory framework that defines and constrains those activities. This is a genuinely open statutory question.</div>
+          </div>
+        </div>
+      </div>
+    )},
+  ];
+  return(
+    <Fig ey="Figure 1 · Interactive" title="What OCC Interpretive Letter 1176 actually says"
+      sub="IL 1176 was issued January 11, 2021 by OCC Chief Counsel Jonathan Gould. Its holding is precise: national trust banks may engage in any activity permissible for a state trust company in their home state — fiduciary or not. That one sentence is the foundation for everything that follows in 2028. Select a tab."
+      src="OCC Interpretive Letter #1176 (Jan. 11, 2021); 12 U.S.C. §§ 24(Seventh), 27(a), 92a"
+    >
+      <Tabs items={tabs} active={tab} onSelect={setTab} label={(t)=>t.label}/>
+      <div key={tab} style={{animation:"slideIn 450ms cubic-bezier(.2,.8,.2,1)"}}>{tabs[tab].content}</div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 2 — The CDL: how the 2028 document works
+// The CDL applies IL 1176 to Sony's specific facts (SD charter)
+// ════════════════════════════════════════════════════════════════
+function CDLMechanism(){
+  const[tab,setTab]=useState(0);
+  const tabs=[
+    {label:"CDL vs. IL",content:(
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+        <div style={{padding:"20px",background:CREAM_DEEP,borderTop:`3px solid ${NAVY_SOFT}`}}>
+          <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:8}}>Interpretive Letter (IL)</div>
+          <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:17,fontWeight:700,color:NAVY,marginBottom:12}}>General legal position</div>
+          <ul style={{margin:0,padding:0,listStyle:"none",fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.7}}>
+            {["Published under a sequential number (e.g., #1176)","States the OCC's general view of what the statute permits","Applies to all institutions in similar circumstances","Citable as precedent by any applicant","Does not constitute approval of any specific activity"].map((t,i)=>(
+              <li key={i} style={{padding:"7px 0",borderBottom:i<4?`1px solid ${RULE}`:"none",display:"flex",gap:10}}><span style={{color:NAVY_SOFT,fontWeight:700,minWidth:16}}>→</span>{t}</li>
+            ))}
+          </ul>
+        </div>
+        <div style={{padding:"20px",background:NAVY,color:CREAM,borderTop:`3px solid ${GOLD}`}}>
+          <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD,marginBottom:8}}>Corporate Decision Letter (CDL)</div>
+          <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:17,fontWeight:700,color:CREAM,marginBottom:12}}>Institution-specific ruling</div>
+          <ul style={{margin:0,padding:0,listStyle:"none",fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.7}}>
+            {["Issued in response to a specific institution's inquiry","Applicant's name redacted before publication","Applies the general IL framework to the institution's specific facts","Provides legal authority for a formal application amendment","No notice-and-comment; issued as an interpretive ruling"].map((t,i)=>(
+              <li key={i} style={{padding:"7px 0",borderBottom:i<4?`1px solid rgba(245,239,225,0.15)`:"none",display:"flex",gap:10}}><span style={{color:GOLD,fontWeight:700,minWidth:16}}>→</span>{t}</li>
+            ))}
+          </ul>
+        </div>
+        <div style={{gridColumn:"1/-1",padding:"14px 18px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${GOLD_DEEP}`,fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>
+          <strong style={{fontFamily:'"Playfair Display",Georgia,serif',color:NAVY}}>The relationship between the two.</strong> IL 1176 (2021) established the general principle. The 2028 CDL applies that principle to a specific institution's facts. The CDL's legal argument: Sony Financial Trust is chartered in South Dakota. South Dakota permits its trust companies to originate consumer loans. Under IL 1176's reading of §27(a), Sony Financial Trust may therefore originate consumer loans as an activity of a trust company. The argument's validity depends entirely on whether IL 1176 is correctly decided — which, post-<em>Loper Bright</em>, a court will determine without deferring to the OCC.
+        </div>
+      </div>
+    )},
+    {label:"The South Dakota hook",content:(
+      <div>
+        <div style={{padding:"16px 20px",background:NAVY,color:CREAM,marginBottom:14,fontFamily:"Georgia,serif",fontSize:15,fontStyle:"italic",lineHeight:1.65,borderLeft:`4px solid ${GOLD}`}}>
+          The CDL's legal argument rests on a specific factual claim: that the state in which Sony Financial Trust is chartered — South Dakota — permits its own trust companies to engage in lending. The authority is not universal. It is derived from that state's law. The state choice is not incidental.
+        </div>
+        {[
+          {head:"Why South Dakota",
+           body:"South Dakota has historically offered an exceptionally permissive trust company regulatory environment — the reason the state attracted substantial trust company activity starting in the 1980s. Its trust statutes are broad, regularly updated, and explicitly contemplate non-fiduciary activities by trust companies. Several South Dakota trust statutes expressly permit trust companies to engage in lending as a related activity. Sony Financial Trust's choice of South Dakota as its chartering state is the prerequisite that makes the CDL argument possible.",
+           tone:"neutral"},
+          {head:"The alternative states",
+           body:"Wyoming and Nevada have similarly broad trust company frameworks and have in recent years actively competed with South Dakota for trust company chartering business — partly in anticipation of exactly this kind of federal trust bank activity. Delaware's trust laws are extensive but somewhat more constrained on the lending question. The choice of home state is a legal strategy, not an operational one: Sony's actual business operations are nationwide.",
+           tone:"neutral"},
+          {head:"The OCC's state-law analysis in the CDL",
+           body:"The CDL identifies specific provisions of South Dakota trust company law that permit lending activities and concludes that consumer instalment lending, BNPL credit, and commercial working capital lending are within the scope of activities South Dakota trust companies may conduct. The CDL does not address whether a South Dakota trust company has ever actually engaged in these activities at scale — it addresses the statutory permission.",
+           tone:"gold"},
+          {head:"CSBS's challenge to the state-law predicate",
+           body:"CSBS argues in its APA brief that the CDL misreads South Dakota trust company law — that the cited provisions authorise lending incidental to trust administration (e.g., a trustee making a loan to preserve trust assets), not stand-alone consumer lending programmes. If CSBS is correct, the CDL's state-law predicate fails, and with it the entire IL 1176 argument. Courts will have to read South Dakota trust company statutes to resolve this question.",
+           tone:"warn"},
+        ].map((s,i)=>(
+          <InfoBlock key={i} head={s.head} body={s.body} tone={s.tone}/>
+        ))}
+      </div>
+    )},
+    {label:"The identification game",content:(
+      <div>
+        <div style={{padding:"16px 20px",background:NAVY,color:CREAM,borderLeft:`4px solid ${GOLD}`,marginBottom:16,fontFamily:"Georgia,serif",fontSize:15,fontStyle:"italic",lineHeight:1.6}}>
+          The OCC published the CDL at 8:47am on a Monday morning in September 2028. The applicant's name was redacted. By 10:52am — <strong style={{color:GOLD,fontStyle:"normal"}}>125 minutes later</strong> — a Benchmark Capital analyst had published a research note identifying the anonymous applicant. The note cited four textual clues from the CDL's factual recitation.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
+          {[
+            {clue:"'The requesting institution holds a national trust charter and has received conditional approval to issue a payment stablecoin under the GENIUS Act of 2026'","match":"Eight institutions hold GENIUS Act trust charter approvals. This alone narrows the field dramatically."},
+            {clue:"'The requesting institution's trust charter encompasses fiduciary and related activities across gaming, streaming, and consumer electronics distribution channels'","match":"Only one GENIUS Act trust charter holder has gaming, streaming, and consumer electronics as its described platform. Zero ambiguity."},
+            {clue:"'The requesting institution is chartered in South Dakota'","match":"South Dakota is publicly listed in Sony Financial Trust's conditional charter approval notice published by the OCC in early 2027."},
+            {clue:"'The requesting institution seeks to offer lending products to consumers and third-party platform participants through its existing stablecoin wallet infrastructure'","match":"Matches publicly reported Sony management commentary on potential SEN Coin lending capabilities from Q2 2028 earnings call."},
+          ].map((c,i)=>(
+            <div key={i} style={{padding:"14px",background:CREAM_DEEP,border:`1px solid ${RULE}`}}>
+              <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:GOLD_DEEP,marginBottom:6,fontWeight:700}}>CDL language (paraphrased)</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:13,color:INK,fontStyle:"italic",marginBottom:10,lineHeight:1.5}}>{c.clue}</div>
+              <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:GREEN,marginBottom:5,fontWeight:700}}>Analyst identification</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:13,color:INK,lineHeight:1.5}}>{c.match}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:"14px 18px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${NAVY}`,fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>
+          <strong style={{fontFamily:'"Playfair Display",Georgia,serif',color:NAVY}}>Market reaction by close:</strong> Visa −5.2%, Mastercard −4.8%, Capital One −6.1%. Sony Tokyo +8.3% after-hours. Six weeks later, Sony Financial Trust filed its formal amended application citing the CDL on page one and thirty-seven subsequent pages.
+        </div>
+      </div>
+    )},
+  ];
+  return(
+    <Fig ey="Figure 2 · Interactive" title="The 2028 corporate decision letter — and the South Dakota hook"
+      sub="The CDL applies IL 1176's §27(a) mechanism to Sony's specific facts. The critical predicate: Sony is chartered in South Dakota, and South Dakota trust companies may lend. IL 1176 says national trust banks can do what state trust companies do. Select a tab."
+      src="The Ledger, from OCC Corporate Decision Letter (Sept. 2028), IL 1176 (Jan. 2021), and Benchmark Capital research note"
+    >
+      <Tabs items={tabs} active={tab} onSelect={setTab} label={(t)=>t.label}/>
+      <div key={tab} style={{animation:"slideIn 450ms cubic-bezier(.2,.8,.2,1)"}}>{tabs[tab].content}</div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 3 — Legal vulnerabilities (Loper Bright + APA + merits)
+// ════════════════════════════════════════════════════════════════
+function LegalVulnerabilities(){
+  const[tab,setTab]=useState(0);
+  const tabs=[
+    {label:"Loper Bright",content:(
+      <div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+          <div style={{padding:"18px",background:CREAM_DEEP,border:`1px solid ${RULE}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:7}}>Under Chevron (pre-2024)</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.65}}>The OCC's interpretation of §27(a) in IL 1176 — that national trust banks may engage in any activity state trust companies may conduct — commands judicial deference unless unreasonable. Courts uphold agency statutory interpretations in the vast majority of cases. IL 1176 is nearly litigation-proof.</div>
+            <div style={{marginTop:12,padding:"10px 12px",background:NAVY_SOFT,color:CREAM,fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.1em"}}>OUTCOME: IL 1176 and the CDL stand unless clearly unreasonable.</div>
+          </div>
+          <div style={{padding:"18px",background:NAVY,color:CREAM,border:`1px solid ${NAVY_DEEP}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD,marginBottom:7}}>Post-Loper Bright (2024–present)</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.65}}>Courts "must exercise their own independent judgment in determining the meaning of the law." The court reads §27(a)'s "trust company and activities related thereto" and decides, de novo, whether that phrase encompasses consumer lending divorced from the state regulatory framework that constrains state trust company lending. The OCC's view is one brief among several.</div>
+            <div style={{marginTop:12,padding:"10px 12px",background:"rgba(154,42,42,0.3)",color:CREAM,fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.1em"}}>OUTCOME: A court could invalidate IL 1176 itself — not just the CDL.</div>
+          </div>
+        </div>
+        <div style={{padding:"16px 20px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${GOLD}`,fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.65}}>
+          <strong style={{fontFamily:'"Playfair Display",Georgia,serif',color:NAVY}}>The deeper Loper Bright risk:</strong> The CSBS challenge is not just against the CDL — it argues IL 1176 itself was wrongly decided. If a court agrees that §27(a) does not extend to non-fiduciary state trust company activities, IL 1176's foundational holding is wrong and every national trust bank relying on it is operating outside its authorized activity set. The CDL is the immediate target; IL 1176 is the ultimate stakes.
+        </div>
+      </div>
+    )},
+    {label:"APA: final agency action?",content:(
+      <div>
+        <div style={{padding:"14px 20px",background:NAVY,color:CREAM,marginBottom:14,fontFamily:"Georgia,serif",fontSize:15,fontStyle:"italic",lineHeight:1.6,borderLeft:`4px solid ${GOLD}`}}>
+          Before reaching the merits, CSBS must clear a threshold APA question: does the CDL constitute "final agency action" subject to challenge under APA §702? Courts have split on this question for OCC CDLs for decades. Post-Loper Bright, clearing this threshold matters far more.
+        </div>
+        {[
+          {head:"Argument that CDLs ARE final agency action (Bennett v. Spear test)",
+           body:"Under Bennett v. Spear (1997), an agency action is final if it (1) marks the consummation of the agency's decision-making process and (2) determines rights or obligations or has legal consequences. A CDL satisfies both: the OCC has completed its legal analysis, and the CDL changes the legal landscape — Sony can now amend its application citing the CDL as authority, other institutions can invoke it as precedent, and state regulators must respond to a new OCC position. Legal consequences clearly flow.",
+           tone:"neutral"},
+          {head:"Argument that CDLs are NOT final agency action",
+           body:"The OCC argues that a CDL is a preliminary interpretive ruling, not a final determination. Sony must still seek formal application approval — a separate proceeding in which interested parties may appear, and which the OCC may deny. The CDL is not the last word; the formal conditional approval is. Courts have accepted this argument in some CDL challenges, finding the subsequent application proceeding is the final action.",
+           tone:"neutral"},
+          {head:"Why the stakes are higher post-Loper Bright",
+           body:"Under Chevron, even if CSBS cleared the final-agency-action threshold, courts would have deferred to the OCC on the merits. The APA threshold was often decisive only in a jurisdictional sense. Post-Loper Bright, clearing the threshold puts CSBS before a court that decides the statutory question independently — making the threshold fight a gateway to a genuinely open merits question rather than a gateway to certain deference.",
+           tone:"gold"},
+        ].map((s,i)=><InfoBlock key={i} head={s.head} body={s.body} tone={s.tone}/>)}
+      </div>
+    )},
+    {label:"Notice-and-comment gap",content:(
+      <div>
+        {[
+          {head:"The OCC's position: CDLs are interpretive rules, not legislative rules",
+           body:"The OCC has consistently maintained that CDLs interpret existing law — they state what §27(a) already permits — and therefore fall within the APA §553(b)(A) exemption from notice-and-comment for interpretive rules. The public is not denied meaningful participation because the law is what it is; the CDL merely clarifies the OCC's reading.",
+           tone:"neutral"},
+          {head:"CSBS's challenge: a rule of this significance required notice-and-comment",
+           body:"By confirming that national trust banks may lend as a class of activity, the CDL effectively creates a new regulatory landscape. Institutions may now expand their activities, state laws are newly preempted, and competitors must respond. An interpretive rule that has such substantial practical effect is a legislative rule in substance and requires notice-and-comment. Post-Loper Bright, courts scrutinise agency procedure more carefully and are less likely to defer on procedural questions.",
+           tone:"warn"},
+          {head:"What vacatur produces",
+           body:"If a court finds the CDL required notice-and-comment and was issued without it, the CDL is vacated. Sony's amended application, citing the CDL as authority, loses its legal foundation simultaneously. The OCC could initiate a notice-and-comment rulemaking reaching the same conclusion — but that process takes 12 to 24 months, during which Sony's lending operations are in legal limbo. Any loans already originated under CDL authority become a separate problem.",
+           tone:"warn"},
+        ].map((s,i)=><InfoBlock key={i} head={s.head} body={s.body} tone={s.tone}/>)}
+      </div>
+    )},
+  ];
+  return(
+    <Fig ey="Figure 3 · Interactive" title="Three legal vulnerabilities — and the Loper Bright dimension of each"
+      sub="CSBS has filed an APA challenge raising three independent grounds. Each could defeat the CDL without reaching the others. Post-Loper Bright, the merits question is genuinely open. Select a tab."
+      src="The Ledger, from CSBS APA brief, Bennett v. Spear (1997), Loper Bright Enterprises v. Raimondo (2024)"
+    >
+      <Tabs items={tabs} active={tab} onSelect={setTab} label={(t)=>t.label}/>
+      <div key={tab} style={{animation:"slideIn 450ms cubic-bezier(.2,.8,.2,1)"}}>{tabs[tab].content}</div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 4 — Sony's lending products + §27(a)/IL 1176 hook
+// ════════════════════════════════════════════════════════════════
+function SonyProducts(){
+  const[sel,setSel]=useState(0);
+  const products=[
+    {name:"PSN Consumer Instalment",cat:"Consumer lending",size:"$500–$5,000",term:"6–36 months",rate:"Prime + 3.5–9.5%",vol:"$2.1bn yr-1 projection",
+     uw:"Proprietary SEN Credit Score: PSN transaction history, SEN Coin wallet behaviour, gaming engagement. Traditional FICO supplemental.",
+     hook:"Sony's application argues that South Dakota trust companies may originate consumer instalment loans as a related activity under South Dakota codified law. Under IL 1176's reading of §27(a), Sony Financial Trust may do the same. The application cites specific South Dakota statutory provisions authorising trust companies to make loans in connection with their activities.",
+     risk:"The CDL predicate rests on CSBS's disputed reading of South Dakota trust law. If CSBS is right that South Dakota's lending provisions apply only to loans incidental to trust administration — not standalone consumer lending programmes — the §27(a) authority evaporates. Additionally, the CFPB has flagged the SEN Credit Score for disparate-impact review under ECOA.",
+     color:NAVY},
+    {name:"SEN BNPL",cat:"Point-of-sale credit",size:"$50–$1,500",term:"4 payments / 6 weeks",rate:"0% promo / 19.9% deferred",vol:"$4.8bn yr-1 projection",
+     uw:"Real-time SEN Coin balance, spending velocity, SEN Credit Score. Two-second decision at PSN checkout.",
+     hook:"The application characterises BNPL as a form of short-term lending activity authorised for South Dakota trust companies, and additionally as incidental to Sony's payment stablecoin activities under §24 Seventh's incidental-powers provision — a separate, cumulative legal basis that does not require the §27(a)/IL 1176 framework.",
+     risk:"The §24 Seventh argument for BNPL is potentially stronger than the §27(a) argument for instalment lending — BNPL embedded in a stablecoin payment is arguably incidental to a payment stablecoin trust function. But the CFPB's 2025 BNPL rule raises TILA disclosure questions that neither the CDL nor the application resolves.",
+     color:GOLD_DEEP},
+    {name:"Indie Developer Capital",cat:"Commercial lending",size:"$25k–$500k",term:"12–48 months",rate:"Prime + 2.0–5.0%",vol:"$380m yr-1 projection",
+     uw:"PSN developer sales history, App Store revenue, milestone-based disbursement tied to product launch gates.",
+     hook:"The application invokes both §27(a) (South Dakota trust companies may make commercial loans) and §24 Seventh (lending to platform participants is incidental to Sony's stablecoin trust functions as platform custodian). This is the most novel combination of authorities in the application and the product most likely to require a separate OCC ruling.",
+     risk:"The 'platform custodian as trust function' argument under §24 Seventh is novel. No prior OCC authority has recognised this theory. And the §27(a) predicate raises the same South Dakota law dispute as the consumer instalment product. ICBA specifically opposes this product as a structural subsidy for platform lending displacing SBA-backed community bank products.",
+     color:GREEN},
+    {name:"SEN Revolving Credit (Phase II)",cat:"Consumer revolving credit",size:"Up to $25,000",term:"Revolving",rate:"Prime + 5.0–12.0%",vol:"Not filed; analyst est. $6–9bn at maturity",
+     uw:"Full platform data stack, third-party bureau, SEN Coin balance as partial collateral. Dynamic limit based on wallet velocity.",
+     hook:"Not yet formally filed. Sony's counsel is evaluating whether South Dakota trust law permits revolving consumer credit as a trust company activity — or whether the product requires a separate OCC approval beyond what the CDL addresses. The concern: a revolving credit facility looks substantively like a credit card, and credit card authority under the NBA has a distinct legal framework.",
+     risk:"The credit card preemption provisions of the NBA apply specifically to credit card issuers. If the OCC determines the revolving facility is a credit card product, the authority question is governed by a different statute. If it is not a credit card, the state-law predicate must still be established. Sony's outside counsel has reportedly told the company the CDL does not clearly resolve this product.",
+     color:CRIMSON},
+  ];
+  const pr=products[sel];
+  return(
+    <Fig ey="Figure 4 · Interactive" title="What Sony wants to lend — and the §27(a) argument for each"
+      sub="Each product in Sony's amended application maps to a specific claim under IL 1176's §27(a) framework. The arguments vary in strength and legal basis. Select a product."
+      src="The Ledger, from Sony Financial Trust OCC amended application (Oct. 2028), CFPB RFI response, ICBA testimony"
+    >
+      <div style={{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"}}>
+        {products.map((p,i)=>(
+          <button key={i} onClick={()=>setSel(i)} style={{padding:"10px 16px",background:sel===i?NAVY:"white",color:sel===i?CREAM:NAVY,border:`1px solid ${sel===i?GOLD:RULE}`,cursor:"pointer",fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",fontWeight:600,transition:"all 200ms"}}>{p.name}</button>
+        ))}
+      </div>
+      <div key={sel} style={{animation:"slideIn 450ms cubic-bezier(.2,.8,.2,1)"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,marginBottom:16,border:`1px solid ${RULE}`}}>
+          {[["Size",pr.size],["Term",pr.term],["Rate",pr.rate],["Year-1 volume",pr.vol]].map(([label,val],i)=>(
+            <div key={i} style={{padding:"14px 16px",borderLeft:i>0?`1px solid ${RULE}`:"none",background:i%2===0?CREAM_DEEP:"white"}}>
+              <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:5}}>{label}</div>
+              <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:15,fontWeight:700,color:NAVY,lineHeight:1.2}}>{val}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:10}}>
+          <div style={{padding:"16px",background:CREAM_DEEP,borderTop:`3px solid ${pr.color}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:7}}>Underwriting model</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>{pr.uw}</div>
+          </div>
+          <div style={{padding:"16px",background:NAVY,color:CREAM,borderTop:`3px solid ${GOLD}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD,marginBottom:7}}>The §27(a) / IL 1176 argument</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.6,fontStyle:"italic"}}>{pr.hook}</div>
+          </div>
+        </div>
+        <div style={{padding:"14px 18px",background:"white",border:`1px solid ${RULE}`,borderLeft:`4px solid ${CRIMSON}`}}>
+          <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:CRIMSON,marginBottom:5}}>Regulatory vulnerability</div>
+          <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6}}>{pr.risk}</div>
+        </div>
+      </div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 5 — CRA gap
+// ════════════════════════════════════════════════════════════════
+function CRAGap(){
+  const[share,setShare]=useState(12);
+  const[lmi,setLmi]=useState(31);
+  const total=4200,tv=total*(share/100),lv=tv*(lmi/100),gap=lv*0.07;
+  return(
+    <Fig ey="Figure 5 · Interactive" title="The CRA gap the CDL opens"
+      sub="Trust-chartered lenders relying on the CDL bear no Community Reinvestment Act obligation. The preemption that removes state CRA equivalents is the same preemption that removes the state-law constraints on lending that IL 1176's framework invokes. Dial the projection."
+      src="The Ledger, from Federal Reserve Z.1 consumer credit data (2028) and NCRC analysis"
+      dark
+    >
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28,alignItems:"start"}}>
+        <div>
+          {[[share,"Trust-chartered lender market share",`${share}%`,2,35,1,setShare,"2%","35%"],[lmi,"Low/mod-income borrower share",`${lmi}%`,10,60,1,setLmi,"10%","60%"]].map((s,i)=>(
+            <div key={i} style={{marginBottom:22}}>
+              <div style={{fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:"rgba(245,239,225,0.6)",marginBottom:4}}>{s[1]}</div>
+              <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:28,fontWeight:800,color:CREAM,letterSpacing:"-0.02em",marginBottom:6}}>{s[2]}</div>
+              <input type="range" min={s[3]} max={s[4]} step={s[5]} value={s[0]} onChange={e=>s[6](parseFloat(e.target.value))}/>
+              <div style={{display:"flex",justifyContent:"space-between",fontFamily:'"Inconsolata",monospace',fontSize:10,color:"rgba(245,239,225,0.4)",marginTop:3}}><span>{s[7]}</span><span>{s[8]}</span></div>
+            </div>
+          ))}
+          <div style={{padding:"14px 16px",background:"rgba(200,164,77,0.1)",borderLeft:`3px solid ${GOLD}`,fontFamily:"Georgia,serif",fontSize:13,fontStyle:"italic",color:"rgba(245,239,225,0.85)",lineHeight:1.6}}>
+            The bootstrapping problem is most visible here: Sony invokes South Dakota's lending permission to establish authority, then invokes federal preemption to shed South Dakota's CRA-equivalent and consumer-protection framework that comes with that permission.
+          </div>
+        </div>
+        <div>
+          {[[`$${tv.toFixed(0)}bn`,"Trust-lender credit volume (CRA-exempt)","per year",GOLD],[`$${lv.toFixed(0)}bn`,"Low/mod-income volume outside CRA","no reinvestment obligation",GOLD_SOFT],[`$${gap.toFixed(1)}bn`,"CRA-equivalent credit gap (@ 7% LMI floor)","foregone annual community lending",CRIMSON]].map(([val,label,sub,accent],i)=>(
+            <div key={i} style={{marginBottom:i<2?18:0}}>
+              <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:"rgba(245,239,225,0.55)",marginBottom:4}}>{label}</div>
+              <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:34,fontWeight:900,color:accent,letterSpacing:"-0.03em",lineHeight:1}}>{val}</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:12,color:"rgba(245,239,225,0.6)",fontStyle:"italic",marginTop:4,marginBottom:i<2?10:0}}>{sub}</div>
+              {i<2&&<div style={{height:1,background:"rgba(245,239,225,0.15)"}}/>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIGURE 6 — Regulatory fault lines
+// ════════════════════════════════════════════════════════════════
+function FaultLines(){
+  const[act,setAct]=useState(0);
+  const actors=[
+    {name:"OCC",stance:"Author / Proponent",sc:GOLD,
+     pos:"The OCC issued the CDL confirming that Sony Financial Trust's South Dakota charter, combined with IL 1176's reading of §27(a), authorises consumer and commercial lending as activities of a trust company. The OCC's position is that this is not a new interpretation — IL 1176 has governed national trust bank activity since 2021, and the CDL merely applies that established framework to Sony's specific facts. The Comptroller has publicly described IL 1176 as correctly decided and stated that new OCC leadership's role is to apply its framework vigorously, not to revisit it.",
+     watching:"Whether Sony's SEN Credit Score satisfies ECOA disparate-impact requirements — the OCC's conditional approval will require fair-lending validation. The OCC is also watching the CSBS challenge closely: a judicial ruling that IL 1176 itself is wrong would affect every national trust bank operating under its authority, not just Sony.",
+     tension:"Post-Loper Bright, the OCC defends the CDL — and, implicitly, IL 1176 — in litigation without any judicial deference to its statutory interpretation. The agency that issued the letter, applied the letter, and will approve the application under the letter is now just one party arguing its reading of §27(a) to a court that will decide independently."},
+    {name:"CSBS",stance:"Opposed",sc:CRIMSON,
+     pos:"CSBS filed an APA challenge to the CDL within 21 days of its publication, arguing three independent grounds. On the merits, CSBS argues that IL 1176 itself was wrongly decided: §27(a)'s 'trust company and activities related thereto' does not extend to consumer lending, because lending is not an activity 'related to' trust administration in any historically recognised sense. CSBS also raises the bootstrapping problem specifically: the §27(a) framework requires that the activity be conducted as a trust company conducts it — including under the state regulatory regime that defines and constrains trust company activities. Preemption cannot be invoked to shed those constraints without losing the §27(a) authority.",
+     watching:"The DC Circuit's ruling on the final-agency-action threshold — which must be resolved before the merits can be reached. CSBS has also sought a preliminary injunction staying the CDL pending review. The Nationwide Cooperative Agreement has been invoked to coordinate all 50 state banking departments, making this the most significant multi-state regulatory coordination effort since the quantum-cybersecurity response of early 2029.",
+     tension:"CSBS member agencies supervise state-chartered trust companies in South Dakota, Wyoming, and other states that compete with national trust banks. The institutional interest and the legal argument are aligned. Twelve state attorneys general have filed supporting amicus briefs."},
+    {name:"CFPB",stance:"Cautious",sc:GOLD_DEEP,
+     pos:"The CFPB has issued an RFI on Sony's SEN Credit Score and its use of gaming behaviour and entertainment consumption data in consumer credit underwriting. The Bureau has not challenged the CDL itself but has stated clearly that its ECOA and TILA jurisdiction attaches to trust-chartered lenders regardless of the OCC's chartering decisions. The CFPB's 2025 BNPL rule applies to Sony's BNPL product — the question is whether the OCC's supervisory oversight satisfies the rule's compliance framework or whether direct CFPB examination is required.",
+     watching:"Whether the OCC will share fair-lending examination findings with the CFPB under interagency protocols. The Bureau's enforcement-only posture below the $10bn threshold creates a structural gap: Sony can accumulate fair-lending exposure before the CFPB has the procedural basis to examine it.",
+     tension:"The CFPB's enforcement-only posture below $10bn means it must wait for consumer complaints or OCC referrals before acting. This is a structural weakness the CDL process did not address and IL 1176 did not anticipate."},
+    {name:"ICBA",stance:"Strongly opposed",sc:CRIMSON,
+     pos:"ICBA has described the CDL as 'the logical conclusion of a regulatory strategy that began in 2021 with IL 1176 and that has, in seven years, converted a chartering letter about what trust companies may do into a framework that permits an entertainment conglomerate to become a consumer lender without a CRA obligation.' ICBA's formal challenge focuses specifically on the bootstrapping problem: the state-law authority Sony invokes includes the state's entire regulatory framework — if preemption removes that framework, the authority disappears with it. ICBA has also presented revenue-displacement modelling to the Senate Banking Committee.",
+     watching:"The Senate Banking Committee hearing in October 2028. ICBA has requested that the Committee examine whether IL 1176 should be addressed legislatively — either by amending §27(a) to define 'trust company activities' to exclude consumer lending, or by extending CRA obligations to national trust banks engaged in lending above a threshold.",
+     tension:"ICBA's member banks compete directly. Some have characterised ICBA's legal argument as commercially motivated. ICBA responds that the bootstrapping argument is legally independent of commercial interest — but the alignment of legal position and commercial benefit remains visible."},
+    {name:"Treasury / FSOC",stance:"Monitoring",sc:NAVY_SOFT,
+     pos:"The OFR has published a working paper examining the systemic risk implications of trust-chartered consumer lending under IL 1176. The paper notes that trust companies with large consumer lending portfolios but no deposit insurance and no Fed master account access are structurally exposed to liquidity stress, with limited resolution tools available compared to a full commercial bank. FSOC has added trust-chartered lenders to its non-bank monitoring workplan. Treasury has not recommended blocking the Sony application or challenging the CDL.",
+     watching:"Whether the CSBS challenge succeeds and how the circuit courts read §27(a). A judicial ruling that IL 1176 is wrong would require a significant reassessment of national trust bank activity broadly — affecting custody, stablecoin, and other functions that have been conducted under IL 1176's authority since 2021.",
+     tension:"The administration's posture is generally favourable to financial innovation. Treasury's monitoring function is more likely to produce additional OFR analysis than a formal FSOC designation or recommendation to block."},
+  ];
+  const a=actors[act];
+  return(
+    <Fig ey="Figure 6 · Interactive" title="Where each actor stands on the CDL and IL 1176"
+      sub="Five institutional actors, five positions. Select an actor for their full posture — including where their stated position and institutional interests create tension."
+      src="The Ledger, from agency comment letters, amicus briefs, OFR working paper, and background interviews"
+    >
+      <div style={{display:"flex",gap:0,marginBottom:24,flexWrap:"wrap"}}>
+        {actors.map((ac,i)=>(
+          <button key={i} onClick={()=>setAct(i)} style={{flex:"1 1 auto",padding:"14px 10px",background:act===i?NAVY:CREAM_DEEP,color:act===i?CREAM:NAVY,border:`1px solid ${RULE}`,borderBottom:act===i?`3px solid ${GOLD}`:`1px solid ${RULE}`,cursor:"pointer",transition:"all 200ms",textAlign:"center"}}>
+            <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:18,fontWeight:800}}>{ac.name}</div>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:ac.sc,marginTop:4,fontWeight:700}}>● {ac.stance}</div>
+          </button>
+        ))}
+      </div>
+      <div key={act} style={{animation:"slideIn 450ms cubic-bezier(.2,.8,.2,1)"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div style={{gridColumn:"1/-1",padding:"18px",background:CREAM_DEEP,border:`1px solid ${RULE}`,borderLeft:`4px solid ${a.sc}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:8}}>Stated position on the CDL and IL 1176</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:15,color:INK,lineHeight:1.65}}>{a.pos}</div>
+          </div>
+          <div style={{padding:"16px",background:"white",border:`1px solid ${RULE}`}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:MUTED,marginBottom:7}}>What they're watching</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:INK,lineHeight:1.6,fontStyle:"italic"}}>{a.watching}</div>
+          </div>
+          <div style={{padding:"16px",background:NAVY}}>
+            <div style={{fontFamily:'"Inconsolata",monospace',fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:GOLD,marginBottom:7}}>Institutional tension</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:14,color:"rgba(245,239,225,0.9)",lineHeight:1.6,fontStyle:"italic"}}>{a.tension}</div>
+          </div>
+        </div>
+      </div>
+    </Fig>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// MAIN
+// ════════════════════════════════════════════════════════════════
+function App(){
+  return(
+    <div style={{background:CREAM,color:INK,minHeight:"100vh",paddingBottom:80,fontFamily:'Georgia,"EB Garamond",serif'}}>
+      <div style={{position:"fixed",inset:0,pointerEvents:"none",opacity:.035,backgroundImage:"url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>\")",zIndex:1}}/>
+      <Masthead/><Strip/>
+
+      {/* Hero */}
+      <div style={{position:"relative",background:`linear-gradient(180deg,${CREAM} 0%,${CREAM_DEEP} 100%)`,borderBottom:`1px solid ${RULE}`,paddingTop:44,paddingBottom:52}}>
+        <div style={{maxWidth:1180,margin:"0 auto",padding:"0 28px",position:"relative",zIndex:2}}>
+          <Reveal>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18,fontFamily:'"Inconsolata",monospace',fontSize:12,letterSpacing:"0.22em",textTransform:"uppercase",color:MUTED}}>
+              <span style={{background:NAVY,color:GOLD,padding:"3px 9px",fontWeight:700}}>Special briefing</span>
+              <span>·</span><span>National trust charters · OCC IL 1176 · §27(a)</span>
+              <span>·</span><span style={{color:GOLD_DEEP,fontWeight:700}}>Interactive</span>
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <h1 style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:"clamp(46px,7vw,96px)",lineHeight:.95,margin:"0 0 22px",fontWeight:900,letterSpacing:"-0.035em",color:NAVY,maxWidth:1000}}>
+              Trust in <span style={{color:GOLD}}>name only</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={240}>
+            <div style={{fontFamily:'"Playfair Display",Georgia,serif',fontSize:"clamp(19px,2vw,24px)",lineHeight:1.4,color:MUTED,fontStyle:"italic",maxWidth:820,marginBottom:28,fontWeight:400,letterSpacing:"-0.005em"}}>
+              OCC Interpretive Letter 1176, issued in January 2021, established that
+              national trust banks may conduct any activity a state trust company may
+              conduct — fiduciary or not. A 2028 corporate decision letter applied that
+              logic to lending. The anonymous applicant was decoded in 125 minutes.
+              In a post-<em>Loper Bright</em> world, the courts will decide whether
+              IL 1176 was right in the first place.
+            </div>
+          </Reveal>
+          <Reveal delay={360}>
+            <div style={{display:"flex",gap:30,flexWrap:"wrap",paddingTop:18,borderTop:`1px solid ${RULE}`,fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.18em",textTransform:"uppercase",color:MUTED}}>
+              <span><span style={{color:NAVY,fontWeight:700}}>Washington, D.C.</span> · Pierre, S.D. · Tokyo · Columbus, Ohio</span>
+              <span>18-min read</span><span>6 interactive figures</span>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* Body */}
+      <article style={{maxWidth:780,margin:"0 auto",padding:"56px 28px 0",position:"relative",zIndex:2}}>
+        <Reveal>
+          <P drop>
+            {"The letter appeared on the OCC's public website at 8:47 on a Monday morning in September 2028, nested between a notice of proposed rulemaking on capital standards and a correction to a prior comment-period notice. Nine pages. The institution that had requested it was identified only as 'the requesting institution.' The OCC, consistent with its longstanding practice for corporate decision letters, had redacted the applicant's name before publication."}
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            By 10:52, a Benchmark Capital analyst covering gaming and financial
+            technology had published a research note. Its title was efficient in
+            the way that financial research sometimes achieves: "OCC CDL on trust
+            company lending — we believe the unnamed institution is Sony Financial
+            Trust, N.A." The note cited four textual clues from the CDL's factual
+            recitation, none of which individually was dispositive, and all four
+            of which together pointed to exactly one institution. By the time
+            European markets opened, the note was on every fintech desk in London.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            By market close, Visa was down <CountUp value={5.2} decimals={1} prefix="−" suffix="%" />,
+            Mastercard <CountUp value={4.8} decimals={1} prefix="−" suffix="%" />,
+            Capital One <CountUp value={6.1} decimals={1} prefix="−" suffix="%" />.
+            Sony's Tokyo-listed shares closed up{" "}
+            <CountUp value={8.3} decimals={1} suffix="%" /> in after-hours trading.
+            Six weeks later, Sony Financial Trust, N.A. filed a 114-page amendment
+            to its existing OCC trust charter application citing the CDL on page one
+            and thirty-seven subsequent pages.
+          </P>
+        </Reveal>
+
+        <PQ attr="Benchmark Capital research note, September 2028">
+          We believe the unnamed institution is Sony Financial Trust. The CDL
+          describes a GENIUS Act stablecoin trust charter encompassing gaming,
+          streaming, and consumer electronics with a nine-figure active user
+          base, chartered in South Dakota. Only one institution fits this
+          description. The valuation implications are significant.
+        </PQ>
+
+        <H2 kicker="Part I">The 2021 letter that made 2028 possible</H2>
+        <Reveal>
+          <P>
+            To understand what the September 2028 CDL says, it is necessary
+            to understand what <SC>OCC Interpretive Letter 1176</SC> said —
+            the actual letter, issued on January 11, 2021, signed by Jonathan V.
+            Gould, the OCC's Senior Deputy Comptroller and Chief Counsel. IL 1176
+            is not about lending, cryptocurrency, or stablecoins. It is about
+            chartering authority. Specifically, it is about what the phrase
+            "trust company and activities related thereto" in 12 USC §27(a)
+            actually means — and whether a national bank chartered to limit
+            its activities to those of a trust company is confined to fiduciary
+            activities, or whether it may do anything a state trust company
+            can do.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            The OCC's answer in IL 1176 was the latter, and it was stated with
+            considerable precision. The letter holds: "a national bank chartered
+            under 12 U.S.C. § 27(a) is not limited to fiduciary activities as
+            defined for purposes of 12 C.F.R. Part 9 and may engage in any
+            permissible activities of a trust company." Activities of a trust
+            company, IL 1176 continues, "include activities permissible for a
+            state trust bank or company even if those state authorized activities
+            are not necessarily considered fiduciary in nature." In seven years,
+            no subsequent OCC leadership has rescinded or significantly modified
+            IL 1176. The current Comptroller has publicly described it as correctly
+            decided. The 2028 CDL cites it as established authority.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            The mechanism IL 1176 established has two steps. Step one: identify
+            what a state trust company in the home state may do under state law.
+            Step two: a national trust bank may do the same, and may do more —
+            anything additionally authorised under §24 Seventh's incidental-powers
+            provision. The scope of a national trust bank's permissible activities
+            is therefore defined, in the first instance, by the law of the state
+            in which it is chartered. Then amplified by federal authority.
+            Then — and this is the part that troubles state regulators — largely
+            freed from the state-law obligations that would constrain a state
+            trust company conducting the same activities, because OCC preemption
+            governs how the activities are conducted once the national charter is
+            in place.
+          </P>
+        </Reveal>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><IL1176Explained/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <H2 kicker="Part II">South Dakota, and the 2028 corporate decision letter</H2>
+        <Reveal>
+          <P>
+            Sony Financial Trust is chartered in South Dakota. This is not an
+            accident. South Dakota has operated one of the most permissive trust
+            company regulatory frameworks in the United States since the 1980s —
+            a deliberate legislative policy that attracted substantial trust company
+            business to the state and that has continued to evolve in anticipation
+            of exactly the kind of national trust bank activity that IL 1176 makes
+            possible. South Dakota trust company statutes are broad, regularly
+            updated, and explicitly contemplate activities that are non-fiduciary
+            in nature.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            The September 2028 CDL's legal argument is therefore not a claim
+            of broad inherent authority for national trust banks to lend.
+            It is a specific application of IL 1176's §27(a) framework to
+            Sony's particular facts: Sony is chartered in South Dakota; South
+            Dakota trust companies may engage in certain lending activities as
+            related activities; therefore, under IL 1176, Sony Financial Trust
+            may do the same. The argument's validity depends entirely on whether
+            IL 1176's reading of §27(a) is correct — which is now the question
+            that a court will answer without deferring to the OCC.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            <SC>CSBS's challenge</SC> to the state-law predicate is both the
+            most technical and potentially the most decisive element of the
+            pending litigation. CSBS argues that the South Dakota statutory
+            provisions the CDL cites authorise lending only as incidental to
+            trust administration — a trustee may lend trust assets to preserve
+            them, a custodian may extend credit to settle a securities transaction.
+            These are not consumer lending programmes. A South Dakota trust company
+            operating a $2bn consumer instalment lending business is not conducting
+            an activity that South Dakota law authorises for trust companies; it is
+            conducting an activity that South Dakota law authorises for licensed
+            consumer lenders, which are subject to entirely different statutes.
+            If CSBS is right, the §27(a) predicate fails and the CDL's legal
+            foundation disappears.
+          </P>
+        </Reveal>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><CDLMechanism/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <PQ attr="CSBS general counsel">
+          IL 1176 says national trust banks may do what state trust companies
+          do. South Dakota trust companies may lend — under South Dakota's
+          consumer lending statute, with its rate caps, its licensing
+          requirements, and its examination framework. A national trust bank
+          that invokes South Dakota authority to lend, and then invokes federal
+          preemption to shed South Dakota's regulatory framework, is not
+          conducting a trust company activity. It is conducting a new kind of
+          activity that no trust company has ever conducted under those terms.
+        </PQ>
+
+        <H2 kicker="Part III">Three legal challenges — and what Loper Bright changed</H2>
+        <Reveal>
+          <P>
+            The CSBS APA challenge raises three independent arguments, any one
+            of which could invalidate the CDL without reaching the others.
+            Under <em>Chevron</em>, the third argument — whether IL 1176's
+            statutory interpretation is correct — was the argument that
+            mattered least, because courts deferred to the OCC's reading of
+            §27(a) so long as it was reasonable. Under <em>Loper Bright
+            Enterprises v. Raimondo</em>, decided in 2024, courts must
+            "exercise their own independent judgment in determining the meaning
+            of the law." The OCC's view of §27(a) is now one argument among
+            several. A court will read the statute and decide.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            This matters in two directions. The most obvious direction is that
+            the CDL is at risk. The less obvious direction is that IL 1176 itself
+            is at risk. A circuit court ruling that §27(a) does not encompass
+            non-fiduciary state trust company activities would not merely invalidate
+            the CDL — it would call into question the foundational holding of
+            IL 1176 and potentially affect the operations of every national trust
+            bank that has expanded its activities on IL 1176's authority since 2021.
+          </P>
+        </Reveal>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><LegalVulnerabilities/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <H2 kicker="Part IV">What Sony wants to lend — and the §27(a) argument for each</H2>
+        <Reveal>
+          <P>
+            Sony's amended application maps each proposed lending product to
+            a specific claim under IL 1176's §27(a) framework, citing specific
+            provisions of South Dakota trust company law for each product.
+            The application is careful to acknowledge the CDL's scope and
+            to articulate a distinct §24 Seventh argument for products where
+            the §27(a) predicate is weaker. The two sources of authority
+            are treated as cumulative, not alternative.
+          </P>
+        </Reveal>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><SonyProducts/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <H2 kicker="Part V">The CRA question — and the bootstrapping problem's distributional consequence</H2>
+        <Reveal>
+          <P>
+            The bootstrapping problem — invoke state authority to claim the
+            power to lend, invoke federal preemption to shed the state
+            regulatory framework that constrains that lending — has a
+            distributional consequence that the CDL does not acknowledge
+            and that state regulators have identified as its most practically
+            significant feature. When preemption sweeps away South Dakota's
+            consumer lending framework, it sweeps away not just the rate
+            caps but any community-benefit obligations, examination requirements,
+            and fair-lending enforcement mechanisms that the state had enacted
+            for trust company lenders. National trust bank lending is conducted
+            under OCC supervision, subject to ECOA as enforced by a CFPB that
+            cannot examine Sony proactively below the $10bn threshold, and
+            subject to no CRA obligation whatsoever.
+          </P>
+        </Reveal>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><CRAGap/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <Reveal>
+          <P>
+            The community bank argument — that this constitutes a structural
+            asymmetry in which platform companies obtain bank-charter lending
+            authority while avoiding bank-charter CRA obligations — is
+            commercially motivated and analytically correct. A community bank
+            in central Ohio originating personal loans under CRA is not competing
+            with Sony Financial Trust on equivalent terms. The asymmetry is not
+            a flaw in the implementation of IL 1176. It is a consequence of
+            the mechanism IL 1176 established: state-law authority plus federal
+            preemption produces an activity set that no state regulator fully
+            supervises and no federal obligation fully constrains.
+          </P>
+        </Reveal>
+
+        <H2 kicker="Part VI">Five actors, five positions</H2>
+      </article>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 28px"}}><FaultLines/></div>
+
+      <article style={{maxWidth:780,margin:"0 auto",padding:"0 28px"}}>
+        <Reveal>
+          <P>
+            The OCC expects to issue a conditional approval of Sony's amended
+            application in the first quarter of 2029. The DC Circuit proceedings
+            will not be resolved by then. The OCC has declined to pause its
+            review. Sony, having filed an amendment premised on legal authority
+            that a court may subsequently find does not exist — or, more
+            precisely, that IL 1176's reading of §27(a) was wrong from the
+            beginning — is making a business decision about when and at what
+            scale to commence lending operations.
+          </P>
+        </Reveal>
+        <Reveal>
+          <P>
+            The stakes of the litigation extend beyond Sony and beyond the
+            CDL. If a circuit court rules that §27(a)'s "trust company and
+            activities related thereto" does not encompass lending — or that
+            the bootstrapping problem defeats the §27(a) argument wherever
+            preemption removes the state regulatory constraints that define
+            the activity — IL 1176 itself is wrong. Every national trust bank
+            that has expanded its activities on IL 1176's authority since 2021,
+            in custody, stablecoin, and other non-fiduciary trust company
+            activities, is potentially conducting activities outside its
+            authorised scope. That is not a rounding error. It is a systemic
+            question about the foundational document of the national trust bank
+            charter system as it has operated for the past seven years.
+          </P>
+        </Reveal>
+
+        <PQ>
+          IL 1176 gave national trust banks the activity set of state trust
+          companies, amplified by federal incidental-powers authority, and
+          freed from state regulatory constraints by federal preemption.
+          The CDL applied that logic to lending. Sony applied to be first.
+          The courts will now decide whether the logic holds — or whether
+          the mechanism that made it possible was wrong from January 2021.
+        </PQ>
+
+        <Reveal>
+          <div style={{textAlign:"center",margin:"40px 0 20px",fontFamily:'"Playfair Display",Georgia,serif',fontSize:22,color:GOLD,fontWeight:900,letterSpacing:"0.4em"}}>§ § §</div>
+        </Reveal>
+
+        <Reveal>
+          <div style={{marginTop:56,padding:"22px 24px",background:CREAM_DEEP,borderLeft:`3px solid ${NAVY_SOFT}`,fontFamily:"Georgia,serif",fontSize:13,color:MUTED,fontStyle:"italic",lineHeight:1.6}}>
+            This is a work of narrative fiction set in 2028, grounded in real regulatory frameworks. OCC Interpretive Letter 1176 is a real document, issued January 11, 2021, signed by Jonathan V. Gould, Senior Deputy Comptroller and Chief Counsel. All quoted language attributed to IL 1176 in this article is taken directly from that document. The September 2028 corporate decision letter, Sony Financial Trust, N.A., the SEN Credit Score, the Benchmark Capital research note, and all specific market figures are fictional. 12 USC §§ 27(a), 24(Seventh), and 92a are real statutes. Loper Bright Enterprises v. Raimondo (2024) is a real Supreme Court decision. The CSBS Nationwide Cooperative Agreement, the dual banking system, the CRA, ECOA, and Treasury/FSOC are real. South Dakota's permissive trust company framework is real; the specific lending provisions the CDL is described as citing are fictional extrapolations.
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <div style={{marginTop:48,paddingTop:24,borderTop:`2px solid ${NAVY}`,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16,fontFamily:'"Inconsolata",monospace',fontSize:11,letterSpacing:"0.18em",textTransform:"uppercase",color:MUTED}}>
+            <span><span style={{color:NAVY,fontWeight:700}}>The Ledger</span> <span style={{color:GOLD_DEEP}}>· Interactive Edition</span></span>
+            <span>Filed from Washington, D.C., Pierre S.D., Tokyo &amp; Columbus, Ohio</span>
+          </div>
+        </Reveal>
+      </article>
+    </div>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+</script>
+
+<!-- Robust CDN loader: unpkg → jsdelivr fallback -->
+<script>
+(function(){
+  "use strict";
+  var DEPS=[
+    {name:"React",k:"React",urls:["https://unpkg.com/react@18.3.1/umd/react.production.min.js","https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"]},
+    {name:"ReactDOM",k:"ReactDOM",urls:["https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js","https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"]},
+    {name:"PropTypes",k:"PropTypes",urls:["https://unpkg.com/prop-types@15.8.1/prop-types.min.js","https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js"]},
+    {name:"Recharts",k:"Recharts",urls:["https://unpkg.com/recharts@2.12.7/umd/Recharts.js","https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.js"]},
+    {name:"Babel",k:"Babel",urls:["https://unpkg.com/@babel/standalone@7.24.7/babel.min.js","https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"]}
+  ];
+  var st=document.querySelector("#root-loading .tag");
+  function ss(m){if(st)st.textContent=m;}
+  function showErr(t,d){
+    var r=document.getElementById("root");if(!r)return;
+    r.innerHTML='<div style="max-width:640px;margin:80px auto;padding:28px 32px;background:#F5EFE1;border-left:4px solid #9A2A2A;font-family:Georgia,serif;color:#1A1814;line-height:1.6;"><div style="font-family:\'Playfair Display\',Georgia,serif;font-size:22px;font-weight:800;color:#0F2A44;margin-bottom:10px;">Could not load The Ledger</div><div style="font-size:15px;margin-bottom:14px;">'+t+'</div><div style="font-family:Inconsolata,monospace;font-size:12px;color:#6B6354;background:#EBE2CE;padding:10px 12px;word-break:break-all;">'+d+'</div><div style="font-size:13px;color:#6B6354;margin-top:14px;font-style:italic;">Serve via GitHub Pages or a local HTTP server — not directly from disk.</div></div>';
+  }
+  function load(urls,key,name){
+    return new Promise(function(res,rej){
+      var i=0;
+      function next(){
+        if(i>=urls.length){rej(new Error(name+": all CDN sources failed"));return;}
+        var s=document.createElement("script");
+        s.src=urls[i++];s.async=false;s.crossOrigin="anonymous";
+        s.onload=function(){typeof window[key]!=="undefined"?res():next();};
+        s.onerror=function(){next();};
+        document.head.appendChild(s);
+      }
+      next();
+    });
+  }
+  var c=Promise.resolve();
+  DEPS.forEach(function(d){c=c.then(function(){ss("Loading "+d.name+"\u2026");return load(d.urls,d.k,d.name);});});
+  c.then(function(){
+    ss("Compiling interactive figures\u2026");
+    try{
+      var src=document.getElementById("article-jsx");
+      if(!src)throw new Error("Article source not found");
+      var compiled=window.Babel.transform(src.textContent,{presets:["react"]}).code;
+      (new Function(compiled))();
+    }catch(e){console.error(e);showErr("The interactive figures failed to compile.",String(e&&e.stack?e.stack:e));}
+  }).catch(function(e){console.error(e);showErr("A required library could not be loaded.",String(e&&e.message?e.message:e));});
+  setTimeout(function(){
+    var l=document.getElementById("root-loading");
+    if(l&&l.isConnected&&typeof window.React==="undefined")showErr("Still loading after 20 seconds.","Check network or serve via HTTP — not file://.");
+  },20000);
+})();
+</script>
+</body>
+</html>
