@@ -580,16 +580,25 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     done = false;
     replay.classList.remove('show');
   });
+  /* When the clip cannot run, the page should rest on the frame it would have
+     ended on, so the payoff copy always sits over the city. */
+  function restOnEnd(){
+    poster.src = 'hero-ledger-end.jpg';
+    poster.style.display = '';
+    hero.classList.remove('playing');
+  }
+
   /* play() returns undefined on older engines, so the promise is optional. */
   function tryPlay(){
     var p = null;
     try { p = v.play ? v.play() : null; } catch (e) { p = null; }
     if (p && p.catch){
-      p.catch(function(){ done = true; replay.classList.add('show'); });
+      p.catch(function(){ done = true; restOnEnd(); replay.classList.add('show'); });
     }
   }
 
   replay.addEventListener('click', function(){
+    poster.src = 'hero-ledger-poster.jpg';
     try { v.currentTime = 0; } catch (e) {}
     done = false;
     replay.classList.remove('show');
@@ -599,6 +608,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   if (reduce){
     done = true;
     ph(2);
+    restOnEnd();
     replay.classList.add('show');
   } else {
     tryPlay();
