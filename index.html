@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The forward file &middot; The Ledger</title>
-<meta name="description" content="The Ledger forward file: six speculative dispatches on American banking, filed from 2027 to 2032.">
+<meta name="description" content="The Ledger forward file: six speculative dispatches on American banking, each filed from a year that has not happened yet.">
+<meta name="theme-color" content="#0a0e1c">
+<meta property="og:title" content="The forward file &middot; The Ledger">
+<meta property="og:description" content="Six speculative dispatches on American banking, filed from 2027 to 2032.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="hero-ledger-end.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0e1c'/%3E%3Crect x='6' y='7' width='20' height='2.6' fill='%23f4efe4'/%3E%3Crect x='6' y='13' width='13' height='1.4' fill='%23b4640f'/%3E%3Crect x='6' y='17' width='20' height='1.4' fill='%237a1f2b'/%3E%3Crect x='6' y='21' width='16' height='1.4' fill='%23b4640f'/%3E%3C/svg%3E">
+<link rel="preload" as="image" href="hero-ledger-poster.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,6 +32,10 @@
   --measure:34rem;
   --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
   --step-4:clamp(2.6rem,6.6vw,4.9rem);
+
+  /* Hero plate is dark in both themes, so it carries its own tokens. */
+  --plate:#0a0e1c; --plate-ink:#e9e4d8; --plate-soft:#a9a293;
+  --plate-rule:#2a3350; --plate-copper:#f6c81e; --plate-oxblood:#e0596c;
 }
 /* --- SECTION 1b - night theme ------------------------------------------- */
 html.night{
@@ -51,91 +62,149 @@ body{
 }
 :focus-visible{outline:2px solid var(--copper); outline-offset:3px}
 .wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
-.col{width:min(100%,var(--measure)); margin-inline:auto}
 .skip{
   position:absolute; left:-9999px; top:0; background:var(--oxblood);
-  color:var(--on-accent); padding:.6rem .9rem; z-index:70;
+  color:var(--on-accent); padding:.6rem .9rem; z-index:80;
   font-family:"Archivo",system-ui,sans-serif; font-size:.85rem;
 }
 .skip:focus{left:.75rem; top:.75rem}
 
 /* ==========================================================================
-   SECTION 3 - MASTHEAD
+   SECTION 3 - MARQUEE HERO
+   Full-bleed video plate with a timed three-phase story over it. Plays once
+   per visit, holds the payoff on the last frame, replay stays available.
+   If the video never arrives the plate falls back to a drawn paper field so
+   the page still reads as finished.
    ========================================================================== */
-.brandbar{
-  display:flex; align-items:center; justify-content:space-between; gap:1rem;
-  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
-  font-family:"JetBrains Mono",monospace; font-size:.64rem;
-  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+.hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  background:var(--plate);
+  min-height:min(86svh,760px);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:5.4rem 0 2.4rem;
 }
-.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
-.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
-.nameplate{
-  margin-top:1.6rem; border-top:3px solid var(--ink); border-bottom:1px solid var(--rule);
-  padding:1.4rem 1.6rem 1.5rem; background:
-    radial-gradient(120% 140% at 12% 0%, color-mix(in srgb,var(--oxblood) 12%,transparent) 0%, transparent 62%),
-    radial-gradient(90% 120% at 96% 8%, color-mix(in srgb,var(--copper) 10%,transparent) 0%, transparent 58%),
-    var(--raised);
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(10,14,28,.44) 0%, rgba(10,14,28,.06) 26%, rgba(10,14,28,.26) 58%, rgba(10,14,28,.82) 100%),
+    linear-gradient(90deg, rgba(10,14,28,.44) 0%, rgba(10,14,28,.08) 46%, transparent 74%);
 }
-.np-top{
-  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
-  flex-wrap:wrap; margin-bottom:1.1rem;
+#bg,#poster{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:0;
 }
-.np-brand{
-  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
-  font-size:1.15rem; letter-spacing:-.02em; text-transform:uppercase;
+#poster{z-index:1}
+.hero.playing #poster{opacity:0; transition:opacity .5s ease}
+/* Drawn fallback: shows only when the video and poster both fail to load. */
+.hero.noasset::before{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:
+    repeating-linear-gradient(180deg, rgba(233,228,216,.055) 0 1px, transparent 1px 13px),
+    radial-gradient(70% 90% at 78% 12%, rgba(246,200,30,.16) 0%, transparent 60%),
+    radial-gradient(80% 90% at 12% 88%, rgba(224,89,108,.20) 0%, transparent 62%),
+    var(--plate);
 }
-.np-brand .the{
-  font-family:"Fraunces",Georgia,serif; font-weight:300; font-style:italic;
-  text-transform:none; letter-spacing:0; margin-right:.18rem;
+.htop{
+  position:absolute; top:0; left:0; right:0; z-index:3;
+  padding:.95rem 0 .8rem;
+  border-bottom:1px solid rgba(233,228,216,.14);
 }
-.np-meta{
-  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
-  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+.htop .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem}
+.htop p,.htop a{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--plate-soft);
+  text-decoration:none;
 }
-.np-meta .dot{margin:0 .4rem; color:var(--rule-strong)}
-.kicker{
-  margin:0 0 .5rem; font-family:"JetBrains Mono",monospace; font-size:.66rem;
-  letter-spacing:.2em; text-transform:uppercase; color:var(--oxblood);
-}
-h1{
-  margin:0 0 .7rem; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
-  font-size:var(--step-4); line-height:.94; letter-spacing:-.035em;
-  max-width:19ch;
-}
-.deck{
-  margin:0 0 .9rem; font-size:var(--step-1); line-height:1.42; color:var(--ink-soft);
-  max-width:46ch; font-weight:300;
-}
-.standing{
-  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
-  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+.htop a{border-bottom:1px solid transparent}
+.htop a:hover{color:var(--plate-ink); border-bottom-color:var(--plate-copper)}
+.htop strong{
+  color:var(--plate-ink); font-family:"Archivo",system-ui,sans-serif;
+  font-weight:900; letter-spacing:.04em;
 }
 
+.story{position:relative; z-index:3}
+.line{
+  opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease;
+  position:absolute; bottom:0; left:0; right:0; pointer-events:none;
+}
+.line.on{opacity:1; transform:none; pointer-events:auto}
+.line[data-ph="2"].on{position:relative}
+.lkick{
+  margin:0 0 .55rem; font-family:"JetBrains Mono",monospace; font-size:.66rem;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--plate-copper);
+}
+.lbig{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+  color:var(--plate-ink); letter-spacing:-.03em; line-height:1.02;
+  font-size:clamp(1.9rem,4.6vw,3.2rem); max-width:22ch;
+}
+h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-width:20ch}
+.lsub{
+  margin:.9rem 0 0; max-width:52ch; color:var(--plate-soft);
+  font-size:var(--step-1); font-weight:300; line-height:1.45;
+}
+.cta{display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.4rem}
+.btn{
+  display:inline-block; text-decoration:none; padding:.62rem 1.1rem;
+  font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em;
+  text-transform:uppercase; border:1px solid var(--plate-rule);
+  color:var(--plate-ink); background:rgba(233,228,216,.06);
+  transition:background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.btn:hover{background:rgba(233,228,216,.12); border-color:var(--plate-copper); transform:translateY(-1px)}
+.btn.lead{background:var(--plate-oxblood); border-color:var(--plate-oxblood); color:#12060a; font-weight:700}
+.btn.lead:hover{background:var(--plate-copper); border-color:var(--plate-copper)}
+#replay{
+  position:absolute; right:1.1rem; bottom:1.1rem; z-index:4;
+  display:none; align-items:center; gap:.4rem; cursor:pointer;
+  background:rgba(10,14,28,.6); color:var(--plate-soft);
+  border:1px solid var(--plate-rule); padding:.4rem .7rem;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase;
+}
+#replay.show{display:inline-flex}
+#replay:hover{color:var(--plate-ink); border-color:var(--plate-copper)}
+
 /* ==========================================================================
-   SECTION 4 - THE FILE (entry list)
-   Each entry is a plate on a year rail. The rail carries the filed-from date
-   because the sequence, not the publication order, is the spine of the series.
+   SECTION 4 - STANDING STRIP
+   The count line under the hero, in the manner of the site's status bars.
+   ========================================================================== */
+.standing{
+  border-bottom:1px solid var(--rule); background:var(--raised);
+}
+.standing .wrap{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.4rem; align-items:center;
+  padding:.75rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);
+}
+.standing b{color:var(--copper); font-weight:700}
+.standing .sright{margin-left:auto}
+
+/* ==========================================================================
+   SECTION 5 - THE FILE
+   Year rail, then one plate per dispatch. Each plate carries a bespoke
+   monoline glyph rather than an illustration, matching the site's glyph sets.
    ========================================================================== */
 .filehead{
   display:flex; align-items:flex-end; justify-content:space-between; gap:1rem;
-  flex-wrap:wrap; margin:2.6rem 0 .9rem;
+  flex-wrap:wrap; margin:3rem 0 .2rem;
 }
 .filehead h2{
   margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
-  font-size:var(--step-2); letter-spacing:-.02em; line-height:1.1;
+  font-size:var(--step-2); letter-spacing:-.025em; line-height:1.1;
 }
 .filehead p{
   margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
   letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
 }
 .yearband{
-  margin-top:1.6rem; padding-top:.5rem; border-top:2px solid var(--ink);
-  display:flex; align-items:baseline; gap:.7rem;
+  margin-top:1.8rem; padding-top:.5rem; border-top:2px solid var(--ink);
+  display:flex; align-items:baseline; gap:.75rem;
 }
 .yearband span:first-child{
-  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.5rem;
-  letter-spacing:-.03em; color:var(--copper);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.55rem;
+  letter-spacing:-.035em; color:var(--copper);
 }
 .yearband span:last-child{
   font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.16em;
@@ -148,21 +217,30 @@ h1{
   transition:border-color .18s ease, transform .18s ease, background .18s ease;
 }
 .entry:hover{border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px)}
-.entry a{display:block; color:inherit; text-decoration:none; padding:1rem 1.1rem 1.05rem}
+.entry > a{
+  display:grid; grid-template-columns:4.6rem 1fr; gap:1rem;
+  color:inherit; text-decoration:none; padding:1.05rem 1.15rem 1.1rem;
+}
+.gwrap{
+  width:4.6rem; height:4.6rem; display:grid; place-items:center;
+  background:var(--sunk); border:1px solid var(--rule); color:var(--oxblood);
+}
+.gwrap svg{width:2.5rem; height:2.5rem; display:block}
+.entry:hover .gwrap{color:var(--copper); border-color:var(--rule-strong)}
 .e-meta{
-  display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:baseline;
-  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  display:flex; flex-wrap:wrap; gap:.4rem .9rem; align-items:baseline;
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem;
   letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);
 }
 .e-topic{color:var(--oxblood); font-weight:700}
 .e-h{
-  margin:.4rem 0 .35rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
-  font-size:clamp(1.25rem,3.1vw,1.6rem); line-height:1.1; letter-spacing:-.025em;
+  margin:.35rem 0 .35rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:clamp(1.25rem,3.1vw,1.6rem); line-height:1.08; letter-spacing:-.028em;
 }
-.entry a:hover .e-h{color:var(--oxblood)}
-.e-deck{margin:0 0 .7rem; font-size:.93rem; line-height:1.55; color:var(--ink-soft); max-width:62ch}
+.entry:hover .e-h{color:var(--oxblood)}
+.e-deck{margin:0 0 .75rem; font-size:.93rem; line-height:1.55; color:var(--ink-soft); max-width:62ch}
 .e-foot{
-  display:flex; flex-wrap:wrap; gap:.45rem .8rem; align-items:center;
+  display:flex; flex-wrap:wrap; gap:.45rem .8rem; align-items:center; margin:0;
   padding-top:.6rem; border-top:1px solid var(--rule);
   font-family:"JetBrains Mono",monospace; font-size:.6rem;
   letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);
@@ -173,27 +251,28 @@ h1{
 }
 .e-open{margin-left:auto; color:var(--copper); font-weight:700}
 
+/* --- SECTION 5b - card trace canvas -------------------------------------
+   Fixed to the viewport and re-read from the live rect each frame, so a page
+   that shifts under it cannot leave a ghost outline behind. Sleeps when no
+   card is hovered.
+   ------------------------------------------------------------------------ */
+#cardfx{position:fixed; inset:0; z-index:5; pointer-events:none}
+
 /* ==========================================================================
-   SECTION 5 - READING NOTE
+   SECTION 6 - READING NOTE + FOOTER
    ========================================================================== */
 .note{
-  margin:2.6rem 0 0; padding:1.1rem 1.2rem; background:var(--sunk);
+  margin:2.8rem 0 0; padding:1.15rem 1.25rem; background:var(--sunk);
   border-left:3px solid var(--copper);
 }
 .note h3{
-  margin:0 0 .4rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  margin:0 0 .45rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
   font-size:1rem; letter-spacing:-.01em;
 }
 .note p{margin:0; font-size:.92rem; line-height:1.6; color:var(--ink-soft); max-width:70ch}
 .note p + p{margin-top:.6rem}
-.note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
-.note a:hover{border-bottom-color:var(--oxblood)}
-
-/* ==========================================================================
-   SECTION 6 - FOOTER + THEME TOGGLE
-   ========================================================================== */
 footer{
-  margin:3.2rem 0 0; padding:1.4rem 0 3rem; border-top:1px solid var(--rule);
+  margin:3.2rem 0 0; padding:1.4rem 0 3.2rem; border-top:1px solid var(--rule);
   font-size:.8rem; line-height:1.6; color:var(--ink-faint); max-width:72ch;
 }
 footer .sig{
@@ -201,6 +280,8 @@ footer .sig{
   text-transform:uppercase; color:var(--ink-soft); margin:0 0 .6rem;
 }
 footer p{margin:0 0 .6rem}
+footer a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+footer a:hover{border-bottom-color:var(--oxblood)}
 #theme{
   position:fixed; right:1rem; bottom:1rem; z-index:60;
   background:var(--raised); color:var(--ink-soft);
@@ -214,35 +295,73 @@ footer p{margin:0 0 .6rem}
    SECTION 7 - RESPONSIVE + MOTION
    ========================================================================== */
 @media (max-width:640px){
-  .nameplate{padding:1.2rem 1rem 1.1rem}
+  .hero{min-height:min(78svh,620px); padding-top:4.6rem}
+  .entry > a{grid-template-columns:1fr; gap:.8rem}
+  .gwrap{width:3.4rem; height:3.4rem}
+  .gwrap svg{width:1.9rem; height:1.9rem}
   .e-open{margin-left:0}
+  .standing .sright{margin-left:0}
 }
-@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important; animation-duration:.01ms !important}
+  #cardfx{display:none}
+}
 </style>
 </head>
 <body>
 <a class="skip" href="#file">Skip to the file</a>
 <button type="button" id="theme">Night</button>
+<canvas id="cardfx" aria-hidden="true"></canvas>
 
-<div class="wrap">
-  <!-- ===== SECTION A - BRAND BAR ===== -->
-  <div class="brandbar">
-    <span>BankRegWire</span>
-    <span>Speculative &middot; The forward file</span>
+<!-- ===== SECTION A - MARQUEE HERO ===== -->
+<section class="hero" id="hero">
+  <video id="bg" muted playsinline preload="auto" aria-hidden="true">
+    <source src="hero-ledger-1080.webm" type="video/webm">
+    <source src="hero-ledger-1080.mp4" type="video/mp4">
+  </video>
+  <img id="poster" src="hero-ledger-poster.jpg" alt="" aria-hidden="true">
+
+  <div class="htop">
+    <div class="wrap">
+      <p><strong>The Ledger</strong> &middot; Forward file</p>
+      <p><a href="/">BankRegWire</a></p>
+    </div>
   </div>
 
-  <!-- ===== SECTION B - NAMEPLATE ===== -->
-  <header class="nameplate">
-    <div class="np-top">
-      <p class="np-brand"><span class="the">The</span> Ledger</p>
-      <p class="np-meta">Index <span class="dot">&middot;</span> Vol. I</p>
+  <div class="wrap story">
+    <div class="line" data-ph="0">
+      <p class="lkick">Every dispatch starts here</p>
+      <p class="lbig">Everything in this file is on the record.</p>
     </div>
-    <p class="kicker">Forward file &middot; Index</p>
-    <h1>The forward file</h1>
-    <p class="deck">Six dispatches on American banking, each written from inside a year that has not arrived. Every one of them starts from something already on the record in 2026 and follows it to the place it plausibly ends.</p>
-    <p class="standing">Six dispatches &middot; Filed from 2027 to 2032 &middot; Read in any order</p>
-  </header>
+    <div class="line" data-ph="1">
+      <p class="lkick">And then</p>
+      <p class="lbig">The record keeps running after the reporting stops.</p>
+    </div>
+    <div class="line" data-ph="2">
+      <p class="lkick">The Ledger &middot; Forward file</p>
+      <h1 class="lbig">Six dispatches from years that have not happened</h1>
+      <p class="lsub">American banking between 2027 and 2032, reported from inside each year. Every piece begins with something already on the record in 2026 and follows it to where it plausibly ends.</p>
+      <div class="cta">
+        <a class="btn lead" href="#file">Open the file</a>
+        <a class="btn" href="ledger-press-start-to-pay.html">Start at 2027</a>
+      </div>
+    </div>
+  </div>
 
+  <button type="button" id="replay" aria-label="Replay the opening">Replay</button>
+</section>
+
+<!-- ===== SECTION B - STANDING STRIP ===== -->
+<div class="standing">
+  <div class="wrap">
+    <span><b>Six</b> dispatches</span>
+    <span>Filed from 2027 to 2032</span>
+    <span>Vol. I</span>
+    <span class="sright">Read in any order</span>
+  </div>
+</div>
+
+<div class="wrap">
   <!-- ===== SECTION C - THE FILE ===== -->
   <main id="file">
     <div class="filehead">
@@ -255,10 +374,20 @@ footer p{margin:0 0 .6rem}
     <ol class="entries">
       <li class="entry">
         <a href="ledger-press-start-to-pay.html">
-          <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; TBD</span><span>Tokyo, New York and Washington, D.C.</span></p>
-          <p class="e-h">Press start to pay</p>
-          <p class="e-deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
-          <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Trust charters</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="16" width="36" height="20" rx="8"></rect>
+              <path d="M13 22v8M9 26h8"></path>
+              <circle cx="33" cy="26" r="6"></circle>
+              <path d="M33 22v8M30.5 24.2h5M30.5 27.8h5"></path>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; TBD</span><span>Tokyo, New York and Washington, D.C.</span></p>
+            <p class="e-h">Press start to pay</p>
+            <p class="e-deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
+            <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Trust charters</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
     </ol>
@@ -268,26 +397,55 @@ footer p{margin:0 0 .6rem}
     <ol class="entries">
       <li class="entry">
         <a href="ledger-nothing-sits-still.html">
-          <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; TBD</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
-          <p class="e-h">Nothing sits still</p>
-          <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
-          <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 18l10-6 10 6"></path>
+              <path d="M10 18v14M26 18v14M8 34h20"></path>
+              <path d="M14 22v8M22 22v8"></path>
+              <path d="M32 20l6 6-6 6M34 26h8"></path>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; TBD</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
+            <p class="e-h">Nothing sits still</p>
+            <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
+            <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
       <li class="entry">
         <a href="ledger-the-examiner-who-never-leaves.html">
-          <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; TBD</span><span>Washington, Topeka and Columbus, Ohio</span></p>
-          <p class="e-h">The examiner who never leaves</p>
-          <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
-          <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 10h-4v28h4M34 10h4v28h-4"></path>
+              <path d="M15 24c3-5 6-7.5 9-7.5s6 2.5 9 7.5c-3 5-6 7.5-9 7.5s-6-2.5-9-7.5z"></path>
+              <circle cx="24" cy="24" r="3"></circle>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; TBD</span><span>Washington, Topeka and Columbus, Ohio</span></p>
+            <p class="e-h">The examiner who never leaves</p>
+            <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
+            <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
       <li class="entry">
         <a href="ledger-nobodys-on-the-file.html">
-          <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; TBD</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
-          <p class="e-h">Nobody's on the file</p>
-          <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
-          <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8h16l8 8v24H12z"></path>
+              <path d="M28 8v8h8"></path>
+              <path d="M17 24h14M17 29h14" stroke-dasharray="3 3"></path>
+              <path d="M17 34h6"></path>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; TBD</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
+            <p class="e-h">Nobody's on the file</p>
+            <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
+            <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
     </ol>
@@ -297,18 +455,40 @@ footer p{margin:0 0 .6rem}
     <ol class="entries">
       <li class="entry">
         <a href="Standard_Setting.html">
-          <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; TBD</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
-          <p class="e-h">Assessed once, trusted often</p>
-          <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
-          <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="24" cy="24" r="5"></circle>
+              <circle cx="10" cy="12" r="2.4"></circle>
+              <circle cx="38" cy="12" r="2.4"></circle>
+              <circle cx="10" cy="36" r="2.4"></circle>
+              <circle cx="38" cy="36" r="2.4"></circle>
+              <path d="M12.1 13.8l8 7M35.9 13.8l-8 7M12.1 34.2l8-7M35.9 34.2l-8-7"></path>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; TBD</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
+            <p class="e-h">Assessed once, trusted often</p>
+            <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
+            <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
       <li class="entry">
         <a href="ledger-the-wallet-woke-up.html">
-          <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; TBD</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
-          <p class="e-h">The wallet woke up</p>
-          <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
-          <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
+          <span class="gwrap" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="12" y="24" width="24" height="16" rx="2"></rect>
+              <path d="M18 24v-6a6 6 0 0 1 11-3.2"></path>
+              <path d="M24 30v4"></path>
+              <path d="M33 13l4 4M37 13l-4 4"></path>
+            </svg>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; TBD</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
+            <p class="e-h">The wallet woke up</p>
+            <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+            <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
+          </span>
         </a>
       </li>
     </ol>
@@ -316,8 +496,8 @@ footer p{margin:0 0 .6rem}
     <!-- ===== SECTION D - READING NOTE ===== -->
     <div class="note">
       <h3>How to read the file</h3>
-      <p>The pieces are independent. Each one carries its own reporting, its own interactive modules and its own disclaimer, and none of them depends on the others for its argument.</p>
-      <p>They do share a world. The charter question in 2027 sets up the deposit market of 2031, and the supervisory framework built to catch the failures of 2023 is the thing that is still running when the cryptography gives way in 2032. Read in sequence, the file is one argument about how quickly the plumbing changes and how slowly the rules follow.</p>
+      <p>The pieces are independent. Each carries its own reporting, its own interactive modules and its own disclaimer, and none depends on the others for its argument.</p>
+      <p>They do share a world. The charter question in 2027 sets up the deposit market of 2031, and the supervisory framework built to catch the failures of 2023 is the thing still running when the cryptography gives way in 2032. Read in sequence, the file is one argument about how fast the plumbing changes and how slowly the rules follow.</p>
     </div>
   </main>
 
@@ -325,14 +505,14 @@ footer p{margin:0 0 .6rem}
   <footer>
     <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
     <p>Every dispatch in this file is a work of narrative fiction. Each one identifies, in its own footer, which elements are drawn from the real record and which are extrapolation. Named institutions, individuals, figures and outcomes dated after 2026 are fictional constructs unless a piece says otherwise.</p>
+    <p><a href="/">Back to BankRegWire</a></p>
   </footer>
-
 </div>
 
 <script>
 /* ==========================================================================
    SECTION 1 - THEME
-   Matches the site convention: bottom-right toggle, localStorage brw-theme.
+   Site convention: bottom-right toggle, localStorage brw-theme.
    ========================================================================== */
 (function(){
   var btn = document.getElementById('theme');
@@ -351,6 +531,150 @@ footer p{margin:0 0 .6rem}
     apply(next);
     try { localStorage.setItem('brw-theme', next); } catch (e) {}
   });
+})();
+
+/* ==========================================================================
+   SECTION 2 - TIMED STORY
+   Plays once on every visit, holds the payoff on the last frame, and shows
+   the payoff immediately if autoplay is blocked or the asset is missing.
+   ========================================================================== */
+(function(){
+  var v = document.getElementById('bg');
+  var hero = document.getElementById('hero');
+  var poster = document.getElementById('poster');
+  var replay = document.getElementById('replay');
+  var lines = [].slice.call(document.querySelectorAll('.line'));
+  var cur = -1, done = false;
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+
+  function ph(p){
+    if (p === cur) return;
+    cur = p;
+    lines.forEach(function(l){ l.classList.toggle('on', +l.dataset.ph === p); });
+  }
+  function tick(){
+    var t = v.currentTime || 0;
+    ph(done ? 2 : (t < 2.0 ? 0 : (t < 5.9 ? 1 : 2)));
+    requestAnimationFrame(tick);
+  }
+
+  /* Missing assets must not leave a black rectangle. */
+  var videoOk = false, posterOk = false;
+  function assetCheck(){
+    if (!videoOk && !posterOk) hero.classList.add('noasset');
+  }
+  v.addEventListener('loadeddata', function(){ videoOk = true; hero.classList.remove('noasset'); });
+  v.addEventListener('playing', function(){ hero.classList.add('playing'); });
+  v.addEventListener('error', function(){ done = true; assetCheck(); });
+  poster.addEventListener('load', function(){ posterOk = true; });
+  poster.addEventListener('error', function(){ poster.style.display = 'none'; assetCheck(); });
+  setTimeout(assetCheck, 2500);
+
+  v.addEventListener('ended', function(){
+    done = true;
+    hero.classList.remove('playing');
+    replay.classList.add('show');
+  });
+  v.addEventListener('play', function(){
+    done = false;
+    replay.classList.remove('show');
+  });
+  /* play() returns undefined on older engines, so the promise is optional. */
+  function tryPlay(){
+    var p = null;
+    try { p = v.play ? v.play() : null; } catch (e) { p = null; }
+    if (p && p.catch){
+      p.catch(function(){ done = true; replay.classList.add('show'); });
+    }
+  }
+
+  replay.addEventListener('click', function(){
+    try { v.currentTime = 0; } catch (e) {}
+    done = false;
+    replay.classList.remove('show');
+    tryPlay();
+  });
+
+  if (reduce){
+    done = true;
+    ph(2);
+    replay.classList.add('show');
+  } else {
+    tryPlay();
+    requestAnimationFrame(tick);
+  }
+})();
+
+/* ==========================================================================
+   SECTION 3 - CARD TRACE
+   A hairline that runs the perimeter of the hovered plate. The rect is read
+   live every frame and the canvas sleeps when nothing is hovered, so a page
+   that shifts underneath cannot strand a painted outline.
+   ========================================================================== */
+(function(){
+  var cv = document.getElementById('cardfx');
+  if (!cv || !cv.getContext) return;
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+  if (reduce) return;
+
+  var ctx = cv.getContext('2d');
+  if (!ctx) return;
+  var target = null, t0 = 0, raf = 0;
+
+  function size(){
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.floor(window.innerWidth * d);
+    cv.height = Math.floor(window.innerHeight * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  size();
+  window.addEventListener('resize', size);
+
+  function accent(){
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--copper');
+    return (v || '#b4640f').trim();
+  }
+  function clear(){ ctx.clearRect(0, 0, cv.width, cv.height); }
+
+  function frame(now){
+    if (!target){ clear(); raf = 0; return; }
+    var r = target.getBoundingClientRect();
+    var per = 2 * (r.width + r.height);
+    var head = ((now - t0) / 1400) % 1;
+    var len = per * 0.34;
+    clear();
+    ctx.save();
+    ctx.strokeStyle = accent();
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.85;
+    ctx.setLineDash([len, per - len]);
+    ctx.lineDashOffset = -head * per;
+    ctx.strokeRect(r.left + 0.5, r.top + 0.5, r.width - 1, r.height - 1);
+    ctx.restore();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start(el){
+    target = el;
+    t0 = performance.now();
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
+  function stop(){
+    target = null;
+    if (raf){ cancelAnimationFrame(raf); raf = 0; }
+    clear();
+  }
+
+  [].slice.call(document.querySelectorAll('.entry')).forEach(function(el){
+    el.addEventListener('mouseenter', function(){ start(el); });
+    el.addEventListener('mouseleave', stop);
+    el.addEventListener('focusin', function(){ start(el); });
+    el.addEventListener('focusout', stop);
+  });
+  window.addEventListener('blur', stop);
+  window.addEventListener('scroll', function(){ if (!target) clear(); }, { passive: true });
 })();
 </script>
 </body>
