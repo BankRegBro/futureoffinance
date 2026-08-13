@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The wallet woke up &middot; The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+}
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+#progress{position:fixed; top:0; left:0; height:2px; width:0%; background:var(--copper); z-index:60}
+
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+}
+.nameplate{
+  margin-top:1.6rem; border-top:3px solid var(--ink); padding:1.5rem 1.4rem 1.3rem;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(122,31,43,.18), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(180,100,15,.24), transparent 62%),
+    linear-gradient(180deg,#e7dbc3 0%,#ebe2ce 55%,#f0e8d7 100%);
+}
+html.night .nameplate{
+  border-top-color:var(--copper);
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(224,89,108,.10), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(246,200,30,.12), transparent 62%),
+    linear-gradient(180deg,#0d1327 0%,#0b1024 55%,#0a0f20 100%);
+}
+.np-top{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem}
+.np-brand{font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.05rem; letter-spacing:.03em; text-transform:uppercase; margin:0}
+.np-brand .the{color:var(--oxblood)}
+.np-meta{font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft); margin:0}
+.np-meta .dot{color:var(--copper)}
+.kicker{font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood); font-weight:700; margin:0 0 .85rem}
+h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; font-size:var(--step-4); line-height:.95;
+  letter-spacing:-.02em; margin:0 0 1rem; max-width:14ch;
+}
+.deck{font-family:"Archivo",system-ui,sans-serif; font-weight:400; font-size:var(--step-1); line-height:1.45; color:var(--ink-soft); max-width:47ch; margin:0}
+.dateline{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:1.4rem 0 0; border-top:1px solid var(--rule-strong); padding-top:.8rem}
+
+/* ==========================================================================
+   SECTION 4 - SIGNATURE MODULE: THE FIRST 72 HOURS
+   A scrubbable crisis clock. Ticks are the real events, the readout carries
+   the price index, and the status line escalates from a chain curiosity to a
+   sector-wide cryptographic emergency.
+   ========================================================================== */
+.wake{margin:2.5rem 0 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:1.5rem 0 1.75rem}
+.wake-head{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between; align-items:flex-end; margin-bottom:1.2rem}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:0}
+.wake-state{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-weight:600; font-size:var(--step-2); line-height:1.12; margin:.35rem 0 0; max-width:26ch;
+}
+.dial{display:flex; align-items:center; gap:.9rem; min-width:min(100%,20rem)}
+.dial label{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+.dial input[type=range]{flex:1; accent-color:var(--oxblood); min-width:8rem}
+.dial output{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.1rem; min-width:4.6rem; text-align:right; font-variant-numeric:tabular-nums}
+
+.tickbar{position:relative; height:2.6rem; background:var(--raised); border:1px solid var(--rule); margin-bottom:-1px}
+.tickbar-fill{position:absolute; inset:0 auto 0 0; width:0; background:var(--oxblood); opacity:.14; transition:width .2s linear}
+.tick{position:absolute; top:0; bottom:0; width:1px; background:var(--rule-strong)}
+.tick.hit{background:var(--oxblood); width:2px}
+.tick.major{background:var(--ink)}
+.tick.major.hit{background:var(--oxblood)}
+
+.event{border:1px solid var(--rule); background:var(--raised); padding:1rem 1.1rem; min-height:8.4rem}
+.event-stamp{font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.13em; text-transform:uppercase; color:var(--oxblood); margin:0 0 .45rem}
+.event-title{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.16rem; line-height:1.25; margin:0 0 .5rem}
+.event-body{font-family:"Archivo",sans-serif; font-weight:400; font-size:.92rem; line-height:1.55; color:var(--ink-soft); margin:0}
+
+.readout{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); border-top:0}
+.rcell{background:var(--raised); padding:.85rem .9rem}
+.rcell dt{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .35rem}
+.rcell dd{margin:0; font-family:"Archivo",sans-serif; font-weight:800; font-size:1.5rem; line-height:1; font-variant-numeric:tabular-nums}
+.rcell.hot dd{color:var(--oxblood)}
+.caption{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.65; color:var(--ink-faint); margin:.85rem 0 0; max-width:64ch}
+
+/* ==========================================================================
+   SECTION 5 - ARTICLE BODY
+   ========================================================================== */
+article{padding:3rem 0 0}
+article p{margin:0 0 1.15rem}
+p.lede::first-letter{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; float:left; font-size:4rem; line-height:.8;
+  padding:.34rem .5rem 0 0; color:var(--oxblood);
+}
+h2{
+  font-family:"JetBrains Mono",monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink);
+  border-top:1px solid var(--ink); padding-top:.65rem; margin:2.75rem 0 1.1rem;
+}
+.lead-in{font-weight:700}
+blockquote{
+  margin:2rem 0; padding:0 0 0 1.35rem; border-left:3px solid var(--oxblood);
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-size:1.4rem; line-height:1.3; font-weight:500;
+}
+blockquote p{margin:0}
+
+/* ==========================================================================
+   SECTION 6 - MODULE: THE HARVEST TIMELINE
+   ========================================================================== */
+.harvest{margin:2.5rem 0; border:1px solid var(--rule); background:var(--raised)}
+.harvest-head{display:flex; flex-wrap:wrap; gap:.75rem; justify-content:space-between; align-items:center; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule)}
+.harvest-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint)}
+.harvest-body{padding:1.1rem}
+.bars{display:flex; align-items:flex-end; gap:3px; height:8rem; padding:.7rem .7rem 0; background:var(--sunk); border:1px solid var(--rule)}
+.yr{flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%}
+.yr i{display:block; background:var(--ink-faint); opacity:.42; transition:background .3s ease,opacity .3s ease,height .3s ease}
+.yr.readable i{background:var(--oxblood); opacity:.92}
+.yr.future i{opacity:.1}
+.bars-scale{display:flex; justify-content:space-between; font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.09em; color:var(--ink-faint); margin-top:.4rem}
+.hstate{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.05rem; margin:.9rem 0 .25rem}
+.hstate.open{color:var(--oxblood)}
+.hnote{font-family:"Archivo",sans-serif; font-size:.9rem; line-height:1.55; color:var(--ink-soft); margin:0}
+
+/* ==========================================================================
+   SECTION 7 - MODULE: MIGRATION LEDGER
+   ========================================================================== */
+.ledger{margin:2.5rem 0; border:1px solid var(--ink)}
+.ledger-head{padding:1rem 1.1rem; background:var(--ink); color:var(--paper)}
+.ledger-head h3{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.15rem; margin:0 0 .25rem}
+.ledger-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.filters{display:flex; flex-wrap:wrap; gap:.4rem; padding:.8rem 1.1rem; border-bottom:1px solid var(--rule); background:var(--raised)}
+.chip{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem .7rem; cursor:pointer; border:1px solid var(--rule-strong); background:transparent; color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.row{border-bottom:1px solid var(--rule); background:var(--raised)}
+.row:last-child{border-bottom:0}
+.row-btn{width:100%; display:grid; grid-template-columns:1fr auto auto; gap:.9rem; align-items:center; text-align:left; padding:.85rem 1.1rem; border:0; background:transparent; cursor:pointer; font-family:inherit; color:inherit}
+.row-btn:hover{background:var(--sunk)}
+.row-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.95rem}
+.row-cat{display:block; font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-top:.2rem}
+.badge{font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; padding:.28rem .55rem; white-space:nowrap}
+.badge.done{background:var(--live-wash); color:var(--live)}
+.badge.partial{background:var(--hold-wash); color:var(--hold)}
+.badge.exposed{background:var(--dead-wash); color:var(--oxblood)}
+.chev{font-family:"JetBrains Mono",monospace; color:var(--ink-faint); font-size:.8rem}
+.row-detail{display:none; padding:0 1.1rem 1.1rem; background:var(--sunk)}
+.row.open .row-detail{display:block}
+.row.open .chev{transform:rotate(90deg); display:inline-block}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.detail-cell{background:var(--raised); padding:.85rem}
+.detail-cell h4{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; margin:0 0 .5rem; color:var(--ink-faint)}
+.detail-cell ul{margin:0; padding-left:1.05rem; font-size:.88rem; line-height:1.55}
+.detail-cell li{margin-bottom:.3rem}
+.detail-note{font-family:"JetBrains Mono",monospace; font-size:.68rem; line-height:1.65; color:var(--ink-soft); margin:.85rem 0 0; padding-left:.7rem; border-left:2px solid var(--rule-strong)}
+.ledger-foot{padding:.8rem 1.1rem; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.07em; color:var(--ink-faint); border-top:1px solid var(--rule); background:var(--raised); margin:0}
+
+/* ==========================================================================
+   SECTION 8 - CLOSING + THEME TOGGLE
+   ========================================================================== */
+.endmark{color:var(--oxblood); font-size:.85rem; margin-bottom:1.6rem}
+footer{margin:3.5rem 0 0; border-top:3px solid var(--ink); padding:1.25rem 0 5rem}
+footer p{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.75; color:var(--ink-faint); margin:0 0 .9rem; max-width:80ch}
+footer .sig{color:var(--ink-soft)}
+#theme{position:fixed; right:1rem; bottom:1rem; z-index:60; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; padding:.6rem .8rem; cursor:pointer; background:var(--raised); color:var(--ink-soft); border:1px solid var(--rule-strong)}
+#theme:hover{color:var(--ink); border-color:var(--copper)}
+
+/* ==========================================================================
+   SECTION 9 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .readout{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .row-btn{grid-template-columns:1fr auto; gap:.5rem}
+  .chev{display:none}
+  p.lede::first-letter{font-size:3.1rem}
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+  .bars{height:6.5rem}
+  .event{min-height:10.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
+
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+
+/* ==========================================================================
+   SECTION 10 - THE FORWARD FILE (in-series navigation)
+   Plain links, no ids, no script. The strip carries the whole series so a
+   reader can see where this dispatch sits in the sequence and step either way.
+   ========================================================================== */
+.ff{margin:3.4rem auto 0; width:min(100%,52rem); border-top:3px solid var(--ink); padding-top:1.1rem}
+.ff-eyebrow{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--oxblood);
+}
+.ff-title{
+  margin:.35rem 0 .3rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:var(--step-1); line-height:1.2; letter-spacing:-.01em;
+}
+.ff-note{margin:0 0 1.3rem; font-size:.86rem; color:var(--ink-faint)}
+.ff-note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.ff-note a:hover{border-bottom-color:var(--oxblood)}
+
+.ff-grid{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr)); gap:.6rem;
+}
+.ff-item{margin:0}
+.ff-card{
+  display:block; height:100%; text-decoration:none; color:inherit;
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  padding:.75rem .85rem .85rem;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+a.ff-card:hover,a.ff-card:focus-visible{
+  border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px);
+}
+.ff-meta{
+  display:flex; gap:.5rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ff-year{color:var(--copper); font-weight:700}
+.ff-h{
+  margin:.35rem 0 .25rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:1rem; line-height:1.22; letter-spacing:-.01em;
+}
+.ff-sum{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-soft)}
+.ff-item.is-here .ff-card{
+  background:var(--sunk); border-left-color:var(--oxblood); cursor:default;
+}
+.ff-here{
+  display:inline-block; margin-top:.45rem;
+  font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood);
+}
+
+.ff-turn{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-top:1.1rem; padding-top:.8rem; border-top:1px solid var(--rule);
+}
+.ff-turn a{
+  max-width:22rem; text-decoration:none; color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.86rem;
+  line-height:1.3;
+}
+.ff-turn a:hover .ff-turn-h{border-bottom-color:var(--oxblood)}
+.ff-turn-lab{
+  display:block; font-family:"JetBrains Mono",monospace; font-weight:400;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:.2rem;
+}
+.ff-turn-h{border-bottom:1px solid var(--rule-strong); transition:border-color .18s ease}
+.ff-next{text-align:right; margin-left:auto}
+@media (max-width:640px){
+  .ff{margin-top:2.6rem}
+  .ff-turn{flex-direction:column}
+  .ff-next{text-align:left; margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" role="presentation"></div>
+<button type="button" id="theme">Night</button>
+
+<div class="wrap">
+
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span><a href="ledger-index.html">The forward file</a> &middot; Speculative &middot; Cryptography</span>
+  </div>
+
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Dispatch &#8470; TBD <span class="dot">&middot;</span> Vol. I</p>
+    </div>
+    <p class="kicker">Forward file &middot; Cryptography</p>
+    <h1>The wallet woke up</h1>
+    <p class="deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+    <p class="dateline">New York, Gaithersburg and Washington, D.C. &middot; Filed from 2032</p>
+  </header>
+
+  <!-- ===== SECTION C - SIGNATURE MODULE: THE FIRST 72 HOURS ===== -->
+  <section class="wake" aria-labelledby="wake-state">
+    <div class="wake-head">
+      <div>
+        <p class="eyebrow">14 November 2029 onward</p>
+        <p class="wake-state" id="wake-state">A dormant address signs a transaction</p>
+      </div>
+      <div class="dial">
+        <label for="hr">Elapsed</label>
+        <input type="range" id="hr" min="0" max="72" step="1" value="0" aria-describedby="wake-caption">
+        <output id="hr-out" for="hr">T+00:00</output>
+      </div>
+    </div>
+
+    <div class="tickbar" id="tickbar"><div class="tickbar-fill" id="tickbar-fill"></div></div>
+
+    <div class="event">
+      <p class="event-stamp" id="event-stamp">03:14 UTC</p>
+      <p class="event-title" id="event-title">Block-reward outputs from 2009 begin to move</p>
+      <p class="event-body" id="event-body">Addresses funded in the first weeks of the chain, untouched for twenty years and universally assumed unspendable, sign valid transactions in sequence.</p>
+    </div>
+
+    <dl class="readout">
+      <div class="rcell" id="c-btc"><dt>Bitcoin, indexed to prior close</dt><dd id="v-btc">100</dd></div>
+      <div class="rcell" id="c-moved"><dt>Value in motion</dt><dd id="v-moved">$0</dd></div>
+      <div class="rcell" id="c-status"><dt>Sector posture</dt><dd id="v-status">Normal</dd></div>
+    </dl>
+
+    <p class="caption" id="wake-caption">Scrub the clock. Ticks mark logged events, heavier ticks mark the four that changed the sector's posture. Figures are stylised and the sequence is fictional.</p>
+  </section>
+
+  <!-- ===== SECTION D - ARTICLE ===== -->
+  <article>
+    <div class="col">
+      <p class="lede">The first transaction cleared at 3.14 in the morning, London time, and for about forty minutes it was a curiosity that a few hundred people on the internet were arguing about. An address funded in January 2009, holding a block reward that had sat untouched for twenty years, had signed a valid transaction. Then another did. Then eleven more, in a steady unhurried sequence, none of them in any hurry at all.</p>
+
+      <p>By 3.36 the outputs had been consolidated. At 3.41 the consolidated balance, a little over 1.1m bitcoin, was sent in a single transaction to a deposit address at a regulated American exchange. At the prior day's close it was worth a fraction under thirty billion dollars.</p>
+
+      <p>There is no version of this that is a theft in the ordinary sense, and everyone who understood what they were looking at knew it within the hour. The private keys to those addresses are not lost in the way a password is lost. They are gone. The people who held them are dead or vanished or were never identified, and the entire premise of the asset was that a key you do not have is a key nobody can produce.</p>
+
+      <p>Somebody produced them. That was the message, and it was delivered in the most legible venue on earth: a public ledger that anyone can read, using the one set of addresses whose movement no one could explain away.</p>
+
+      <blockquote><p>"They did not need to publish a paper. They moved the coins. Every cryptographer on the planet understood the claim by breakfast."</p></blockquote>
+
+      <h2>Why the exchange</h2>
+
+      <p>The choice of destination is the detail that specialists still argue about, because sending thirty billion dollars of unexplained value to a regulated, surveilled, freezable American venue is not what somebody does when they want the money.</p>
+
+      <p>The exchange froze the deposit inside three hours, filed with FinCEN, and had Treasury on the phone before the sun was up in New York. None of the balance was liquidated. None of it has been. It sits, in litigation and in limbo, and the most widely held view among the people who have studied the transaction pattern is that this outcome was not merely foreseen but intended.</p>
+
+      <p><span class="lead-in">A capability of this kind</span> is worth vastly more as a demonstrated threat than as a realised theft, and it can only be demonstrated once. Doing it through an exchange that would certainly freeze the funds converts an act that would otherwise look like criminal opportunism into something closer to a diplomatic communication. The sender established, publicly and unambiguously, that they could take anything secured this way, and simultaneously established that on this occasion they had chosen not to.</p>
+
+      <p>Attribution has never been formally established. Three governments have made statements that stop just short of naming a fourth. The interesting question was never who profited, because nobody did.</p>
+
+      <h2>What the models actually did</h2>
+
+      <p>The popular account, that artificial intelligence broke encryption, is wrong in a way that matters to anyone trying to plan.</p>
+
+      <p>The theoretical algorithms had existed since the 1990s. The obstacle was engineering: running them on real hardware demanded error correction so expensive that credible resource estimates ran to millions of physical qubits, and every one of those estimates rested on design choices that human researchers had assembled by hand across two decades.</p>
+
+      <p>Models trained on the physics literature and on simulator output proved extraordinarily good at exactly that search. Better error correcting codes. Shorter circuit decompositions. More efficient routing. Tighter distillation. No single result was spectacular. Compounded across the whole stack they cut the resource requirement by roughly three orders of magnitude, and a machine that had been forty years away became a machine that several national programmes already possessed and had not mentioned.</p>
+
+      <p>"We did not get a breakthrough," one of the researchers involved in the subsequent post-mortem put it. "We got two hundred small optimisations that all pointed the same direction, and the direction was toward us."</p>
+
+      <p><span class="lead-in">The planning lesson</span> has been repeated since without much success. Timelines built on the assumption of human-paced engineering are not conservative estimates. They are estimates of one specific scenario, and that scenario quietly stopped being the relevant one around 2027 while the migration budgets stayed calibrated to the 2040s.</p>
+
+      <h2>Bitcoin was the proof, not the problem</h2>
+
+      <p>The asset was uniquely and irreparably exposed, for a reason peculiar to its design. In most systems a public key is a working credential that rotates on a schedule. On a public chain the key material is published permanently, by design, as the price of verifiability, and any output whose key has appeared is a standing target that cannot be recalled.</p>
+
+      <p>The remedy was obvious and impossible. Moving those balances to quantum-resistant addresses requires whoever holds them to move them, and the holders of the most exposed coins are dead, lost, or the founder. No authority could compel migration. No consensus process could resolve it in the days available. The market repriced on the arithmetic rather than waiting for a theft, which was correct and helped nobody, and what trades today trades as a collectible with an asterisk.</p>
+
+      <p>But the collapse of a single asset class, however large, is not why 14 November is taught in risk seminars. It is taught because of what the demonstration implied about everything else that was secured the same way, which was very nearly everything.</p>
+
+      <h2>The trust layer</h2>
+
+      <p>The banking system's first reaction was relief, and it was half earned. Its key material is not published. Its certificates rotate. It had a migration path, standardised years earlier, and the large institutions had begun walking it. Live customer traffic was re-secured with genuine competence inside eighteen months.</p>
+
+      <p>The relief did not survive contact with the second-order question, which is what happens to a system whose entire notion of authenticity rests on signatures that can now be forged.</p>
+
+      <p><span class="lead-in">Consider code signing.</span> Every bank in the country runs software that its own systems accept because it carries a valid signature from a trusted publisher. The signature is the reason the update installs without a human deciding to trust it. An adversary able to produce a signature indistinguishable from the genuine article does not need to breach a network. It can present itself as the vendor.</p>
+
+      <p>The same logic runs through the certificate authorities that vouch for the identity of every institution online, through the attestation chains that let a hardware security module prove it is the module it claims to be, and through the authentication that lets one bank believe a message genuinely came from another. None of this is data confidentiality. It is identity, and identity was the thing that broke.</p>
+
+      <p>What followed was the largest coordinated revocation and reissuance in the history of the internet, conducted over a weekend by people who had rehearsed it only as a tabletop exercise. Two card networks paused a settlement window rather than process instructions they could not cryptographically vouch for. It held. It was close, and everyone involved says so.</p>
+
+      <blockquote><p>"Confidentiality was the problem we had prepared for. Authenticity was the problem we had."</p></blockquote>
+
+      <h2>The archive</h2>
+
+      <p>The third exposure is the one that no migration can address, because it is a fact about the past.</p>
+
+      <p>Harvest now, decrypt later was never a secret. Intelligence services have understood since the mid 2010s that traffic which cannot be read today can be recorded today and read later, and that for information with a long shelf life this is entirely rational. The financial sector produces a great deal of information with a long shelf life. Network architecture does not change quickly. Credentials are reused for years. Internal system names, integration topologies, vendor relationships, payment routing conventions, and the specific structure of who authorises what: all of it ages slowly, and all of it was moving across links protected by exactly the key exchange that 14 November retired.</p>
+    </div>
+
+    <!-- ===== SECTION E - MODULE: THE HARVEST TIMELINE ===== -->
+    <div class="col">
+      <section class="harvest" aria-label="Recorded traffic and its readability">
+        <div class="harvest-head">
+          <p>Intercepted financial traffic in adversary archives</p>
+          <div class="dial">
+            <label for="yr">Year</label>
+            <input type="range" id="yr" min="2016" max="2032" step="1" value="2022">
+            <output id="yr-out" for="yr">2022</output>
+          </div>
+        </div>
+        <div class="harvest-body">
+          <div class="bars" id="bars" aria-hidden="true"></div>
+          <div class="bars-scale"><span>2016</span><span>2020</span><span>2024</span><span>2028</span><span>2032</span></div>
+          <p class="hstate" id="hstate">Recorded, and unreadable</p>
+          <p class="hnote" id="hnote">Traffic captured under public-key exchange stays sealed while the exchange holds. Volume accumulates. Nothing is legible to whoever is holding it.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>An archive of this kind does not open progressively. It opens at once, and the whole of it becomes legible on the same morning.</p>
+
+      <p>The consequence is not that adversaries read bank traffic today. Live links were migrated. The consequence is that whatever was recorded between roughly 2016 and 2030 and retained is readable by whoever retained it, and recording was cheap enough that the prudent assumption is that a great deal was retained.</p>
+
+      <p>"You have to think about it as reconnaissance, not theft," says a former Treasury official now advising banks on cryptographic inventory. "Nobody decrypts a 2019 session to find a wire they can replay. They decrypt ten thousand 2019 sessions and build an extremely accurate map of how a bank is assembled. That map does not expire. And every future operation against that institution is enormously cheaper because of it."</p>
+
+      <h2>What migrated, and what did not</h2>
+
+      <p>The migration has been the largest coordinated engineering effort the sector has attempted, and its record is uneven in an entirely predictable pattern.</p>
+    </div>
+
+    <!-- ===== SECTION F - MODULE: MIGRATION LEDGER ===== -->
+    <div class="col">
+      <section class="ledger" aria-label="Cryptographic migration status by system class">
+        <div class="ledger-head">
+          <h3>Migration status by system class</h3>
+          <p>Sector survey &middot; retrieved March 2032</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filter by status">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="done" aria-pressed="false">Migrated</button>
+          <button type="button" class="chip" data-filter="partial" aria-pressed="false">Partial</button>
+          <button type="button" class="chip" data-filter="exposed" aria-pressed="false">Exposed</button>
+        </div>
+        <div id="ledger-rows"></div>
+        <p class="ledger-foot">Status reflects live systems only. No entry addresses the readability of previously recorded sessions, which migration cannot remedy.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>The pattern is familiar to anyone who has watched a technology transition in this sector. What migrated fastest was what a large bank controls directly and replaces often. What has not migrated is embedded in hardware with a fifteen year service life, or supplied by a vendor with no commercial reason to hurry, or sitting in an institution that cannot fund the work.</p>
+
+      <p>Which is to say the residual exposure has concentrated, again, in community banks. A $400m institution running a core platform shared by six hundred similar banks migrates when its vendor migrates, and the vendor migrates when enough customers make it a contractual condition. The customers able to make it a condition are the ones the vendor least depends on.</p>
+
+      <h2>The state actor question</h2>
+
+      <p>The careful version is worth stating precisely, because the loose version circulating is both alarming and wrong.</p>
+
+      <p>No US bank has suffered a loss attributable to quantum cryptanalysis. On any credible assessment the capability is not being used to move money, and there are structural reasons to expect it will not be. It is worth more unrevealed than spent, and 14 November already spent the one demonstration available.</p>
+
+      <p>What the capability is worth now is position. An adversary holding a decrypted archive knows how an institution is assembled, which third parties it depends on, where its authorisation boundaries sit, and which of its systems were still running retired cryptography in 2028 and are therefore probably still running it. That is preparatory intelligence. It is durable, it is specific, and it converts directly into a shorter path for whatever comes next.</p>
+
+      <p>The supervisory response has been to require what almost nobody had: an inventory. Institutions must maintain and report a cryptographic bill of materials covering every system, dependency and vendor, with migration status and a dated remediation plan. It is unglamorous and it is the single most useful thing the agencies have done, because the recurring finding across two years of examinations is that institutions did not know what they were running.</p>
+
+      <blockquote><p>"The first question we ask is what cryptography you use. Most of the time nobody in the building can answer it."</p></blockquote>
+
+      <p>Nothing here suggests a defenceless sector. The migration was fast by the standards of anything this industry has ever coordinated, the replacement standards were ready before they were needed, and the institutions with resources have used them well. But the defender must migrate everything, including whatever came in with an acquisition eleven years ago that nobody has opened since. The adversary needs one path that was never migrated and one archive that was never deleted.</p>
+
+      <p>The coins are still sitting at the exchange, frozen, three years on. Nobody has claimed them. Nobody has explained them. They are the most expensive signature in history, and the message they carry has not been withdrawn.</p>
+
+      <p class="endmark">&#9632;</p>
+    </div>
+  </article>
+
+  <!-- ===== SECTION F2 - THE FORWARD FILE (in-series navigation) ===== -->
+  <nav class="ff" aria-label="More from the forward file">
+    <p class="ff-eyebrow">The forward file</p>
+    <h2 class="ff-title">Six dispatches from a decade that has not happened</h2>
+    <p class="ff-note">Filed in sequence from 2027 to 2032. <a href="ledger-index.html">Open the full file</a>.</p>
+  <ol class="ff-grid">
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-press-start-to-pay.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2027</span> <span>Chartering</span></p>
+      <p class="ff-h">Press start to pay</p>
+      <p class="ff-sum">An entertainment company asks the OCC for bank powers and the right to issue its own dollar.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nothing-sits-still.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Deposits</span></p>
+      <p class="ff-h">Nothing sits still</p>
+      <p class="ff-sum">Open banking and agentic commerce turn the retail deposit base into a spot market.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-examiner-who-never-leaves.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Supervision</span></p>
+      <p class="ff-h">The examiner who never leaves</p>
+      <p class="ff-sum">Continuous supervision replaces the periodic exam, and four thousand banks manage to one dashboard.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nobodys-on-the-file.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Mortgage</span></p>
+      <p class="ff-h">Nobody's on the file</p>
+      <p class="ff-sum">Underwriting automation takes the cost, the jobs, and the point of a licensing regime.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="Standard_Setting.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Third-party risk</span></p>
+      <p class="ff-h">Assessed once, trusted often</p>
+      <p class="ff-sum">One assessment, published to a registry, makes it rational for a small bank to try something new.</p>
+    </a>
+  </li>
+  <li class="ff-item is-here" aria-current="page">
+    <div class="ff-card">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Cryptography</span></p>
+      <p class="ff-h">The wallet woke up</p>
+      <p class="ff-sum">Coins dormant since 2009 move, and the transfer itself is the announcement that the mathematics failed.</p>
+      <span class="ff-here">You are here</span>
+    </div>
+  </li>
+  </ol>
+  <div class="ff-turn">
+    <a class="ff-prev" href="Standard_Setting.html"><span class="ff-turn-lab">Previous dispatch</span><span class="ff-turn-h">Assessed once, trusted often</span></a>
+  </div>
+  </nav>
+
+  <!-- ===== SECTION G - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>This is a work of narrative fiction set in 2032. The harvest-now-decrypt-later threat model, the structural exposure of published blockchain public keys, the existence of dormant early-chain balances, the standardisation of post-quantum algorithms, and the long service life of embedded financial hardware are drawn from the real record. The November 2029 transaction, all figures, the survey, and every outcome described after 2026 are fictional extrapolations. No technical detail here is operational.</p>
+  </footer>
+
+</div>
+
+<script>
+/* ==========================================================================
+   SECTION 1 - THEME
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - READING PROGRESS
+   ========================================================================== */
+(function(){
+  var bar = document.getElementById('progress');
+  function update(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+  }
+  document.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ==========================================================================
+   SECTION 3 - SIGNATURE MODULE: THE FIRST 72 HOURS
+   Events carry the hour they land, the price index at that point, the value
+   in motion, and the sector posture. The scrubber reports the latest event
+   at or before the cursor, so dragging reads as time passing.
+   ========================================================================== */
+(function(){
+  var SPAN = 72;
+
+  var EVENTS = [
+    { h:0,  major:true,  stamp:'03:14 UTC',
+      title:'Block-reward outputs from 2009 begin to move',
+      body:'Addresses funded in the first weeks of the chain, untouched for twenty years and universally assumed unspendable, sign valid transactions in sequence.',
+      btc:100, moved:'$0', status:'Normal' },
+    { h:1,  major:false, stamp:'T+00:27',
+      title:'Outputs consolidated into a single balance',
+      body:'Chain analysts confirm the addresses include coinbase outputs from January 2009. The consolidated balance is a little over 1.1m bitcoin.',
+      btc:94,  moved:'$30.4bn', status:'Normal' },
+    { h:2,  major:true,  stamp:'T+00:41',
+      title:'The balance is sent to a regulated exchange',
+      body:'A single transaction routes the entire consolidated balance to a deposit address at a large American exchange. The destination is surveilled, KYC-bound and freezable, which is immediately read as deliberate.',
+      btc:71,  moved:'$30.4bn', status:'Watching' },
+    { h:3,  major:false, stamp:'T+02:50',
+      title:'Cryptographers converge on the only explanation',
+      body:'Three independent groups publish the same conclusion within minutes of each other. The keys were not recovered. They were derived.',
+      btc:52,  moved:'$30.4bn', status:'Watching' },
+    { h:4,  major:false, stamp:'T+03:06',
+      title:'The exchange freezes the deposit',
+      body:'The venue halts the balance, files with FinCEN and notifies Treasury. None of it is liquidated. None of it has been since.',
+      btc:44,  moved:'Frozen', status:'Alert' },
+    { h:7,  major:false, stamp:'T+06:20',
+      title:'Digital asset markets seize',
+      body:'Major venues suspend withdrawals across every asset secured by the same curve family. Redemption queues form at the largest stablecoin issuers.',
+      btc:29,  moved:'Frozen', status:'Alert' },
+    { h:11, major:true,  stamp:'T+11:00',
+      title:'Certificate authorities begin emergency reissuance',
+      body:'The trust anchors underpinning online identity start the largest coordinated revocation and reissuance ever attempted. The concern is no longer confidentiality. It is whether a signature proves anything.',
+      btc:24,  moved:'Frozen', status:'Emergency' },
+    { h:19, major:false, stamp:'T+19:00',
+      title:'Interagency statement issued',
+      body:'The federal banking agencies direct institutions to inventory cryptographic dependencies, prioritise code signing and authentication paths, and report status within seventy-two hours.',
+      btc:21,  moved:'Frozen', status:'Emergency' },
+    { h:27, major:true,  stamp:'T+27:00',
+      title:'Two card networks pause a settlement window',
+      body:'Rather than process instructions they cannot cryptographically vouch for, two networks hold a settlement cycle. It is the first deliberate interruption of retail payment settlement in either network\u2019s history.',
+      btc:18,  moved:'Frozen', status:'Emergency' },
+    { h:38, major:false, stamp:'T+38:00',
+      title:'Federal Reserve liquidity statement',
+      body:'The Fed confirms discount window availability and states that payment systems are operating. The statement is aimed less at banks than at the people watching banks.',
+      btc:16,  moved:'Frozen', status:'Emergency' },
+    { h:55, major:false, stamp:'T+55:00',
+      title:'Emergency directive to federal systems',
+      body:'Civilian agencies are ordered onto quantum-resistant algorithms for all externally reachable authentication, with fixed deadlines and no waiver process.',
+      btc:13,  moved:'Frozen', status:'Emergency' },
+    { h:72, major:false, stamp:'T+72:00',
+      title:'Three days on, no bank has lost money',
+      body:'The settlement window resumes. Certificates hold. Bitcoin is down eighty-nine percent. Every institution in the country now has an open question about what its own systems are running.',
+      btc:11,  moved:'Frozen', status:'Sustained' }
+  ];
+
+  var slider = document.getElementById('hr');
+  var out = document.getElementById('hr-out');
+  var fill = document.getElementById('tickbar-fill');
+  var bar = document.getElementById('tickbar');
+  var state = document.getElementById('wake-state');
+  var eStamp = document.getElementById('event-stamp');
+  var eTitle = document.getElementById('event-title');
+  var eBody = document.getElementById('event-body');
+  var vBtc = document.getElementById('v-btc');
+  var vMoved = document.getElementById('v-moved');
+  var vStatus = document.getElementById('v-status');
+  var cBtc = document.getElementById('c-btc');
+  var cStatus = document.getElementById('c-status');
+
+  /* Ticks are placed once; the hit class is what moves. */
+  var ticks = EVENTS.map(function(ev){
+    var t = document.createElement('div');
+    t.className = 'tick' + (ev.major ? ' major' : '');
+    t.style.left = ((ev.h / SPAN) * 100) + '%';
+    bar.appendChild(t);
+    return t;
+  });
+
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+  function render(){
+    var h = Number(slider.value);
+    out.textContent = 'T+' + pad(h) + ':00';
+    fill.style.width = ((h / SPAN) * 100).toFixed(1) + '%';
+
+    var current = EVENTS[0];
+    EVENTS.forEach(function(ev, i){
+      if (ev.h <= h) current = ev;
+      ticks[i].classList.toggle('hit', ev.h <= h);
+    });
+
+    eStamp.textContent = current.stamp;
+    eTitle.textContent = current.title;
+    eBody.textContent = current.body;
+    vBtc.textContent = current.btc;
+    vMoved.textContent = current.moved;
+    vStatus.textContent = current.status;
+
+    var hot = current.status === 'Emergency' || current.status === 'Sustained';
+    cStatus.classList.toggle('hot', hot);
+    cBtc.classList.toggle('hot', current.btc < 50);
+
+    state.textContent = current.status === 'Normal'
+      ? 'A dormant address signs a transaction'
+      : current.status === 'Watching'
+        ? 'Nobody can explain it any other way'
+        : current.status === 'Alert'
+          ? 'The claim is understood, and it is not about bitcoin'
+          : 'Every signature in the system is now a question';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 4 - MODULE: THE HARVEST TIMELINE
+   Before the break year the archive is inert. From the break on, everything
+   recorded up to the cursor recolours at once, because a sealed archive does
+   not open progressively.
+   ========================================================================== */
+(function(){
+  var START = 2016, END = 2032, BREAK = 2029;
+  var bars = document.getElementById('bars');
+  var slider = document.getElementById('yr');
+  var out = document.getElementById('yr-out');
+  var hstate = document.getElementById('hstate');
+  var hnote = document.getElementById('hnote');
+
+  function volFor(y){ return Math.round(100 * Math.pow(1.24, y - START)); }
+
+  var cells = [];
+  for (var y = START; y <= END; y++){
+    var col = document.createElement('div');
+    col.className = 'yr';
+    var i = document.createElement('i');
+    col.appendChild(i);
+    bars.appendChild(col);
+    cells.push({year:y, col:col, bar:i});
+  }
+  var maxVol = volFor(END);
+
+  function render(){
+    var cursor = Number(slider.value);
+    var open = cursor >= BREAK;
+    out.textContent = cursor;
+
+    cells.forEach(function(c){
+      c.bar.style.height = Math.max(3, (volFor(c.year) / maxVol) * 100).toFixed(1) + '%';
+      c.col.classList.toggle('future', c.year > cursor);
+      c.col.classList.toggle('readable', open && c.year <= cursor);
+    });
+
+    hstate.classList.toggle('open', open);
+    hstate.textContent = open
+      ? 'The archive opens, all of it, at once'
+      : 'Recorded, and unreadable';
+    hnote.textContent = open
+      ? 'Everything captured since 2016 becomes legible on the same morning. Migration protects what happens next and does nothing about what was already taken.'
+      : 'Traffic captured under public-key exchange stays sealed while the exchange holds. Volume accumulates. Nothing is legible to whoever is holding it.';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 5 - MODULE: MIGRATION LEDGER
+   ========================================================================== */
+(function(){
+  var ITEMS = [
+    {
+      name:'Code signing and software supply chain',
+      cat:'Authenticity',
+      status:'done', label:'Migrated',
+      done:['Publisher certificates reissued under quantum-resistant chains','Build pipelines re-signed across major vendors','Verification enforced at install time, not first run'],
+      left:['Historic releases signed under retired schemes remain in circulation','Air-gapped and appliance software updated by hand'],
+      note:'Treated as the sector emergency it was. A forged publisher signature is indistinguishable from a genuine one, which makes it the shortest path into a bank that never has to touch the perimeter.'
+    },
+    {
+      name:'Certificate authorities and trust anchors',
+      cat:'Identity',
+      status:'done', label:'Migrated',
+      done:['Root and intermediate hierarchies reissued','Revocation infrastructure scaled for the event','Pinning and transparency logs rebuilt on new primitives'],
+      left:['Embedded trust stores in devices that cannot be updated','Long-lived certificates issued before the cutover'],
+      note:'The revocation and reissuance conducted in the days after 14 November was the largest ever attempted, run by people who had only rehearsed it.'
+    },
+    {
+      name:'Interbank messaging and settlement',
+      cat:'Payments infrastructure',
+      status:'done', label:'Migrated',
+      done:['Operators mandated migration with hard cutover dates','Message authentication and channel protection both replaced','Coordinated member testing windows'],
+      left:['Bilateral correspondent links outside the main networks','Smaller foreign counterparties on extended timelines'],
+      note:'Mandates worked where market pressure did not. The operators could set a date and disconnect anyone who missed it, which no supervisor was willing to do.'
+    },
+    {
+      name:'Hardware security modules',
+      cat:'Key management and attestation',
+      status:'partial', label:'Partial',
+      done:['Current-generation devices firmware-upgraded','New deployments quantum-resistant by default'],
+      left:['Devices past vendor support cannot be upgraded','Replacement constrained by manufacturing lead times','Attestation chains still rooted in retired primitives on older fleets'],
+      note:'Physically constrained rather than financially constrained. Several institutions are waiting on hardware that has been ordered and cannot arrive faster.'
+    },
+    {
+      name:'Core banking platforms',
+      cat:'Vendor-supplied systems',
+      status:'partial', label:'Partial',
+      done:['Major platform vendors shipped migrated releases','Largest customers upgraded on accelerated schedules'],
+      left:['Upgrade requires a core conversion many banks cannot schedule','Customisations block the path at long-tenured institutions','Smaller vendors have published no roadmap'],
+      note:'The migration is available. Consuming it requires a project most community banks have neither the staff nor the operating window to run.'
+    },
+    {
+      name:'ATM and branch device fleets',
+      cat:'Embedded hardware',
+      status:'exposed', label:'Exposed',
+      done:['Newer units field-upgradable and largely complete'],
+      left:['Fleets with a fifteen year service life and no upgrade path','Replacement cost exceeds annual technology budgets at small banks','Compensating controls only'],
+      note:'A service life that outran the assumption it was bought under. No amount of urgency shortens a capital replacement cycle.'
+    },
+    {
+      name:'Archived and backup data',
+      cat:'Data at rest',
+      status:'exposed', label:'Exposed',
+      done:['Current backups re-encrypted under new schemes'],
+      left:['Historic archives encrypted under retired schemes','Offsite media held by third parties','Records under retention mandates that forbid deletion'],
+      note:'Re-encrypting an archive protects it going forward and does nothing about copies already taken. This is the category regulators are quietest about.'
+    }
+  ];
+
+  var host = document.getElementById('ledger-rows');
+  var filter = 'all';
+
+  function cell(title, items){
+    var d = document.createElement('div');
+    d.className = 'detail-cell';
+    var h = document.createElement('h4');
+    h.textContent = title;
+    var ul = document.createElement('ul');
+    items.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    d.appendChild(h); d.appendChild(ul);
+    return d;
+  }
+
+  function build(){
+    host.innerHTML = '';
+    var shown = ITEMS.filter(function(v){
+      return filter === 'all' || v.status === filter;
+    });
+
+    if (shown.length === 0){
+      var empty = document.createElement('p');
+      empty.className = 'ledger-foot';
+      empty.textContent = 'No systems match this status.';
+      host.appendChild(empty);
+      return;
+    }
+
+    shown.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-btn';
+      btn.setAttribute('aria-expanded', 'false');
+
+      var nameWrap = document.createElement('span');
+      var name = document.createElement('span');
+      name.className = 'row-name';
+      name.textContent = v.name;
+      var cat = document.createElement('span');
+      cat.className = 'row-cat';
+      cat.textContent = v.cat;
+      nameWrap.appendChild(name); nameWrap.appendChild(cat);
+
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + v.status;
+      badge.textContent = v.label;
+
+      var chev = document.createElement('span');
+      chev.className = 'chev';
+      chev.textContent = '\u203A';
+
+      btn.appendChild(nameWrap); btn.appendChild(badge); btn.appendChild(chev);
+
+      var detail = document.createElement('div');
+      detail.className = 'row-detail';
+      var grid = document.createElement('div');
+      grid.className = 'detail-grid';
+      grid.appendChild(cell('Done', v.done));
+      grid.appendChild(cell('Outstanding', v.left));
+      detail.appendChild(grid);
+
+      var note = document.createElement('p');
+      note.className = 'detail-note';
+      note.textContent = v.note;
+      detail.appendChild(note);
+
+      btn.addEventListener('click', function(){
+        var open = row.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+
+      row.appendChild(btn); row.appendChild(detail);
+      host.appendChild(row);
+    });
+  }
+
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      filter = c.getAttribute('data-filter');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', String(o === c)); });
+      build();
+    });
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>

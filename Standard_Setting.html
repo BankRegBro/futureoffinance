@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assessed once, trusted often &middot; The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system: Fraunces / Archivo / JetBrains Mono, warm paper
+   ground, oxblood as the structural accent, copper as the live accent.
+   Values are a reference approximation of the live system, safe to overwrite
+   with the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4;
+  --raised:#fbf6ec;
+  --sunk:#ece4d4;
+  --ink:#16150f;
+  --ink-soft:#4a4436;
+  --ink-faint:#7d7462;
+  --rule:#ddd2bd;
+  --rule-strong:#b9ab90;
+
+  --oxblood:#7a1f2b;
+  --copper:#b4640f;
+  --on-accent:#fbf6ec;
+  --live:#2f6b4f;
+  --live-wash:#e2ebe0;
+  --hold:#8a6a16;
+  --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+
+  --measure:34rem;
+  --step-0:1.0625rem;
+  --step-1:1.25rem;
+  --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+}
+
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c;
+  --raised:#111729;
+  --sunk:#070a18;
+  --ink:#e9e4d8;
+  --ink-soft:#a9a293;
+  --ink-faint:#797466;
+  --rule:#232c44;
+  --rule-strong:#39456a;
+
+  --oxblood:#e0596c;
+  --copper:#f6c81e;
+  --on-accent:#070a18;
+  --live:#3ecf8e;
+  --live-wash:#10261f;
+  --hold:#f6c81e;
+  --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400;
+  font-size:var(--step-0);
+  line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+
+#progress{
+  position:fixed; top:0; left:0; height:2px; width:0%;
+  background:var(--copper); z-index:60;
+}
+
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   The Ledger nameplate. Rule weight above the plate is heavier than below so
+   the nameplate reads as the most inked object on the page.
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem;
+  border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace;
+  font-size:.64rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+
+.nameplate{
+  margin-top:1.6rem;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(122,31,43,.18), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(180,100,15,.24), transparent 62%),
+    linear-gradient(180deg,#e7dbc3 0%,#ebe2ce 55%,#f0e8d7 100%);
+  border-top:3px solid var(--ink);
+  padding:1.5rem 1.4rem 1.3rem;
+}
+html.night .nameplate{
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(224,89,108,.10), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(246,200,30,.12), transparent 62%),
+    linear-gradient(180deg,#0d1327 0%,#0b1024 55%,#0a0f20 100%);
+  border-top-color:var(--copper);
+}
+.np-top{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem;
+}
+.np-brand{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:900; font-size:1.05rem; letter-spacing:.03em;
+  text-transform:uppercase; color:var(--ink); margin:0;
+}
+.np-brand .the{color:var(--oxblood)}
+.np-meta{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.62rem; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-soft); margin:0;
+}
+.np-meta .dot{color:var(--copper)}
+
+.kicker{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.66rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--oxblood); font-weight:700; margin:0 0 .85rem;
+}
+h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; font-size:var(--step-4); line-height:.95;
+  letter-spacing:-.02em; margin:0 0 1rem; max-width:16ch; color:var(--ink);
+}
+.deck{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:400; font-size:var(--step-1); line-height:1.45;
+  color:var(--ink-soft); max-width:46ch; margin:0;
+}
+.dateline{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.64rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-faint); margin:1.4rem 0 0;
+  border-top:1px solid var(--rule-strong); padding-top:.8rem;
+}
+
+/* ==========================================================================
+   SECTION 4 - SIGNATURE MODULE: THE COLLAPSE
+   Duplicated vendor reviews versus one shared assessment. Drawn from live
+   geometry so the tangle is real rather than illustrated.
+   ========================================================================== */
+.collapse{
+  margin:2.5rem 0 0; border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule); padding:1.5rem 0 1.75rem;
+}
+.collapse-head{
+  display:flex; flex-wrap:wrap; gap:1rem;
+  justify-content:space-between; align-items:flex-end; margin-bottom:1.1rem;
+}
+.eyebrow{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.64rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-faint); margin:0;
+}
+.collapse-state{
+  font-family:"Fraunces",serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-weight:600; font-size:var(--step-2); line-height:1.12;
+  margin:.35rem 0 0; max-width:22ch;
+}
+.switch{display:flex; border:1px solid var(--ink); background:var(--raised)}
+.switch button{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.63rem; letter-spacing:.1em; text-transform:uppercase;
+  padding:.6rem .95rem; border:0; background:transparent;
+  color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+}
+.switch button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.stage{
+  position:relative; width:100%; aspect-ratio:16/7; min-height:220px;
+  background:var(--raised); border:1px solid var(--rule);
+}
+.stage svg{position:absolute; inset:0; width:100%; height:100%}
+.edge{
+  stroke:var(--ink-faint); stroke-width:.6; opacity:.5; fill:none;
+  transition:d .9s cubic-bezier(.6,0,.2,1),opacity .5s ease,stroke .5s ease;
+}
+.edge.shared{stroke:var(--copper); opacity:.8}
+.node{fill:var(--ink-soft)}
+.hub{fill:var(--ink); transition:r .6s ease,fill .5s ease}
+.hub.shared{fill:var(--copper)}
+.hub-label{
+  font-family:"JetBrains Mono",monospace; font-size:5px; letter-spacing:.1em;
+  text-transform:uppercase; fill:var(--paper);
+}
+.readout{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-top:0;
+}
+.rcell{background:var(--raised); padding:.85rem .9rem}
+.rcell dt{
+  font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-faint); margin:0 0 .35rem;
+}
+.rcell dd{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:1.5rem; line-height:1; font-variant-numeric:tabular-nums;
+}
+.rcell.is-good dd{color:var(--copper)}
+.caption{
+  font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.65;
+  color:var(--ink-faint); margin:.85rem 0 0; max-width:62ch;
+}
+
+/* ==========================================================================
+   SECTION 5 - ARTICLE BODY
+   ========================================================================== */
+article{padding:3rem 0 0}
+article p{margin:0 0 1.15rem}
+p.lede::first-letter{
+  font-family:"Fraunces",serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; float:left; font-size:4rem; line-height:.8;
+  padding:.34rem .5rem 0 0; color:var(--oxblood);
+}
+h2{
+  font-family:"JetBrains Mono",monospace;
+  font-size:.7rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink); border-top:1px solid var(--ink);
+  padding-top:.65rem; margin:2.75rem 0 1.1rem;
+}
+.lead-in{font-weight:700}
+blockquote{
+  margin:2rem 0; padding:0 0 0 1.35rem; border-left:3px solid var(--oxblood);
+  font-family:"Fraunces",serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-size:1.4rem; line-height:1.3; font-weight:500;
+}
+blockquote p{margin:0}
+
+/* ==========================================================================
+   SECTION 6 - MODULE: THE ARITHMETIC
+   ========================================================================== */
+.arith{margin:2.5rem 0; border:1px solid var(--rule); background:var(--raised)}
+.arith-head{
+  display:flex; flex-wrap:wrap; gap:.75rem; justify-content:space-between;
+  align-items:center; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule);
+}
+.arith-head p{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);
+}
+.metric{padding:1.1rem; border-bottom:1px solid var(--rule)}
+.metric:last-child{border-bottom:0}
+.metric-name{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600;
+  font-size:.82rem; letter-spacing:.02em; color:var(--ink-soft); margin:0 0 .75rem;
+}
+.bar-row{display:flex; align-items:center; gap:.8rem; margin-bottom:.45rem}
+.bar-track{
+  flex:1; height:1.5rem; background:var(--sunk);
+  border:1px solid var(--rule); position:relative;
+}
+.bar-fill{position:absolute; inset:0 auto 0 0; width:0;
+  transition:width .85s cubic-bezier(.6,0,.2,1)}
+.bar-fill.before{background:var(--ink-soft)}
+.bar-fill.after{background:var(--copper)}
+.bar-value{
+  font-family:"JetBrains Mono",monospace; font-size:.76rem; font-weight:500;
+  min-width:8.5rem; text-align:right; font-variant-numeric:tabular-nums;
+}
+.bar-tag{
+  font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-faint); min-width:3.4rem;
+}
+
+/* ==========================================================================
+   SECTION 7 - MODULE: THE REGISTRY
+   ========================================================================== */
+.registry{margin:2.5rem 0; border:1px solid var(--ink)}
+.registry-head{
+  padding:1rem 1.1rem; background:var(--ink); color:var(--paper);
+}
+.registry-head h3{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:1.15rem; letter-spacing:.02em; margin:0 0 .25rem;
+}
+.registry-head p{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.12em; text-transform:uppercase; opacity:.75;
+}
+.filters{
+  display:flex; flex-wrap:wrap; gap:.4rem; padding:.8rem 1.1rem;
+  border-bottom:1px solid var(--rule); background:var(--raised);
+}
+.chip{
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.1em;
+  text-transform:uppercase; padding:.4rem .7rem; cursor:pointer;
+  border:1px solid var(--rule-strong); background:transparent; color:var(--ink-soft);
+}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.row{border-bottom:1px solid var(--rule); background:var(--raised)}
+.row:last-child{border-bottom:0}
+.row-btn{
+  width:100%; display:grid; grid-template-columns:1fr auto auto; gap:.9rem;
+  align-items:center; text-align:left; padding:.85rem 1.1rem;
+  border:0; background:transparent; cursor:pointer; font-family:inherit; color:inherit;
+}
+.row-btn:hover{background:var(--sunk)}
+.row-name{font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.95rem}
+.row-cat{
+  display:block; font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-top:.2rem;
+}
+.badge{
+  font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em;
+  text-transform:uppercase; padding:.28rem .55rem; white-space:nowrap;
+}
+.badge.certified{background:var(--live-wash); color:var(--live)}
+.badge.recert{background:var(--hold-wash); color:var(--hold)}
+.badge.withdrawn{background:var(--dead-wash); color:var(--oxblood)}
+.chev{font-family:"JetBrains Mono",monospace; color:var(--ink-faint); font-size:.8rem}
+.row-detail{display:none; padding:0 1.1rem 1.1rem; background:var(--sunk)}
+.row.open .row-detail{display:block}
+.row.open .chev{transform:rotate(90deg); display:inline-block}
+.detail-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--rule); border:1px solid var(--rule);
+}
+.detail-cell{background:var(--raised); padding:.85rem}
+.detail-cell h4{
+  font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em;
+  text-transform:uppercase; margin:0 0 .5rem; color:var(--ink-faint);
+}
+.detail-cell ul{margin:0; padding-left:1.05rem; font-size:.88rem; line-height:1.55}
+.detail-cell li{margin-bottom:.3rem}
+.detail-note{
+  font-family:"JetBrains Mono",monospace; font-size:.68rem; line-height:1.65;
+  color:var(--ink-soft); margin:.85rem 0 0; padding-left:.7rem;
+  border-left:2px solid var(--rule-strong);
+}
+.registry-foot{
+  padding:.8rem 1.1rem; font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.07em; color:var(--ink-faint);
+  border-top:1px solid var(--rule); background:var(--raised); margin:0;
+}
+
+/* ==========================================================================
+   SECTION 8 - CLOSING + THEME TOGGLE
+   ========================================================================== */
+.endmark{color:var(--oxblood); font-size:.85rem; margin-bottom:1.6rem}
+footer{margin:3.5rem 0 0; border-top:3px solid var(--ink); padding:1.25rem 0 5rem}
+footer p{
+  font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.75;
+  color:var(--ink-faint); margin:0 0 .9rem; max-width:80ch;
+}
+footer .sig{color:var(--ink-soft)}
+
+#theme{
+  position:fixed; right:1rem; bottom:1rem; z-index:60;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em;
+  text-transform:uppercase; padding:.6rem .8rem; cursor:pointer;
+  background:var(--raised); color:var(--ink-soft); border:1px solid var(--rule-strong);
+}
+#theme:hover{color:var(--ink); border-color:var(--copper)}
+
+/* ==========================================================================
+   SECTION 9 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .readout{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .row-btn{grid-template-columns:1fr auto; gap:.5rem}
+  .chev{display:none}
+  .bar-value{min-width:6.5rem; font-size:.7rem}
+  p.lede::first-letter{font-size:3.1rem}
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important; animation-duration:.01ms !important}
+}
+
+/* ==========================================================================
+   SECTION 10 - THE FORWARD FILE (in-series navigation)
+   Plain links, no ids, no script. The strip carries the whole series so a
+   reader can see where this dispatch sits in the sequence and step either way.
+   ========================================================================== */
+.ff{margin:3.4rem auto 0; width:min(100%,52rem); border-top:3px solid var(--ink); padding-top:1.1rem}
+.ff-eyebrow{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--oxblood);
+}
+.ff-title{
+  margin:.35rem 0 .3rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:var(--step-1); line-height:1.2; letter-spacing:-.01em;
+}
+.ff-note{margin:0 0 1.3rem; font-size:.86rem; color:var(--ink-faint)}
+.ff-note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.ff-note a:hover{border-bottom-color:var(--oxblood)}
+
+.ff-grid{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr)); gap:.6rem;
+}
+.ff-item{margin:0}
+.ff-card{
+  display:block; height:100%; text-decoration:none; color:inherit;
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  padding:.75rem .85rem .85rem;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+a.ff-card:hover,a.ff-card:focus-visible{
+  border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px);
+}
+.ff-meta{
+  display:flex; gap:.5rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ff-year{color:var(--copper); font-weight:700}
+.ff-h{
+  margin:.35rem 0 .25rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:1rem; line-height:1.22; letter-spacing:-.01em;
+}
+.ff-sum{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-soft)}
+.ff-item.is-here .ff-card{
+  background:var(--sunk); border-left-color:var(--oxblood); cursor:default;
+}
+.ff-here{
+  display:inline-block; margin-top:.45rem;
+  font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood);
+}
+
+.ff-turn{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-top:1.1rem; padding-top:.8rem; border-top:1px solid var(--rule);
+}
+.ff-turn a{
+  max-width:22rem; text-decoration:none; color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.86rem;
+  line-height:1.3;
+}
+.ff-turn a:hover .ff-turn-h{border-bottom-color:var(--oxblood)}
+.ff-turn-lab{
+  display:block; font-family:"JetBrains Mono",monospace; font-weight:400;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:.2rem;
+}
+.ff-turn-h{border-bottom:1px solid var(--rule-strong); transition:border-color .18s ease}
+.ff-next{text-align:right; margin-left:auto}
+@media (max-width:640px){
+  .ff{margin-top:2.6rem}
+  .ff-turn{flex-direction:column}
+  .ff-next{text-align:left; margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" role="presentation"></div>
+<button type="button" id="theme">Night</button>
+
+<div class="wrap">
+
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span><a href="ledger-index.html">The forward file</a> &middot; Speculative &middot; Third-party risk</span>
+  </div>
+
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Dispatch &#8470; TBD <span class="dot">&middot;</span> Vol. I</p>
+    </div>
+    <p class="kicker">Forward file &middot; Third-party risk</p>
+    <h1>Assessed once, trusted often</h1>
+    <p class="deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
+    <p class="dateline">Cedar Falls, Iowa, and Washington, D.C. &middot; Filed from 2032</p>
+  </header>
+
+  <!-- ===== SECTION C - SIGNATURE MODULE: THE COLLAPSE ===== -->
+  <section class="collapse" aria-labelledby="collapse-state">
+    <div class="collapse-head">
+      <div>
+        <p class="eyebrow">One vendor, four thousand banks</p>
+        <p class="collapse-state" id="collapse-state">Every bank commissions its own review</p>
+      </div>
+      <div class="switch" role="group" aria-label="Assessment model">
+        <button type="button" id="btn-before" aria-pressed="true">Before 2026</button>
+        <button type="button" id="btn-after" aria-pressed="false">With certification</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <svg id="diagram" viewBox="0 0 320 140" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+    </div>
+
+    <dl class="readout">
+      <div class="rcell" id="cell-reviews"><dt>Reviews performed</dt><dd id="val-reviews">4,000</dd></div>
+      <div class="rcell" id="cell-cost"><dt>Diligence cost per bank</dt><dd id="val-cost">$118,000</dd></div>
+      <div class="rcell" id="cell-time"><dt>Selection to production</dt><dd id="val-time">14 months</dd></div>
+    </dl>
+
+    <p class="caption">Each node is a bank evaluating the same vendor against substantially the same criteria. The certification model replaces the duplicated reviews with one assessment, refreshed on a cycle and published to a registry any bank can consult.</p>
+  </section>
+
+  <!-- ===== SECTION D - ARTICLE ===== -->
+  <article>
+    <div class="col">
+      <p class="lede">The product that Farmers &amp; Merchants State Bank launched in March was not, by the standards of financial technology, revolutionary. It was a cash-flow underwriting tool that reads a small business's bank transaction history and produces a working-capital line decision in under a day, the sort of thing large banks have offered since the late 2020s and fintech lenders since before that. What was remarkable was not the product. It was that a bank with $410m in assets and thirty-one employees was able to deploy it at all.</p>
+
+      <p>"Six weeks," says Lisa Brandt, the bank's president, with the particular satisfaction of someone quoting a number she has quoted many times. "Signed the contract in January, live in March. Diligence took nine days."</p>
+
+      <p>Brandt has been running the bank for eleven years. She remembers the alternative. In 2024 she looked at a broadly comparable vendor and abandoned the project after four months. The problem was never the software. The problem was that evaluating whether the vendor met her regulators' expectations for third-party risk management required a review her bank could not perform and could not afford to buy. The vendor's annual licence was $34,000. The outside diligence quote was $118,000. "You do that arithmetic once," she says, "and then you stop looking at vendors."</p>
+
+      <p>Multiply that arithmetic across roughly four thousand community banks, and you have a reasonable description of why, for most of the 2020s, technological innovation in American banking was something that happened at large institutions and to everyone else.</p>
+
+      <h2>The duplication problem</h2>
+
+      <p>The economics that defeated Brandt in 2024 were not a market failure in any exotic sense. They were a straightforward coordination problem, and everyone involved could see it.</p>
+
+      <p>Banking regulators require institutions to conduct due diligence on third-party service providers proportionate to the risk those providers introduce. The requirement is sound. Its practical effect, in a fragmented banking system, was that the same fintech vendor would be independently reviewed by every bank that considered using it. Each review covered substantially the same ground, produced substantially the same conclusions, and cost the vendor weeks of engineering and compliance time and the bank tens of thousands of dollars.</p>
+
+      <p>For a large institution spreading that cost across a $2trn balance sheet, this was an irritation. For a community bank it was a prohibition. The fixed cost of establishing that a vendor was safe did not scale down with the size of the bank doing the establishing. A $400m bank paid roughly what a $400bn bank paid, for the same review, and then absorbed it against a fraction of the revenue.</p>
+
+      <p>The vendors, for their part, were being asked the same several hundred questions repeatedly by institutions that would not share the answers with each other. Small fintech firms routinely reported that responding to bank diligence questionnaires consumed more staff time than product development. Many simply stopped selling to community banks, concluding that the acquisition cost per institution could never be recovered on the contract sizes available.</p>
+
+      <blockquote><p>"You do that arithmetic once, and then you stop looking at vendors."</p></blockquote>
+
+      <p><span class="lead-in">The collapse of Synapse</span> in April 2024 gave the problem a face. The banking-as-a-service middleware firm's implosion left consumers unable to access roughly $90m in funds held through partner banks, and exposed how little several of those banks had actually understood about the ledgering arrangements they were relying on. The failure was not caused by an absence of diligence requirements. It was caused, in part, by diligence that was extensive on paper, duplicated across institutions, and shallow in the places that turned out to matter.</p>
+
+      <p>That combination, burdensome and inadequate at the same time, is the specific pathology that a standard-setting body is designed to cure.</p>
+
+      <h2>What the FDIC built</h2>
+
+      <p>The idea had been circulating since the first Trump administration, when then-FDIC Chairman Jelena McWilliams floated a certification regime for bank technology vendors. It went nowhere for several years, resurfacing periodically in speeches and comment letters without ever acquiring an owner.</p>
+
+      <p>It acquired one in the summer of 2026. A draft term sheet circulated by the FDIC in July of that year proposed an independent standard-setting organisation, convened with the American Bankers Association, the Independent Community Bankers of America, the Bank Policy Institute, the Financial Technology Association, the American Fintech Council, and the Coalition for Financial Ecosystem Standards. The FDIC would provide seed funding. The OCC joined within weeks. The body that emerged, incorporated the following year as the Bank Innovation Standards Council and universally known as BISC, held its first standards vote in 2028.</p>
+
+      <p>The design choices made in that first year explain most of what has happened since.</p>
+
+      <p>The first was that BISC would write standards and accredit assessors, but would not itself conduct assessments. The council publishes the criteria. Independent assessor firms, accredited by BISC and ring-fenced from any consulting relationship with the vendors they review, perform the work. Results are published to a certification registry that any bank can consult. The separation was deliberate and, in the view of most participants, is the reason the certifications carry weight. A standard-setter that also sold assessments would have had an obvious incentive problem.</p>
+
+      <p><span class="lead-in">The second choice</span> was that certification would be voluntary and would confer no safe harbour. This was the most contested provision in the term sheet and the one the industry most wanted changed. Banks argued, not unreasonably, that if a vendor had been assessed against federally acknowledged standards by an accredited assessor, contracting with that vendor ought to reduce a bank's own supervisory exposure. The regulators refused. Banks remain responsible for safe and sound operation, for consumer protection, for ongoing monitoring, and for institution-specific risk assessment. A certificate is evidence. It is not a defence.</p>
+
+      <p>In retrospect the refusal was the making of the thing. A safe harbour would have converted certification into a compliance formality, a document to be obtained and filed. Its absence kept banks engaged in the parts of diligence that are genuinely institution-specific: how the vendor integrates with this bank's systems, what this bank's contract says, what this bank monitors after go-live. BISC standardised the questions that have the same answer at every bank. It left alone the questions that do not.</p>
+
+      <h2>The arithmetic, revisited</h2>
+
+      <p>The effect on community bank technology adoption has been larger than most of the framework's designers expected. The core mechanism is simple: a common assessment, performed once, refreshed on a defined cycle, and reused by every bank that consults the registry. A vendor assessed in January is available to four thousand institutions in February on the strength of the same review. The fixed cost that could not be scaled down is instead scaled across.</p>
+    </div>
+
+    <!-- ===== SECTION E - MODULE: THE ARITHMETIC ===== -->
+    <div class="col">
+      <section class="arith" aria-label="Community bank adoption metrics">
+        <div class="arith-head">
+          <p>Banks below $1bn in assets</p>
+          <div class="switch" role="group" aria-label="Time period">
+            <button type="button" id="btn-2026" aria-pressed="true">2026</button>
+            <button type="button" id="btn-2032" aria-pressed="false">2032</button>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Vendor selection to production deployment</p>
+          <div class="bar-row">
+            <span class="bar-tag">Median</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-time"></span></span>
+            <span class="bar-value" id="txt-time">14.2 months</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Institution-level diligence cost per vendor</p>
+          <div class="bar-row">
+            <span class="bar-tag">Low</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-costlo"></span></span>
+            <span class="bar-value" id="txt-costlo">$80,000</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-tag">High</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-costhi"></span></span>
+            <span class="bar-value" id="txt-costhi">$150,000</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Banks reporting a new deployment in the past year</p>
+          <div class="bar-row">
+            <span class="bar-tag">Share</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-adopt"></span></span>
+            <span class="bar-value" id="txt-adopt">31%</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>What those banks are deploying is the more interesting question. The early expectation was that community banks would use the new capacity to buy the things large banks already had: better online account opening, mobile deposit, digital lending workflows. A good deal of that has happened, and it has largely closed the customer-experience gap that was driving deposit attrition to national institutions.</p>
+
+      <p>But a second pattern has emerged that few anticipated. Community banks have begun deploying technology that large banks have no particular reason to build, because it serves markets too small or too specific to interest them. Agricultural cash-flow forecasting tools calibrated to individual commodity cycles. Tribal lending platforms designed around trust-land title complexities that national underwriting models cannot process. Multilingual account-opening flows for immigrant communities in specific metropolitan corridors. Remittance corridors serving single sending regions.</p>
+
+      <p>"The thing nobody predicted," says Todd Phillips, a former FDIC official now at the Klaros Group, "is that lowering the diligence cost didn't just let small banks buy the same products as big banks. It made it viable for vendors to build products for small banks. If you can sell to four thousand institutions on one certification instead of negotiating four thousand separate reviews, suddenly the community bank market is a market. Before, it was a collection of four thousand individually unprofitable sales cycles."</p>
+
+      <h2>The examiners adjusted</h2>
+
+      <p>The framework's effect on supervision has been quieter and, in the assessment of the agencies themselves, largely positive. Examiners were explicitly instructed that certification confers no safe harbour and that third-party risk management remains a full-scope examination topic. In practice, the existence of a common baseline changed what examiners spent their time on. A bank using a certified vendor does not need to demonstrate that the vendor has adequate encryption at rest, business continuity planning, or subservicer oversight. Those are covered by the certification and verifiable from the registry. The examination conversation moves directly to the questions that are actually specific to the institution: contract terms, integration architecture, monitoring, exit planning.</p>
+
+      <p>State banking regulators, who supervise the majority of community banks, were early and forceful advocates. The Conference of State Bank Supervisors pushed hard during the term sheet negotiations for the registry to be publicly accessible rather than subscription-gated, on the grounds that a certification regime affordable only to institutions that could pay for access would reproduce the inequity it was meant to solve. The provision survived. The registry is free to consult.</p>
+
+      <p><span class="lead-in">The assessor market</span> has been the framework's most awkward growing pain. BISC accredited eleven assessor firms in its first cycle. Three subsequently lost accreditation, one for inadequate testing depth and two for conflict-of-interest violations involving advisory relationships with assessed vendors. The council's enforcement was swift and public, which most observers regard as having been essential to the registry's credibility. It also revealed that accrediting assessors is a harder ongoing task than writing standards, and that BISC's budget was initially calibrated for the latter rather than the former.</p>
+    </div>
+
+    <!-- ===== SECTION F - MODULE: THE REGISTRY ===== -->
+    <div class="col">
+      <section class="registry" aria-label="Certification registry">
+        <div class="registry-head">
+          <h3>Certification registry</h3>
+          <p>Public extract &middot; retrieved March 2032</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filter by status">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="certified" aria-pressed="false">Certified</button>
+          <button type="button" class="chip" data-filter="recert" aria-pressed="false">Recertified</button>
+          <button type="button" class="chip" data-filter="withdrawn" aria-pressed="false">Withdrawn</button>
+        </div>
+        <div id="registry-rows"></div>
+        <p class="registry-foot">Certification records what a vendor met at assessment. It is not a safe harbour and does not substitute for institution-specific diligence.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <h2>What certification does not do</h2>
+
+      <p>In February 2030 a certified payments vendor serving roughly ninety community banks failed. The failure was operational rather than fraudulent, a botched migration that corrupted transaction records and took eleven days to fully reconstruct, but it was disruptive, expensive, and it happened to a firm carrying a current BISC certification.</p>
+
+      <p>The post-mortem was uncomfortable and, in the end, clarifying. The assessment had been performed correctly against the standards as written. The standards, at that time, did not adequately address change-management controls during major infrastructure migrations. The vendor had passed a test that did not test the thing that broke.</p>
+
+      <p>BISC amended the standard within four months and required re-certification against the new criterion on an accelerated cycle. The banks affected recovered. But the episode established, in a way that no amount of drafting could have, what a certification actually is: evidence that a vendor met a defined set of criteria at a point in time, assessed by a qualified third party. It is not a guarantee of performance, and the standards will always lag the failure modes nobody has seen yet.</p>
+
+      <p>"The certificate tells you the vendor passed the test," Brandt says. "It doesn't tell you the test covered everything. We still ask our own questions. We just don't ask the four hundred questions that somebody else already asked and published the answers to."</p>
+
+      <blockquote><p>"The certificate tells you the vendor passed the test. It doesn't tell you the test covered everything."</p></blockquote>
+
+      <h2>The shape of the unlock</h2>
+
+      <p>It is worth being precise about what has and has not changed, because the community banking sector has been the subject of a great deal of premature obituary-writing and a certain amount of premature celebration.</p>
+
+      <p>Consolidation has not stopped. The number of insured depository institutions continues to decline, driven by succession problems, margin compression, and most acutely by the cybersecurity cost burden that no standard-setting body addresses. BISC has not made community banking easy. It has removed one specific constraint.</p>
+
+      <p>But it was a load-bearing constraint. The community bank's durable advantage has always been proximity: knowing the borrower, the collateral, the local economy, the difference between a bad year and a bad business. What the sector lost over two decades was not that advantage but the ability to pair it with competent technology. The diligence-cost barrier meant that a bank could either be small and local or technologically current, and the arithmetic pushed hard toward the former.</p>
+
+      <p>Brandt's bank is now doing something that would have been unavailable to it in 2024: applying a machine-learning cash-flow model to underwriting decisions that she then overrides, roughly one time in nine, on the basis of knowledge the model does not have. "The model is better than me on the numbers," she says. "I'm better than the model on whether the numbers mean what they appear to mean. That combination is the whole business. I just couldn't get to it before, because getting to it cost more than the bank could pay."</p>
+
+      <p>That is a modest description of a significant thing. The standard-setting body seeded by the FDIC in 2026 did not transform banking. It made a category of decision affordable that had previously been priced out of reach for four thousand institutions, and then those institutions did what they were always good at, with better tools.</p>
+
+      <p>Not every regulatory intervention needs to be more ambitious than that.</p>
+
+      <p class="endmark">&#9632;</p>
+    </div>
+  </article>
+
+  <!-- ===== SECTION F2 - THE FORWARD FILE (in-series navigation) ===== -->
+  <nav class="ff" aria-label="More from the forward file">
+    <p class="ff-eyebrow">The forward file</p>
+    <h2 class="ff-title">Six dispatches from a decade that has not happened</h2>
+    <p class="ff-note">Filed in sequence from 2027 to 2032. <a href="ledger-index.html">Open the full file</a>.</p>
+  <ol class="ff-grid">
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-press-start-to-pay.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2027</span> <span>Chartering</span></p>
+      <p class="ff-h">Press start to pay</p>
+      <p class="ff-sum">An entertainment company asks the OCC for bank powers and the right to issue its own dollar.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nothing-sits-still.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Deposits</span></p>
+      <p class="ff-h">Nothing sits still</p>
+      <p class="ff-sum">Open banking and agentic commerce turn the retail deposit base into a spot market.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-examiner-who-never-leaves.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Supervision</span></p>
+      <p class="ff-h">The examiner who never leaves</p>
+      <p class="ff-sum">Continuous supervision replaces the periodic exam, and four thousand banks manage to one dashboard.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nobodys-on-the-file.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Mortgage</span></p>
+      <p class="ff-h">Nobody's on the file</p>
+      <p class="ff-sum">Underwriting automation takes the cost, the jobs, and the point of a licensing regime.</p>
+    </a>
+  </li>
+  <li class="ff-item is-here" aria-current="page">
+    <div class="ff-card">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Third-party risk</span></p>
+      <p class="ff-h">Assessed once, trusted often</p>
+      <p class="ff-sum">One assessment, published to a registry, makes it rational for a small bank to try something new.</p>
+      <span class="ff-here">You are here</span>
+    </div>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-wallet-woke-up.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Cryptography</span></p>
+      <p class="ff-h">The wallet woke up</p>
+      <p class="ff-sum">Coins dormant since 2009 move, and the transfer itself is the announcement that the mathematics failed.</p>
+    </a>
+  </li>
+  </ol>
+  <div class="ff-turn">
+    <a class="ff-prev" href="ledger-nobodys-on-the-file.html"><span class="ff-turn-lab">Previous dispatch</span><span class="ff-turn-h">Nobody's on the file</span></a>
+    <a class="ff-next" href="ledger-the-wallet-woke-up.html"><span class="ff-turn-lab">Next dispatch</span><span class="ff-turn-h">The wallet woke up</span></a>
+  </div>
+  </nav>
+
+  <!-- ===== SECTION G - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>This is a work of narrative fiction set in 2032. The FDIC's July 2026 draft term sheet for an industry standard-setting body, the trade associations involved, the Synapse collapse, and the voluntary and no-safe-harbour design are drawn from contemporaneous reporting. The Bank Innovation Standards Council, Farmers &amp; Merchants State Bank, Lisa Brandt, the certification registry extract, and all outcomes described after 2026 are fictional extrapolations.</p>
+  </footer>
+
+</div>
+
+<script>
+/* ==========================================================================
+   SECTION 1 - THEME
+   Matches the site convention: bottom-right toggle, localStorage brw-theme.
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - READING PROGRESS
+   ========================================================================== */
+(function(){
+  var bar = document.getElementById('progress');
+  function update(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+  }
+  document.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ==========================================================================
+   SECTION 3 - SIGNATURE MODULE: THE COLLAPSE
+   Bank nodes each run their own edge to the vendor, or route through one
+   shared assessment node. Readout figures move with the geometry.
+   ========================================================================== */
+(function(){
+  var svg = document.getElementById('diagram');
+  var NS = 'http://www.w3.org/2000/svg';
+  var HUB = {x:250, y:70};
+  var GATE = {x:168, y:70};
+  var COUNT = 44;
+  var nodes = [];
+  var edges = [];
+  var mode = 'before';
+
+  function seeded(i){
+    var s = Math.sin(i * 12.9898) * 43758.5453;
+    return s - Math.floor(s);
+  }
+
+  for (var i = 0; i < COUNT; i++){
+    var col = i % 6;
+    var row = Math.floor(i / 6);
+    nodes.push({
+      x: 18 + col * 15 + seeded(i) * 8,
+      y: 12 + row * 16 + seeded(i + 99) * 8
+    });
+  }
+
+  function path(n){
+    if (mode === 'before'){
+      var mx = (n.x + HUB.x) / 2;
+      return 'M' + n.x + ',' + n.y + ' Q' + mx + ',' + (n.y + (HUB.y - n.y) * 0.15) + ' ' + HUB.x + ',' + HUB.y;
+    }
+    return 'M' + n.x + ',' + n.y + ' Q' + ((n.x + GATE.x) / 2) + ',' + n.y + ' ' + GATE.x + ',' + GATE.y;
+  }
+
+  nodes.forEach(function(n){
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('class', 'edge');
+    p.setAttribute('d', path(n));
+    svg.appendChild(p);
+    edges.push(p);
+  });
+
+  var trunk = document.createElementNS(NS, 'path');
+  trunk.setAttribute('class', 'edge');
+  trunk.setAttribute('d', 'M' + GATE.x + ',' + GATE.y + ' L' + HUB.x + ',' + HUB.y);
+  trunk.setAttribute('stroke-width', '1.6');
+  trunk.style.opacity = '0';
+  svg.appendChild(trunk);
+
+  nodes.forEach(function(n){
+    var c = document.createElementNS(NS, 'circle');
+    c.setAttribute('class', 'node');
+    c.setAttribute('cx', n.x);
+    c.setAttribute('cy', n.y);
+    c.setAttribute('r', '2');
+    svg.appendChild(c);
+  });
+
+  var gate = document.createElementNS(NS, 'circle');
+  gate.setAttribute('class', 'hub');
+  gate.setAttribute('cx', GATE.x);
+  gate.setAttribute('cy', GATE.y);
+  gate.setAttribute('r', '0');
+  svg.appendChild(gate);
+
+  var gateLabel = document.createElementNS(NS, 'text');
+  gateLabel.setAttribute('class', 'hub-label');
+  gateLabel.setAttribute('x', GATE.x);
+  gateLabel.setAttribute('y', GATE.y + 1.8);
+  gateLabel.setAttribute('text-anchor', 'middle');
+  svg.appendChild(gateLabel);
+
+  var hub = document.createElementNS(NS, 'circle');
+  hub.setAttribute('class', 'hub');
+  hub.setAttribute('cx', HUB.x);
+  hub.setAttribute('cy', HUB.y);
+  hub.setAttribute('r', '9');
+  svg.appendChild(hub);
+
+  var hubLabel = document.createElementNS(NS, 'text');
+  hubLabel.setAttribute('class', 'hub-label');
+  hubLabel.setAttribute('x', HUB.x);
+  hubLabel.setAttribute('y', HUB.y + 1.8);
+  hubLabel.setAttribute('text-anchor', 'middle');
+  hubLabel.textContent = 'VENDOR';
+  svg.appendChild(hubLabel);
+
+  var stateText = document.getElementById('collapse-state');
+  var btnBefore = document.getElementById('btn-before');
+  var btnAfter = document.getElementById('btn-after');
+  var vReviews = document.getElementById('val-reviews');
+  var vCost = document.getElementById('val-cost');
+  var vTime = document.getElementById('val-time');
+  var cells = ['cell-reviews','cell-cost','cell-time'].map(function(id){
+    return document.getElementById(id);
+  });
+
+  function render(){
+    var shared = mode === 'after';
+    edges.forEach(function(p, i){
+      p.setAttribute('d', path(nodes[i]));
+      p.classList.toggle('shared', shared);
+    });
+    trunk.style.opacity = shared ? '1' : '0';
+    trunk.classList.toggle('shared', shared);
+    gate.setAttribute('r', shared ? '11' : '0');
+    gate.classList.toggle('shared', shared);
+    gateLabel.textContent = shared ? 'ASSESSED' : '';
+
+    stateText.textContent = shared
+      ? 'One assessment, published to a registry'
+      : 'Every bank commissions its own review';
+
+    vReviews.textContent = shared ? '1' : '4,000';
+    vCost.textContent = shared ? '$9,000' : '$118,000';
+    vTime.textContent = shared ? '6 weeks' : '14 months';
+
+    cells.forEach(function(c){ c.classList.toggle('is-good', shared); });
+    btnBefore.setAttribute('aria-pressed', String(!shared));
+    btnAfter.setAttribute('aria-pressed', String(shared));
+  }
+
+  btnBefore.addEventListener('click', function(){ mode = 'before'; render(); });
+  btnAfter.addEventListener('click', function(){ mode = 'after'; render(); });
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 4 - MODULE: THE ARITHMETIC
+   Bars scale against a fixed per-metric maximum so both years stay comparable.
+   ========================================================================== */
+(function(){
+  var DATA = {
+    '2026': {
+      time:   {v:14.2,   label:'14.2 months', max:18},
+      costlo: {v:80000,  label:'$80,000',     max:160000},
+      costhi: {v:150000, label:'$150,000',    max:160000},
+      adopt:  {v:31,     label:'31%',         max:100}
+    },
+    '2032': {
+      time:   {v:1.6,    label:'6.9 weeks',   max:18},
+      costlo: {v:9000,   label:'$9,000',      max:160000},
+      costhi: {v:18000,  label:'$18,000',     max:160000},
+      adopt:  {v:78,     label:'78%',         max:100}
+    }
+  };
+
+  var KEYS = ['time','costlo','costhi','adopt'];
+  var b26 = document.getElementById('btn-2026');
+  var b32 = document.getElementById('btn-2032');
+  var year = '2026';
+
+  function render(){
+    var set = DATA[year];
+    var after = year === '2032';
+    KEYS.forEach(function(k){
+      var d = set[k];
+      var bar = document.getElementById('bar-' + k);
+      var txt = document.getElementById('txt-' + k);
+      bar.style.width = Math.max(2, (d.v / d.max) * 100).toFixed(1) + '%';
+      bar.classList.toggle('after', after);
+      bar.classList.toggle('before', !after);
+      txt.textContent = d.label;
+    });
+    b26.setAttribute('aria-pressed', String(!after));
+    b32.setAttribute('aria-pressed', String(after));
+  }
+
+  b26.addEventListener('click', function(){ year = '2026'; render(); });
+  b32.addEventListener('click', function(){ year = '2032'; render(); });
+
+  var section = document.querySelector('.arith');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ render(); io.disconnect(); }
+      });
+    }, {threshold:0.25});
+    io.observe(section);
+  } else {
+    render();
+  }
+})();
+
+/* ==========================================================================
+   SECTION 5 - MODULE: THE REGISTRY
+   Rows expand into the split the piece argues for: what a shared assessment
+   settles, and what stays with the bank.
+   ========================================================================== */
+(function(){
+  var VENDORS = [
+    {
+      name:'Cedar Cash Flow Analytics',
+      cat:'Small business underwriting',
+      status:'certified', label:'Certified',
+      assessed:['Model governance and drift monitoring','Data retention and deletion','Fair lending testing protocol','Subservicer inventory'],
+      bank:['Override authority and thresholds','Adverse action notice wording','Integration with core system','Portfolio concentration limits'],
+      note:'Assessed March 2031. Next refresh March 2033.'
+    },
+    {
+      name:'Meridian Ledger Systems',
+      cat:'Payments processing',
+      status:'recert', label:'Recertified',
+      assessed:['Change management during migrations','Transaction record reconstruction','Business continuity and failover','Encryption at rest and in transit'],
+      bank:['Contractual recovery time commitments','Customer communication planning','Settlement exception handling','Exit and data portability terms'],
+      note:'Original certification predated the 2030 change-management criterion. Recertified July 2030 against the amended standard.'
+    },
+    {
+      name:'Prairie Onboarding',
+      cat:'Account opening',
+      status:'certified', label:'Certified',
+      assessed:['Identity verification controls','Multilingual disclosure accuracy','Accessibility conformance','Vendor personnel screening'],
+      bank:['CIP program alignment','Branch and digital channel parity','Complaint routing','Marketing review'],
+      note:'Assessed September 2031. Next refresh September 2033.'
+    },
+    {
+      name:'Northgate Deposit Tools',
+      cat:'Treasury services',
+      status:'withdrawn', label:'Withdrawn',
+      assessed:['Assessment incomplete at withdrawal'],
+      bank:['Full institution diligence required','No registry reliance available'],
+      note:'Certification withdrawn January 2032 after the accredited assessor lost accreditation for conflict of interest. Reassessment pending with a different firm.'
+    },
+    {
+      name:'Rivet Remittance Rails',
+      cat:'Cross-border payments',
+      status:'certified', label:'Certified',
+      assessed:['Sanctions screening coverage','Corridor-level FX disclosure','Settlement finality controls','Agent network oversight'],
+      bank:['Corridor risk appetite','Transaction limits','Suspicious activity escalation','Correspondent relationships'],
+      note:'Assessed November 2031. Next refresh November 2033.'
+    }
+  ];
+
+  var host = document.getElementById('registry-rows');
+  var filter = 'all';
+
+  function cell(title, items){
+    var d = document.createElement('div');
+    d.className = 'detail-cell';
+    var h = document.createElement('h4');
+    h.textContent = title;
+    var ul = document.createElement('ul');
+    items.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    d.appendChild(h);
+    d.appendChild(ul);
+    return d;
+  }
+
+  function build(){
+    host.innerHTML = '';
+    var shown = VENDORS.filter(function(v){
+      return filter === 'all' || v.status === filter;
+    });
+
+    if (shown.length === 0){
+      var empty = document.createElement('p');
+      empty.className = 'registry-foot';
+      empty.textContent = 'No vendors match this status.';
+      host.appendChild(empty);
+      return;
+    }
+
+    shown.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-btn';
+      btn.setAttribute('aria-expanded', 'false');
+
+      var nameWrap = document.createElement('span');
+      var name = document.createElement('span');
+      name.className = 'row-name';
+      name.textContent = v.name;
+      var cat = document.createElement('span');
+      cat.className = 'row-cat';
+      cat.textContent = v.cat;
+      nameWrap.appendChild(name);
+      nameWrap.appendChild(cat);
+
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + v.status;
+      badge.textContent = v.label;
+
+      var chev = document.createElement('span');
+      chev.className = 'chev';
+      chev.textContent = '\u203A';
+
+      btn.appendChild(nameWrap);
+      btn.appendChild(badge);
+      btn.appendChild(chev);
+
+      var detail = document.createElement('div');
+      detail.className = 'row-detail';
+
+      var grid = document.createElement('div');
+      grid.className = 'detail-grid';
+      grid.appendChild(cell('Settled by the assessment', v.assessed));
+      grid.appendChild(cell('Stays with the bank', v.bank));
+      detail.appendChild(grid);
+
+      var note = document.createElement('p');
+      note.className = 'detail-note';
+      note.textContent = v.note;
+      detail.appendChild(note);
+
+      btn.addEventListener('click', function(){
+        var open = row.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+
+      row.appendChild(btn);
+      row.appendChild(detail);
+      host.appendChild(row);
+    });
+  }
+
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      filter = c.getAttribute('data-filter');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', String(o === c)); });
+      build();
+    });
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>

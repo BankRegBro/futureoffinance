@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Press start to pay &middot; The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+}
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+#progress{position:fixed; top:0; left:0; height:2px; width:0%; background:var(--copper); z-index:60}
+
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+}
+.nameplate{
+  margin-top:1.6rem; border-top:3px solid var(--ink); padding:1.5rem 1.4rem 1.3rem;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(122,31,43,.18), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(180,100,15,.24), transparent 62%),
+    linear-gradient(180deg,#e7dbc3 0%,#ebe2ce 55%,#f0e8d7 100%);
+}
+html.night .nameplate{
+  border-top-color:var(--copper);
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(224,89,108,.10), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(246,200,30,.12), transparent 62%),
+    linear-gradient(180deg,#0d1327 0%,#0b1024 55%,#0a0f20 100%);
+}
+.np-top{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem}
+.np-brand{font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.05rem; letter-spacing:.03em; text-transform:uppercase; margin:0}
+.np-brand .the{color:var(--oxblood)}
+.np-meta{font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft); margin:0}
+.np-meta .dot{color:var(--copper)}
+.kicker{font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood); font-weight:700; margin:0 0 .85rem}
+h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; font-size:var(--step-4); line-height:.95;
+  letter-spacing:-.02em; margin:0 0 1rem; max-width:15ch;
+}
+.deck{font-family:"Archivo",system-ui,sans-serif; font-weight:400; font-size:var(--step-1); line-height:1.45; color:var(--ink-soft); max-width:47ch; margin:0}
+.dateline{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:1.4rem 0 0; border-top:1px solid var(--rule-strong); padding-top:.8rem}
+
+/* ==========================================================================
+   SECTION 4 - SHARED MODULE CHROME
+   ========================================================================== */
+.mod{margin:2.5rem 0 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:1.5rem 0 1.75rem}
+.mod-head{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between; align-items:flex-end; margin-bottom:1.2rem}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:0}
+.mod-state{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-weight:600; font-size:var(--step-2); line-height:1.12; margin:.35rem 0 0; max-width:26ch;
+}
+.switch{display:flex; border:1px solid var(--ink); background:var(--raised)}
+.switch button{font-family:"JetBrains Mono",monospace; font-size:.63rem; letter-spacing:.1em; text-transform:uppercase; padding:.6rem .95rem; border:0; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap}
+.switch button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.dial{display:flex; align-items:center; gap:.9rem; min-width:min(100%,20rem)}
+.dial label{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+.dial input[type=range]{flex:1; accent-color:var(--copper); min-width:8rem}
+.dial output{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.1rem; min-width:4.4rem; text-align:right; font-variant-numeric:tabular-nums}
+.stage{position:relative; width:100%; aspect-ratio:16/7; min-height:230px; background:var(--raised); border:1px solid var(--rule)}
+.stage svg{position:absolute; inset:0; width:100%; height:100%}
+.readout{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); border-top:0}
+.rcell{background:var(--raised); padding:.85rem .9rem}
+.rcell dt{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .35rem}
+.rcell dd{margin:0; font-family:"Archivo",sans-serif; font-weight:800; font-size:1.5rem; line-height:1; font-variant-numeric:tabular-nums}
+.rcell.hot dd{color:var(--oxblood)}
+.rcell.good dd{color:var(--copper)}
+.caption{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.65; color:var(--ink-faint); margin:.85rem 0 0; max-width:64ch}
+
+/* ==========================================================================
+   SECTION 5 - ARTICLE BODY
+   ========================================================================== */
+article{padding:3rem 0 0}
+article p{margin:0 0 1.15rem}
+p.lede::first-letter{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; float:left; font-size:4rem; line-height:.8;
+  padding:.34rem .5rem 0 0; color:var(--oxblood);
+}
+h2{
+  font-family:"JetBrains Mono",monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink);
+  border-top:1px solid var(--ink); padding-top:.65rem; margin:2.75rem 0 1.1rem;
+}
+.lead-in{font-weight:700}
+blockquote{
+  margin:2rem 0; padding:0 0 0 1.35rem; border-left:3px solid var(--oxblood);
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-size:1.4rem; line-height:1.3; font-weight:500;
+}
+blockquote p{margin:0}
+
+/* ==========================================================================
+   SECTION 6 - INLINE PANEL MODULE
+   ========================================================================== */
+.panel{margin:2.5rem 0; border:1px solid var(--rule); background:var(--raised)}
+.panel-head{display:flex; flex-wrap:wrap; gap:.75rem; justify-content:space-between; align-items:center; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule)}
+.panel-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint)}
+.panel-body{padding:1.1rem}
+.metric{padding:1.1rem; border-bottom:1px solid var(--rule)}
+.metric:last-of-type{border-bottom:0}
+.metric-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.82rem; color:var(--ink-soft); margin:0 0 .75rem}
+.bar-row{display:flex; align-items:center; gap:.8rem; margin-bottom:.45rem}
+.bar-track{flex:1; height:1.5rem; background:var(--sunk); border:1px solid var(--rule); position:relative}
+.bar-fill{position:absolute; inset:0 auto 0 0; width:0; transition:width .85s cubic-bezier(.6,0,.2,1)}
+.bar-fill.before{background:var(--ink-soft)}
+.bar-fill.after{background:var(--copper)}
+.bar-fill.bad{background:var(--oxblood)}
+.bar-value{font-family:"JetBrains Mono",monospace; font-size:.76rem; font-weight:500; min-width:8.5rem; text-align:right; font-variant-numeric:tabular-nums}
+.bar-tag{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); min-width:4.2rem}
+
+/* ==========================================================================
+   SECTION 7 - LEDGER MODULE
+   ========================================================================== */
+.ledger{margin:2.5rem 0; border:1px solid var(--ink)}
+.ledger-head{padding:1rem 1.1rem; background:var(--ink); color:var(--paper)}
+.ledger-head h3{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.15rem; margin:0 0 .25rem}
+.ledger-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.filters{display:flex; flex-wrap:wrap; gap:.4rem; padding:.8rem 1.1rem; border-bottom:1px solid var(--rule); background:var(--raised)}
+.chip{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem .7rem; cursor:pointer; border:1px solid var(--rule-strong); background:transparent; color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.row{border-bottom:1px solid var(--rule); background:var(--raised)}
+.row:last-child{border-bottom:0}
+.row-btn{width:100%; display:grid; grid-template-columns:1fr auto auto; gap:.9rem; align-items:center; text-align:left; padding:.85rem 1.1rem; border:0; background:transparent; cursor:pointer; font-family:inherit; color:inherit}
+.row-btn:hover{background:var(--sunk)}
+.row-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.95rem}
+.row-cat{display:block; font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-top:.2rem}
+.badge{font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; padding:.28rem .55rem; white-space:nowrap}
+.badge.low{background:var(--live-wash); color:var(--live)}
+.badge.mid{background:var(--hold-wash); color:var(--hold)}
+.badge.high{background:var(--dead-wash); color:var(--oxblood)}
+.chev{font-family:"JetBrains Mono",monospace; color:var(--ink-faint); font-size:.8rem}
+.row-detail{display:none; padding:0 1.1rem 1.1rem; background:var(--sunk)}
+.row.open .row-detail{display:block}
+.row.open .chev{transform:rotate(90deg); display:inline-block}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.detail-cell{background:var(--raised); padding:.85rem}
+.detail-cell h4{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; margin:0 0 .5rem; color:var(--ink-faint)}
+.detail-cell ul{margin:0; padding-left:1.05rem; font-size:.88rem; line-height:1.55}
+.detail-cell li{margin-bottom:.3rem}
+.detail-note{font-family:"JetBrains Mono",monospace; font-size:.68rem; line-height:1.65; color:var(--ink-soft); margin:.85rem 0 0; padding-left:.7rem; border-left:2px solid var(--rule-strong)}
+.ledger-foot{padding:.8rem 1.1rem; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.07em; color:var(--ink-faint); border-top:1px solid var(--rule); background:var(--raised); margin:0}
+
+/* ==========================================================================
+   SECTION 8 - CLOSING + THEME TOGGLE
+   ========================================================================== */
+.endmark{color:var(--oxblood); font-size:.85rem; margin-bottom:1.6rem}
+footer{margin:3.5rem 0 0; border-top:3px solid var(--ink); padding:1.25rem 0 5rem}
+footer p{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.75; color:var(--ink-faint); margin:0 0 .9rem; max-width:80ch}
+footer .sig{color:var(--ink-soft)}
+#theme{position:fixed; right:1rem; bottom:1rem; z-index:60; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; padding:.6rem .8rem; cursor:pointer; background:var(--raised); color:var(--ink-soft); border:1px solid var(--rule-strong)}
+#theme:hover{color:var(--ink); border-color:var(--copper)}
+
+/* ==========================================================================
+   SECTION 9 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .readout{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .row-btn{grid-template-columns:1fr auto; gap:.5rem}
+  .chev{display:none}
+  .bar-value{min-width:6.5rem; font-size:.7rem}
+  p.lede::first-letter{font-size:3.1rem}
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
+
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+
+/* ==========================================================================
+   SECTION 10 - THE FORWARD FILE (in-series navigation)
+   Plain links, no ids, no script. The strip carries the whole series so a
+   reader can see where this dispatch sits in the sequence and step either way.
+   ========================================================================== */
+.ff{margin:3.4rem auto 0; width:min(100%,52rem); border-top:3px solid var(--ink); padding-top:1.1rem}
+.ff-eyebrow{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--oxblood);
+}
+.ff-title{
+  margin:.35rem 0 .3rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:var(--step-1); line-height:1.2; letter-spacing:-.01em;
+}
+.ff-note{margin:0 0 1.3rem; font-size:.86rem; color:var(--ink-faint)}
+.ff-note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.ff-note a:hover{border-bottom-color:var(--oxblood)}
+
+.ff-grid{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr)); gap:.6rem;
+}
+.ff-item{margin:0}
+.ff-card{
+  display:block; height:100%; text-decoration:none; color:inherit;
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  padding:.75rem .85rem .85rem;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+a.ff-card:hover,a.ff-card:focus-visible{
+  border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px);
+}
+.ff-meta{
+  display:flex; gap:.5rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ff-year{color:var(--copper); font-weight:700}
+.ff-h{
+  margin:.35rem 0 .25rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:1rem; line-height:1.22; letter-spacing:-.01em;
+}
+.ff-sum{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-soft)}
+.ff-item.is-here .ff-card{
+  background:var(--sunk); border-left-color:var(--oxblood); cursor:default;
+}
+.ff-here{
+  display:inline-block; margin-top:.45rem;
+  font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood);
+}
+
+.ff-turn{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-top:1.1rem; padding-top:.8rem; border-top:1px solid var(--rule);
+}
+.ff-turn a{
+  max-width:22rem; text-decoration:none; color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.86rem;
+  line-height:1.3;
+}
+.ff-turn a:hover .ff-turn-h{border-bottom-color:var(--oxblood)}
+.ff-turn-lab{
+  display:block; font-family:"JetBrains Mono",monospace; font-weight:400;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:.2rem;
+}
+.ff-turn-h{border-bottom:1px solid var(--rule-strong); transition:border-color .18s ease}
+.ff-next{text-align:right; margin-left:auto}
+@media (max-width:640px){
+  .ff{margin-top:2.6rem}
+  .ff-turn{flex-direction:column}
+  .ff-next{text-align:left; margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" role="presentation"></div>
+<button type="button" id="theme">Night</button>
+
+<div class="wrap">
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span><a href="ledger-index.html">The forward file</a> &middot; Speculative &middot; Chartering</span>
+  </div>
+
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Dispatch &#8470; TBD <span class="dot">&middot;</span> Vol. I</p>
+    </div>
+    <p class="kicker">Forward file &middot; Chartering</p>
+    <h1>Press start to pay</h1>
+    <p class="deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
+    <p class="dateline">Tokyo, New York and Washington, D.C. &middot; Filed from 2027</p>
+  </header>
+
+  <!-- ===== SECTION C - SIGNATURE MODULE: THE LOOP ===== -->
+  <section class="mod" aria-labelledby="loop-state">
+    <div class="mod-head">
+      <div>
+        <p class="eyebrow">Where the money goes on the way through</p>
+        <p class="mod-state" id="loop-state">Five businesses, five payment stacks, five tolls</p>
+      </div>
+      <div class="switch" role="group" aria-label="Payment architecture">
+        <button type="button" id="btn-frag" aria-pressed="true">Today</button>
+        <button type="button" id="btn-loop" aria-pressed="false">With SEN Coin</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <svg id="loop" viewBox="0 0 320 140" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+    </div>
+
+    <dl class="readout">
+      <div class="rcell" id="c-toll"><dt>Interchange leaving the ecosystem</dt><dd id="v-toll">$520m</dd></div>
+      <div class="rcell" id="c-hold"><dt>Balances held by Sony</dt><dd id="v-hold">$0</dd></div>
+      <div class="rcell" id="c-rail"><dt>Payment rails in use</dt><dd id="v-rail">5</dd></div>
+    </dl>
+
+    <p class="caption">Sony's businesses currently clear through separate processors that do not talk to each other. A single issued dollar collapses them onto one rail, retains the interchange, and holds the float on the way through. Figures are stylised.</p>
+  </section>
+
+  <!-- ===== SECTION D - ARTICLE ===== -->
+  <article>
+    <div class="col">
+      <p class="lede">The filing arrived at the Office of the Comptroller of the Currency in late 2026, forty-seven pages of dense regulatory prose submitted under the name Sony Financial Trust, N.A. Applications for national trust charters are not ordinarily newsworthy. This one is different. Buried in section four, under the heading "Proposed Activities and Services," is a single sentence that has set the payments industry on edge: the applicant intends, upon approval and subject to certification under the GENIUS Act of 2026, to issue a fully reserved, US dollar-denominated payment stablecoin for use across Sony's global digital ecosystem.</p>
+
+      <p>Sony is, in other words, applying to become a bank. Not a retail bank. It is not proposing to take deposits from the public or make loans in any conventional sense. A trust bank: a narrowly chartered institution holding assets for others, and in this case holding the Treasury-bill reserves that would back a Sony-issued dollar circulating across PlayStation Network, Sony Pictures, Sony Music, the Bravia platform, and a constellation of affiliated services that together touch an estimated 700 million people.</p>
+
+      <p>The OCC has not ruled. Comptroller Gould has made little secret of his disposition, describing the GENIUS Act in an autumn speech as the most consequential piece of financial infrastructure legislation since Dodd-Frank and arguing that his mandate under it is to enable regulated innovation rather than to protect incumbent business models. People familiar with the review expect a conditional approval in the first quarter of 2027.</p>
+
+      <p>"We are modelling the approval as a near-certainty," says one senior executive at a large card-issuing bank, who asked not to be named. "The question is not whether it happens. It is what we do when it does."</p>
+
+      <h2>The arithmetic that makes it worth doing</h2>
+
+      <p>Consider what Sony controls. PlayStation Network has 145 million monthly users spending an estimated $26bn a year on games, content, subscriptions and in-game purchases. Sony Pictures releases roughly 25 films a year into a library reaching over 100 countries. Sony Music is one of three major labels. The Alpha camera ecosystem sustains a community that buys hardware, software subscriptions and cloud storage on recurring cycles. Bravia televisions are the primary screen in tens of millions of households.</p>
+
+      <p>Each of these currently handles payments through a different mixture of cards, regional processors and platform wallets that do not communicate. A customer who games, streams, buys music and stores photographs pays for each separately, through separate interfaces, generating interchange of two to three percent every time. A single issued dollar collapses all of it onto one rail.</p>
+
+      <p><span class="lead-in">The interchange saving</span> is the obvious prize and the smaller one: roughly $520m a year at full adoption. The float is the real business. Under the GENIUS Act's reserve requirements an issuer holds one-to-one backing in short-duration Treasuries, and the Act permits the issuer to retain the yield on them. The consumer holding a balance in a Sony wallet is lending Sony money that Sony invests in government securities and keeps the return on.</p>
+    </div>
+
+    <!-- ===== SECTION E - MODULE: THE FLOAT ===== -->
+    <div class="col">
+      <section class="panel" aria-label="Reserve income model">
+        <div class="panel-head">
+          <p>Reserve income at 4.3 percent</p>
+          <div class="dial">
+            <label for="supply">Circulating</label>
+            <input type="range" id="supply" min="1" max="20" step="1" value="5">
+            <output id="supply-out" for="supply">$5bn</output>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">Annual yield on the reserve portfolio</p>
+          <div class="bar-row">
+            <span class="bar-tag">Gross</span>
+            <span class="bar-track"><span class="bar-fill after" id="bar-gross"></span></span>
+            <span class="bar-value" id="txt-gross">$215m</span>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">Returned to wallet holders as SEN Credits</p>
+          <div class="bar-row">
+            <span class="bar-tag">Rewards</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-rew"></span></span>
+            <span class="bar-value" id="txt-rew">$54m</span>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">Retained by Sony, before interchange savings</p>
+          <div class="bar-row">
+            <span class="bar-tag">Net</span>
+            <span class="bar-track"><span class="bar-fill after" id="bar-net"></span></span>
+            <span class="bar-value" id="txt-net">$161m</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>The rewards structure is the elegant part. SEN Credits would be distributed as a fraction of the yield earned on a holder's own balance, redeemable for game content, subscriptions and hardware discounts. A consumer keeping $150 in the wallet earns something like $6.45 a year. Modest individually, and structurally more durable than the interchange-funded points programmes it competes with, because Sony is not paying for the rewards out of margin. It is handing back a slice of the float and keeping the rest.</p>
+
+      <p>"It is the most elegant monetisation of trust I have seen proposed in years," says Thomas Osei, a fintech investor tracking the stablecoin ecosystem since the Act passed. "They take the consumer's own money, put it in Treasuries, and give back part of the return as entertainment rewards. The consumer feels rewarded. And leaving costs them the reward stream."</p>
+
+      <h2>Why a trust charter</h2>
+
+      <p>The choice of instrument reflects a calculation about control. A state money-transmitter licence is a fifty-jurisdiction patchwork that constrains reserve composition. A bank partnership hands oversight and margin to the chartered partner. A national trust charter gives Sony a federally regulated institution of its own, valid everywhere, able to hold and manage the reserve without intermediation and to issue an instrument carrying the legitimacy of a nationally chartered bank.</p>
+
+      <p>The banking lobby objects, volubly. The Independent Community Bankers of America has filed a comment letter arguing that trust charters for technology conglomerates create an uneven field, delivering the benefits of a charter without the obligations of full-service banking. The letter has the ring of an argument made by people who know they are losing and feel obliged to make the record.</p>
+
+      <p><span class="lead-in">The more substantive concern</span>, reportedly raised inside the OCC itself, is data. A trust entity intermediating payments across gaming, streaming, music, film and photography accumulates a dataset of extraordinary granularity: not what consumers enjoy, which platform analytics already reveal, but what they will pay for it, how fast they spend after loading, and how their leisure correlates with their financial behaviour. Bank privacy rules were written long before anyone contemplated an entertainment-conglomerate bank. Any conditional approval is expected to carry enhanced data-governance requirements and a hard separation between payment data and commercial data.</p>
+
+      <h2>The Tokyo question</h2>
+
+      <p>There is a dimension of this application that has attracted less attention than it deserves, which is that the applicant's parent is Japanese.</p>
+
+      <p>A national trust charter would sit inside a corporate group whose ultimate supervision belongs to the Japan Financial Services Agency, and the OCC's assessment has to reach questions that do not arise for a domestic applicant. Whether the reserve is genuinely ring-fenced from the parent in an insolvency governed by Japanese law. Whether US supervisors can obtain what they need from a group whose books sit largely outside their reach. Whether the FSA and the OCC can agree a supervisory understanding, and how quickly, given that the FSA has its own developing stablecoin regime and its own view about a domestic champion issuing dollars.</p>
+
+      <p>None of this is disqualifying. Foreign-owned institutions hold US charters routinely. But it adds a layer of negotiation that the application's timeline has not obviously priced in, and it gives the OCC a legitimate reason to move slowly that has nothing to do with protecting Visa.</p>
+
+      <h2>The graveyard</h2>
+
+      <p>Everything above is the bull case, and it is genuinely strong. It is also worth remembering that the history of large companies issuing their own payment instruments is close to a graveyard.</p>
+
+      <p>A consortium of the largest American retailers spent years and a great deal of money building a merchant-controlled payment network specifically to escape interchange, and it never launched at scale. Retailer-branded wallets have been introduced repeatedly across two decades and have almost uniformly failed to achieve meaningful penetration. The reason is consistent and unglamorous: a general-purpose card works everywhere, earns rewards on everything, and extends credit when the customer needs it, while a single-merchant wallet does one thing in one place and demands the customer maintain a separate balance to do it.</p>
+
+      <blockquote><p>"Every one of these has died the same death. Not rejection. Indifference. People simply do not want a second wallet for one shop."</p></blockquote>
+
+      <p>Sony's answer is that its ecosystem is unusually large, unusually sticky, and unusually good at making its customers feel they are inside something rather than shopping at it. That answer is more credible than most of its predecessors. It is still the same bet those predecessors made, and the base rate is unkind.</p>
+
+      <p><span class="lead-in">There is also the matter</span> of Sony's own security history, which the charter review cannot avoid and which the company's public case conspicuously does not address. The 2011 PlayStation Network intrusion exposed the personal data of roughly 77 million accounts and took the service offline for weeks. In 2014 an intrusion at Sony Pictures destroyed internal systems, drained the company's private correspondence into public view, and became the reference case for what a determined state-linked actor can do to an entertainment company that is not a bank.</p>
+
+      <p>Neither event says anything definitive about the security of a trust entity chartered in 2027 and built for the purpose. Both say something about institutional history, and prudential supervision is substantially the practice of taking institutional history seriously. An applicant asking to hold billions in reserves and to become the payment identity for tens of millions of young customers will be asked, in detail, what changed.</p>
+
+      <h2>What could go wrong</h2>
+
+      <p>The failure modes are worth setting out plainly, because the commentary so far has been split between people who think this is inevitable and people who think it is outrageous, and very few who have worked through how it actually breaks.</p>
+    </div>
+
+    <!-- ===== SECTION F - MODULE: THE RISK LEDGER ===== -->
+    <div class="col">
+      <section class="ledger" aria-label="Failure modes">
+        <div class="ledger-head">
+          <h3>Failure modes, ranked by how quietly they arrive</h3>
+          <p>Assessment &middot; pre-decision &middot; 2027</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filter by severity">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="high" aria-pressed="false">Most likely</button>
+          <button type="button" class="chip" data-filter="mid" aria-pressed="false">Live risk</button>
+          <button type="button" class="chip" data-filter="low" aria-pressed="false">Tail</button>
+        </div>
+        <div id="ledger-rows"></div>
+        <p class="ledger-foot">Ranked by probability, not by consequence. The likeliest outcome is not a scandal. It is that not enough people bother.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <h2>The generational prize</h2>
+
+      <p>What unsettles the payments industry is not the arithmetic. It is the demography.</p>
+
+      <p>The cohort Sony is targeting skews heavily to the 18-to-35 range, which is precisely when primary financial habits form. Visa and Mastercard built their franchises by being present at the first credit card application. Sony proposes to be present earlier, at the moment a young adult's entertainment spending, which for this group is frequent and substantial, moves onto a payment system native to the platform they already live inside.</p>
+
+      <p>"The card became the default because it was the first one," says a senior executive at one of the major networks, who also declined to be named. "If they get the wallet relationship at twenty-two, the card relationship at twenty-five is a different conversation. That is what keeps us up at night."</p>
+
+      <p>The cross-media linkages amplify it. A wallet loaded for a game offers a discounted month of streaming. A music subscription paid in SEN Coin earns credits redeemable for PlayStation content. None of it requires the customer to think of themselves as using a financial product. The payment is invisible, the rewards accumulate, and the loop tightens.</p>
+
+      <h2>The flywheel and the lawyers</h2>
+
+      <p>The most ambitious element, and the one drawing scrutiny alongside the charter review, is what Sony's strategists call the content flywheel. Adoption is accelerated by content incentives available only to wallet holders. Broader adoption means a larger float and more reserve income. Reserve income funds more content and more generous rewards, which drives further adoption. The financial infrastructure and the creative infrastructure stop being parallel businesses that share a parent and become one engine.</p>
+
+      <p>Sony has been careful in public. The filing describes content incentives as optional commercial promotions rather than structural features of the payment product. Competition lawyers note that the line between a promotional tie and an anticompetitive one turns on implementation: offering wallet holders a discount is not the same as withholding content from everyone else, and Sony has explicitly disclaimed the latter. Whether the commercial pressure to maximise adoption preserves that distinction over time is a question the Department of Justice has reportedly begun to ask.</p>
+
+      <h2>The road to a ruling</h2>
+
+      <p>A decision is expected in the first quarter. The Stablecoin Certification Commission typically follows an OCC trust approval within ninety days where the reserve architecture has already been examined, which would put an instrument in consumers' hands before the end of the year.</p>
+
+      <p>The form matters as much as the fact. A narrow charter restricting the coin to Sony's own services validates the immediate commercial logic and defers the real question. A broad charter authorising third-party merchant acceptance makes Sony a payment network competitor on day one, and the networks do not believe their responses are ready for that.</p>
+
+      <p>The remaining avenue of resistance is Congress. Several members of the Senate Banking Committee have signalled interest in amending the Act to impose holding periods before float income can be retained, CRA-equivalent obligations, and caps on the circulating supply of any single non-bank issuer. Whether anything passes before Gould rules is doubtful. The calendar is crowded and the fintech lobby is well resourced.</p>
+
+      <p>What is not in doubt is that the GENIUS Act created a framework under which a consumer electronics and entertainment company can plausibly obtain the powers of a federally chartered institution and issue its own dollar. The framework exists. Sony is testing it first, and the answer will determine the future of every large consumer platform now watching.</p>
+
+      <p>There are, by the OCC's own count, eleven such pre-applications under informal discussion with licensing staff. Whether any of them is worth filing depends on something no regulator will decide, which is whether ordinary people can be persuaded to keep money somewhere new.</p>
+
+      <p class="endmark">&#9632;</p>
+    </div>
+  </article>
+
+  <!-- ===== SECTION F2 - THE FORWARD FILE (in-series navigation) ===== -->
+  <nav class="ff" aria-label="More from the forward file">
+    <p class="ff-eyebrow">The forward file</p>
+    <h2 class="ff-title">Six dispatches from a decade that has not happened</h2>
+    <p class="ff-note">Filed in sequence from 2027 to 2032. <a href="ledger-index.html">Open the full file</a>.</p>
+  <ol class="ff-grid">
+  <li class="ff-item is-here" aria-current="page">
+    <div class="ff-card">
+      <p class="ff-meta"><span class="ff-year">Filed from 2027</span> <span>Chartering</span></p>
+      <p class="ff-h">Press start to pay</p>
+      <p class="ff-sum">An entertainment company asks the OCC for bank powers and the right to issue its own dollar.</p>
+      <span class="ff-here">You are here</span>
+    </div>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nothing-sits-still.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Deposits</span></p>
+      <p class="ff-h">Nothing sits still</p>
+      <p class="ff-sum">Open banking and agentic commerce turn the retail deposit base into a spot market.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-examiner-who-never-leaves.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Supervision</span></p>
+      <p class="ff-h">The examiner who never leaves</p>
+      <p class="ff-sum">Continuous supervision replaces the periodic exam, and four thousand banks manage to one dashboard.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nobodys-on-the-file.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Mortgage</span></p>
+      <p class="ff-h">Nobody's on the file</p>
+      <p class="ff-sum">Underwriting automation takes the cost, the jobs, and the point of a licensing regime.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="Standard_Setting.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Third-party risk</span></p>
+      <p class="ff-h">Assessed once, trusted often</p>
+      <p class="ff-sum">One assessment, published to a registry, makes it rational for a small bank to try something new.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-wallet-woke-up.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Cryptography</span></p>
+      <p class="ff-h">The wallet woke up</p>
+      <p class="ff-sum">Coins dormant since 2009 move, and the transfer itself is the announcement that the mathematics failed.</p>
+    </a>
+  </li>
+  </ol>
+  <div class="ff-turn">
+    <a class="ff-next" href="ledger-nothing-sits-still.html"><span class="ff-turn-lab">Next dispatch</span><span class="ff-turn-h">Nothing sits still</span></a>
+  </div>
+  </nav>
+
+  <!-- ===== SECTION G - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>This is a work of narrative fiction set in 2027. The GENIUS Act of 2026, the OCC national trust charter pathway, the 2011 PlayStation Network intrusion, the 2014 Sony Pictures intrusion, and the history of failed merchant payment consortia are drawn from the real record. Sony Financial Trust, N.A., SEN Coin, the charter application, the reserve model, and all statements attributed to named or unnamed individuals are fictional constructs.</p>
+  </footer>
+
+</div>
+
+<script>
+
+/* ==========================================================================
+   SECTION 6 - LEDGER DATA
+   ========================================================================== */
+window.LEDGER_HEADS = ['How it happens', 'What it would look like'];
+window.LEDGER_ITEMS = [
+  {
+    name:'Nobody adopts it',
+    cat:'Consumer indifference',
+    status:'high', label:'Most likely',
+    left:['Customers decline to maintain a second balance for one ecosystem','Card rewards on general spending outweigh entertainment credits','Loading friction kills conversion at checkout'],
+    right:['Adoption plateaus in the low single-digit millions','Float never reaches the scale that funds the rewards','Quietly repositioned as a loyalty programme within two years'],
+    note:'The base rate for merchant-issued instruments is brutal and this is the outcome the arithmetic is least able to argue away. Every previous attempt died of indifference rather than opposition.'
+  },
+  {
+    name:'The charter arrives narrow',
+    cat:'Regulatory outcome',
+    status:'mid', label:'Live risk',
+    left:['OCC restricts use to Sony-owned services','Third-party merchant acceptance deferred pending review','Data-governance conditions constrain the flywheel'],
+    right:['Commercially workable, strategically neutered','No payment network competitor emerges','The eleven pre-applications thin out considerably'],
+    note:'A narrow charter is the outcome that satisfies everyone in the room and settles nothing. It also removes most of the reason for a competitor to file.'
+  },
+  {
+    name:'A security event during the build',
+    cat:'Operational risk',
+    status:'mid', label:'Live risk',
+    left:['Intrusion at any point in the ecosystem during standup','Historic breach record reopens the reputational question','Wallet credentials compromised at consumer scale'],
+    right:['Charter conditions tightened or approval suspended','Adoption freezes among exactly the cohort being courted','Congressional interest converts from theoretical to urgent'],
+    note:'Sony has been the subject of two of the most consequential corporate intrusions on record. Neither predicts the security of a purpose-built trust entity, and both will be raised.'
+  },
+  {
+    name:'The tie becomes a tying claim',
+    cat:'Antitrust',
+    status:'mid', label:'Live risk',
+    left:['Content incentives harden from promotion into condition','Exclusive windows made contingent on wallet use','Rival payment methods disadvantaged at checkout'],
+    right:['Justice Department opens a formal inquiry','Flywheel dismantled by consent decree','The strategic case collapses into an ordinary wallet'],
+    note:'The distinction between a discount for wallet holders and a penalty for everyone else is legally decisive and commercially slippery. Adoption pressure pushes in exactly one direction.'
+  },
+  {
+    name:'Supervisory reach fails at the border',
+    cat:'Home-country supervision',
+    status:'low', label:'Tail',
+    left:['OCC and the Japan FSA cannot agree an information-sharing understanding','Reserve ring-fencing untested under Japanese insolvency law','Group-level books remain outside US supervisory reach'],
+    right:['Approval delayed indefinitely rather than denied','Conditions imposed that make the structure uneconomic','Sony restructures the entity or withdraws'],
+    note:'Rarely fatal and frequently slow. This is the objection that costs eighteen months without ever producing a headline.'
+  },
+  {
+    name:'Congress moves first',
+    cat:'Legislative',
+    status:'low', label:'Tail',
+    left:['GENIUS Act amended to cap non-bank circulating supply','Float income subjected to holding periods','CRA-equivalent obligations attached to large-platform issuers'],
+    right:['Reserve economics no longer clear the hurdle rate','The charter is granted into a framework that has moved','Filed applications withdrawn en masse'],
+    note:'The banking lobby has the argument and not the calendar. Passing anything before the Comptroller rules would require a legislative speed this Congress has not demonstrated.'
+  }
+];
+
+/* ==========================================================================
+   SECTION 1 - THEME
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - READING PROGRESS
+   ========================================================================== */
+(function(){
+  var bar = document.getElementById('progress');
+  function update(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+  }
+  document.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ==========================================================================
+   SECTION 3 - LEDGER MODULE (shared builder)
+   Rows expand into a two-column split plus a note. Filter chips narrow by
+   the status field. Consumers set window.LEDGER_ITEMS and the column heads.
+   ========================================================================== */
+(function(){
+  var ITEMS = window.LEDGER_ITEMS || [];
+  var HEADS = window.LEDGER_HEADS || ['Left', 'Right'];
+  var host = document.getElementById('ledger-rows');
+  if (!host) return;
+  var filter = 'all';
+
+  function cell(title, items){
+    var d = document.createElement('div');
+    d.className = 'detail-cell';
+    var h = document.createElement('h4');
+    h.textContent = title;
+    var ul = document.createElement('ul');
+    items.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    d.appendChild(h); d.appendChild(ul);
+    return d;
+  }
+
+  function build(){
+    host.innerHTML = '';
+    var shown = ITEMS.filter(function(v){
+      return filter === 'all' || v.status === filter;
+    });
+
+    if (shown.length === 0){
+      var empty = document.createElement('p');
+      empty.className = 'ledger-foot';
+      empty.textContent = 'Nothing matches this filter.';
+      host.appendChild(empty);
+      return;
+    }
+
+    shown.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-btn';
+      btn.setAttribute('aria-expanded', 'false');
+
+      var nameWrap = document.createElement('span');
+      var name = document.createElement('span');
+      name.className = 'row-name';
+      name.textContent = v.name;
+      var cat = document.createElement('span');
+      cat.className = 'row-cat';
+      cat.textContent = v.cat;
+      nameWrap.appendChild(name); nameWrap.appendChild(cat);
+
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + v.status;
+      badge.textContent = v.label;
+
+      var chev = document.createElement('span');
+      chev.className = 'chev';
+      chev.textContent = '\u203A';
+
+      btn.appendChild(nameWrap); btn.appendChild(badge); btn.appendChild(chev);
+
+      var detail = document.createElement('div');
+      detail.className = 'row-detail';
+      var grid = document.createElement('div');
+      grid.className = 'detail-grid';
+      grid.appendChild(cell(HEADS[0], v.left));
+      grid.appendChild(cell(HEADS[1], v.right));
+      detail.appendChild(grid);
+
+      var note = document.createElement('p');
+      note.className = 'detail-note';
+      note.textContent = v.note;
+      detail.appendChild(note);
+
+      btn.addEventListener('click', function(){
+        var open = row.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+
+      row.appendChild(btn); row.appendChild(detail);
+      host.appendChild(row);
+    });
+  }
+
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      filter = c.getAttribute('data-filter');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', String(o === c)); });
+      build();
+    });
+  });
+
+  build();
+})();
+
+
+/* ==========================================================================
+   SECTION 4 - SIGNATURE MODULE: THE LOOP
+   Five Sony properties arranged around a centre. In "today" each clears to
+   its own external processor and leaks a toll on the way out. In "SEN Coin"
+   the flows redirect inward to a single issued dollar and the tolls fade.
+   ========================================================================== */
+(function(){
+  var svg = document.getElementById('loop');
+  var NS = 'http://www.w3.org/2000/svg';
+  var HUB = {x:160, y:70};
+  var mode = 'frag';
+
+  var NODES = [
+    {label:'PLAYSTATION', x:160, y:20},
+    {label:'PICTURES',    x:264, y:48},
+    {label:'MUSIC',       x:224, y:118},
+    {label:'BRAVIA',      x:96,  y:118},
+    {label:'ALPHA',       x:56,  y:48}
+  ];
+
+  /* Each property's external processor sits further out along the same ray. */
+  function outward(n, dist){
+    var dx = n.x - HUB.x, dy = n.y - HUB.y;
+    var len = Math.sqrt(dx*dx + dy*dy) || 1;
+    return {x: n.x + (dx/len)*dist, y: n.y + (dy/len)*dist};
+  }
+
+  var parts = NODES.map(function(n){
+    var out = outward(n, 26);
+
+    var edge = document.createElementNS(NS, 'path');
+    edge.setAttribute('fill', 'none');
+    edge.setAttribute('stroke-width', '1.1');
+    svg.appendChild(edge);
+
+    var toll = document.createElementNS(NS, 'rect');
+    toll.setAttribute('x', out.x - 4);
+    toll.setAttribute('y', out.y - 4);
+    toll.setAttribute('width', 8);
+    toll.setAttribute('height', 8);
+    toll.setAttribute('transform', 'rotate(45 ' + out.x + ' ' + out.y + ')');
+    svg.appendChild(toll);
+
+    var dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('cx', n.x);
+    dot.setAttribute('cy', n.y);
+    dot.setAttribute('r', '3.4');
+    svg.appendChild(dot);
+
+    var label = document.createElementNS(NS, 'text');
+    label.setAttribute('x', n.x);
+    label.setAttribute('y', n.y - 7);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('font-size', '4.6');
+    label.setAttribute('letter-spacing', '0.5');
+    label.setAttribute('font-family', 'JetBrains Mono, monospace');
+    label.textContent = n.label;
+    svg.appendChild(label);
+
+    return {node:n, out:out, edge:edge, toll:toll, dot:dot, label:label};
+  });
+
+  var hub = document.createElementNS(NS, 'circle');
+  hub.setAttribute('cx', HUB.x);
+  hub.setAttribute('cy', HUB.y);
+  hub.setAttribute('r', '0');
+  svg.appendChild(hub);
+
+  var hubLabel = document.createElementNS(NS, 'text');
+  hubLabel.setAttribute('x', HUB.x);
+  hubLabel.setAttribute('y', HUB.y + 1.6);
+  hubLabel.setAttribute('text-anchor', 'middle');
+  hubLabel.setAttribute('font-size', '4.4');
+  hubLabel.setAttribute('letter-spacing', '0.6');
+  hubLabel.setAttribute('font-family', 'JetBrains Mono, monospace');
+  svg.appendChild(hubLabel);
+
+  var state = document.getElementById('loop-state');
+  var bFrag = document.getElementById('btn-frag');
+  var bLoop = document.getElementById('btn-loop');
+  var vToll = document.getElementById('v-toll');
+  var vHold = document.getElementById('v-hold');
+  var vRail = document.getElementById('v-rail');
+  var cToll = document.getElementById('c-toll');
+  var cHold = document.getElementById('c-hold');
+
+  function css(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function render(){
+    var unified = mode === 'loop';
+    var ink = css('--ink');
+    var faint = css('--ink-faint');
+    var ox = css('--oxblood');
+    var cop = css('--copper');
+
+    parts.forEach(function(p){
+      if (unified){
+        p.edge.setAttribute('d', 'M' + p.node.x + ',' + p.node.y + ' L' + HUB.x + ',' + HUB.y);
+        p.edge.setAttribute('stroke', cop);
+        p.edge.setAttribute('opacity', '0.85');
+        p.toll.setAttribute('opacity', '0.08');
+        p.toll.setAttribute('fill', faint);
+      } else {
+        p.edge.setAttribute('d', 'M' + p.node.x + ',' + p.node.y + ' L' + p.out.x + ',' + p.out.y);
+        p.edge.setAttribute('stroke', ox);
+        p.edge.setAttribute('opacity', '0.6');
+        p.toll.setAttribute('opacity', '0.9');
+        p.toll.setAttribute('fill', ox);
+      }
+      p.dot.setAttribute('fill', ink);
+      p.label.setAttribute('fill', faint);
+    });
+
+    hub.setAttribute('r', unified ? '13' : '0');
+    hub.setAttribute('fill', cop);
+    hubLabel.textContent = unified ? 'SEN' : '';
+    hubLabel.setAttribute('fill', css('--on-accent'));
+
+    state.textContent = unified
+      ? 'One issued dollar, and the toll stays inside'
+      : 'Five businesses, five payment stacks, five tolls';
+
+    vToll.textContent = unified ? '$0' : '$520m';
+    vHold.textContent = unified ? '$5bn' : '$0';
+    vRail.textContent = unified ? '1' : '5';
+
+    cToll.classList.toggle('hot', !unified);
+    cHold.classList.toggle('good', unified);
+    bFrag.setAttribute('aria-pressed', String(!unified));
+    bLoop.setAttribute('aria-pressed', String(unified));
+  }
+
+  bFrag.addEventListener('click', function(){ mode = 'frag'; render(); });
+  bLoop.addEventListener('click', function(){ mode = 'loop'; render(); });
+  document.getElementById('theme').addEventListener('click', function(){
+    setTimeout(render, 30);
+  });
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 5 - MODULE: THE FLOAT
+   Real arithmetic. Yield on the reserve at 4.3 percent, a quarter handed
+   back as rewards, the remainder retained.
+   ========================================================================== */
+(function(){
+  var YIELD = 0.043;
+  var PAYBACK = 0.25;
+  var MAXBN = 20;
+
+  var slider = document.getElementById('supply');
+  var out = document.getElementById('supply-out');
+
+  function money(m){
+    return m >= 1000 ? '$' + (m/1000).toFixed(2) + 'bn' : '$' + Math.round(m) + 'm';
+  }
+
+  function render(){
+    var bn = Number(slider.value);
+    var gross = bn * 1000 * YIELD;
+    var rew = gross * PAYBACK;
+    var net = gross - rew;
+    var maxGross = MAXBN * 1000 * YIELD;
+
+    out.textContent = '$' + bn + 'bn';
+    document.getElementById('txt-gross').textContent = money(gross);
+    document.getElementById('txt-rew').textContent = money(rew);
+    document.getElementById('txt-net').textContent = money(net);
+    document.getElementById('bar-gross').style.width = ((gross/maxGross)*100).toFixed(1) + '%';
+    document.getElementById('bar-rew').style.width = ((rew/maxGross)*100).toFixed(1) + '%';
+    document.getElementById('bar-net').style.width = ((net/maxGross)*100).toFixed(1) + '%';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+})();
+
+</script>
+</body>
+</html>

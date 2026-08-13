@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nothing sits still &middot; The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+}
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+#progress{position:fixed; top:0; left:0; height:2px; width:0%; background:var(--copper); z-index:60}
+
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+}
+.nameplate{
+  margin-top:1.6rem; border-top:3px solid var(--ink); padding:1.5rem 1.4rem 1.3rem;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(122,31,43,.18), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(180,100,15,.24), transparent 62%),
+    linear-gradient(180deg,#e7dbc3 0%,#ebe2ce 55%,#f0e8d7 100%);
+}
+html.night .nameplate{
+  border-top-color:var(--copper);
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(224,89,108,.10), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(246,200,30,.12), transparent 62%),
+    linear-gradient(180deg,#0d1327 0%,#0b1024 55%,#0a0f20 100%);
+}
+.np-top{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem}
+.np-brand{font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.05rem; letter-spacing:.03em; text-transform:uppercase; margin:0}
+.np-brand .the{color:var(--oxblood)}
+.np-meta{font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft); margin:0}
+.np-meta .dot{color:var(--copper)}
+.kicker{font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood); font-weight:700; margin:0 0 .85rem}
+h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; font-size:var(--step-4); line-height:.95;
+  letter-spacing:-.02em; margin:0 0 1rem; max-width:15ch;
+}
+.deck{font-family:"Archivo",system-ui,sans-serif; font-weight:400; font-size:var(--step-1); line-height:1.45; color:var(--ink-soft); max-width:46ch; margin:0}
+.dateline{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:1.4rem 0 0; border-top:1px solid var(--rule-strong); padding-top:.8rem}
+
+/* ==========================================================================
+   SECTION 4 - SIGNATURE MODULE: THE DRAIN CLOCK
+   Agent penetration against time to a 30 percent outflow, read against the
+   window in which a human supervisory response can actually land.
+   ========================================================================== */
+.clock{margin:2.5rem 0 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:1.5rem 0 1.75rem}
+.clock-head{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between; align-items:flex-end; margin-bottom:1.2rem}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:0}
+.clock-state{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-weight:600; font-size:var(--step-2); line-height:1.12; margin:.35rem 0 0; max-width:24ch;
+}
+.dial{display:flex; align-items:center; gap:.9rem; min-width:min(100%,20rem)}
+.dial label{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+.dial input[type=range]{flex:1; accent-color:var(--copper); min-width:8rem}
+.dial output{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.1rem; min-width:3.2rem; text-align:right; font-variant-numeric:tabular-nums}
+
+.track{position:relative; height:4.5rem; background:var(--raised); border:1px solid var(--rule); overflow:hidden}
+.track-fill{position:absolute; inset:0 auto 0 0; width:0; background:var(--copper); opacity:.22; transition:width .35s ease}
+.track-fill.past{background:var(--oxblood); opacity:.26}
+.window{position:absolute; top:0; bottom:0; border-right:2px dashed var(--oxblood); pointer-events:none}
+.window span{
+  position:absolute; top:.4rem; left:.45rem; white-space:nowrap;
+  font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--oxblood);
+}
+.track-read{position:absolute; left:.7rem; bottom:.5rem; font-family:"Archivo",sans-serif; font-weight:900; font-size:1.9rem; line-height:1; font-variant-numeric:tabular-nums}
+.track-scale{display:flex; justify-content:space-between; font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.09em; color:var(--ink-faint); margin-top:.4rem}
+.verdict{margin:.9rem 0 0; padding:.75rem .9rem; border-left:3px solid var(--rule-strong); font-family:"Archivo",sans-serif; font-size:.92rem; line-height:1.5; color:var(--ink-soft)}
+.verdict.bad{border-left-color:var(--oxblood); color:var(--ink)}
+.caption{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.65; color:var(--ink-faint); margin:.85rem 0 0; max-width:64ch}
+
+/* ==========================================================================
+   SECTION 5 - ARTICLE BODY
+   ========================================================================== */
+article{padding:3rem 0 0}
+article p{margin:0 0 1.15rem}
+p.lede::first-letter{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; float:left; font-size:4rem; line-height:.8;
+  padding:.34rem .5rem 0 0; color:var(--oxblood);
+}
+h2{
+  font-family:"JetBrains Mono",monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink);
+  border-top:1px solid var(--ink); padding-top:.65rem; margin:2.75rem 0 1.1rem;
+}
+.lead-in{font-weight:700}
+blockquote{
+  margin:2rem 0; padding:0 0 0 1.35rem; border-left:3px solid var(--oxblood);
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-size:1.4rem; line-height:1.3; font-weight:500;
+}
+blockquote p{margin:0}
+
+/* ==========================================================================
+   SECTION 6 - MODULE: DEPOSIT BETA
+   ========================================================================== */
+.beta{margin:2.5rem 0; border:1px solid var(--rule); background:var(--raised)}
+.beta-head{display:flex; flex-wrap:wrap; gap:.75rem; justify-content:space-between; align-items:center; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule)}
+.beta-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint)}
+.switch{display:flex; border:1px solid var(--ink); background:var(--raised)}
+.switch button{font-family:"JetBrains Mono",monospace; font-size:.63rem; letter-spacing:.1em; text-transform:uppercase; padding:.6rem .95rem; border:0; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap}
+.switch button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.metric{padding:1.1rem; border-bottom:1px solid var(--rule)}
+.metric:last-of-type{border-bottom:0}
+.metric-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.82rem; color:var(--ink-soft); margin:0 0 .75rem}
+.bar-row{display:flex; align-items:center; gap:.8rem; margin-bottom:.45rem}
+.bar-track{flex:1; height:1.5rem; background:var(--sunk); border:1px solid var(--rule); position:relative}
+.bar-fill{position:absolute; inset:0 auto 0 0; width:0; transition:width .85s cubic-bezier(.6,0,.2,1)}
+.bar-fill.before{background:var(--ink-soft)}
+.bar-fill.after{background:var(--copper)}
+.bar-value{font-family:"JetBrains Mono",monospace; font-size:.76rem; font-weight:500; min-width:8.5rem; text-align:right; font-variant-numeric:tabular-nums}
+.bar-tag{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); min-width:3.6rem}
+
+/* ==========================================================================
+   SECTION 7 - MODULE: THE DEFENCES LEDGER
+   ========================================================================== */
+.ledger{margin:2.5rem 0; border:1px solid var(--ink)}
+.ledger-head{padding:1rem 1.1rem; background:var(--ink); color:var(--paper)}
+.ledger-head h3{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.15rem; margin:0 0 .25rem}
+.ledger-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.row{border-bottom:1px solid var(--rule); background:var(--raised)}
+.row:last-child{border-bottom:0}
+.row-btn{width:100%; display:grid; grid-template-columns:1fr auto auto; gap:.9rem; align-items:center; text-align:left; padding:.85rem 1.1rem; border:0; background:transparent; cursor:pointer; font-family:inherit; color:inherit}
+.row-btn:hover{background:var(--sunk)}
+.row-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.95rem}
+.row-cat{display:block; font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-top:.2rem}
+.badge{font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; padding:.28rem .55rem; white-space:nowrap}
+.badge.holds{background:var(--live-wash); color:var(--live)}
+.badge.partial{background:var(--hold-wash); color:var(--hold)}
+.badge.failed{background:var(--dead-wash); color:var(--oxblood)}
+.chev{font-family:"JetBrains Mono",monospace; color:var(--ink-faint); font-size:.8rem}
+.row-detail{display:none; padding:0 1.1rem 1.1rem; background:var(--sunk)}
+.row.open .row-detail{display:block}
+.row.open .chev{transform:rotate(90deg); display:inline-block}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.detail-cell{background:var(--raised); padding:.85rem}
+.detail-cell h4{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; margin:0 0 .5rem; color:var(--ink-faint)}
+.detail-cell ul{margin:0; padding-left:1.05rem; font-size:.88rem; line-height:1.55}
+.detail-cell li{margin-bottom:.3rem}
+.detail-note{font-family:"JetBrains Mono",monospace; font-size:.68rem; line-height:1.65; color:var(--ink-soft); margin:.85rem 0 0; padding-left:.7rem; border-left:2px solid var(--rule-strong)}
+.ledger-foot{padding:.8rem 1.1rem; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.07em; color:var(--ink-faint); border-top:1px solid var(--rule); background:var(--raised); margin:0}
+
+/* ==========================================================================
+   SECTION 8 - CLOSING + THEME TOGGLE
+   ========================================================================== */
+.endmark{color:var(--oxblood); font-size:.85rem; margin-bottom:1.6rem}
+footer{margin:3.5rem 0 0; border-top:3px solid var(--ink); padding:1.25rem 0 5rem}
+footer p{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.75; color:var(--ink-faint); margin:0 0 .9rem; max-width:80ch}
+footer .sig{color:var(--ink-soft)}
+#theme{position:fixed; right:1rem; bottom:1rem; z-index:60; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; padding:.6rem .8rem; cursor:pointer; background:var(--raised); color:var(--ink-soft); border:1px solid var(--rule-strong)}
+#theme:hover{color:var(--ink); border-color:var(--copper)}
+
+/* ==========================================================================
+   SECTION 9 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .detail-grid{grid-template-columns:1fr}
+  .row-btn{grid-template-columns:1fr auto; gap:.5rem}
+  .chev{display:none}
+  .bar-value{min-width:6.5rem; font-size:.7rem}
+  p.lede::first-letter{font-size:3.1rem}
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+  .track-read{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
+
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+
+/* ==========================================================================
+   SECTION 10 - THE FORWARD FILE (in-series navigation)
+   Plain links, no ids, no script. The strip carries the whole series so a
+   reader can see where this dispatch sits in the sequence and step either way.
+   ========================================================================== */
+.ff{margin:3.4rem auto 0; width:min(100%,52rem); border-top:3px solid var(--ink); padding-top:1.1rem}
+.ff-eyebrow{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--oxblood);
+}
+.ff-title{
+  margin:.35rem 0 .3rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:var(--step-1); line-height:1.2; letter-spacing:-.01em;
+}
+.ff-note{margin:0 0 1.3rem; font-size:.86rem; color:var(--ink-faint)}
+.ff-note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.ff-note a:hover{border-bottom-color:var(--oxblood)}
+
+.ff-grid{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr)); gap:.6rem;
+}
+.ff-item{margin:0}
+.ff-card{
+  display:block; height:100%; text-decoration:none; color:inherit;
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  padding:.75rem .85rem .85rem;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+a.ff-card:hover,a.ff-card:focus-visible{
+  border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px);
+}
+.ff-meta{
+  display:flex; gap:.5rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ff-year{color:var(--copper); font-weight:700}
+.ff-h{
+  margin:.35rem 0 .25rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:1rem; line-height:1.22; letter-spacing:-.01em;
+}
+.ff-sum{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-soft)}
+.ff-item.is-here .ff-card{
+  background:var(--sunk); border-left-color:var(--oxblood); cursor:default;
+}
+.ff-here{
+  display:inline-block; margin-top:.45rem;
+  font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood);
+}
+
+.ff-turn{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-top:1.1rem; padding-top:.8rem; border-top:1px solid var(--rule);
+}
+.ff-turn a{
+  max-width:22rem; text-decoration:none; color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.86rem;
+  line-height:1.3;
+}
+.ff-turn a:hover .ff-turn-h{border-bottom-color:var(--oxblood)}
+.ff-turn-lab{
+  display:block; font-family:"JetBrains Mono",monospace; font-weight:400;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:.2rem;
+}
+.ff-turn-h{border-bottom:1px solid var(--rule-strong); transition:border-color .18s ease}
+.ff-next{text-align:right; margin-left:auto}
+@media (max-width:640px){
+  .ff{margin-top:2.6rem}
+  .ff-turn{flex-direction:column}
+  .ff-next{text-align:left; margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" role="presentation"></div>
+<button type="button" id="theme">Night</button>
+
+<div class="wrap">
+
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span><a href="ledger-index.html">The forward file</a> &middot; Speculative &middot; Liquidity</span>
+  </div>
+
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Dispatch &#8470; TBD <span class="dot">&middot;</span> Vol. I</p>
+    </div>
+    <p class="kicker">Forward file &middot; Deposits</p>
+    <h1>Nothing sits still</h1>
+    <p class="deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
+    <p class="dateline">Columbus, Ohio, and Washington, D.C. &middot; Filed from 2031</p>
+  </header>
+
+  <!-- ===== SECTION C - SIGNATURE MODULE: THE DRAIN CLOCK ===== -->
+  <section class="clock" aria-labelledby="clock-state">
+    <div class="clock-head">
+      <div>
+        <p class="eyebrow">Time to a 30 percent retail outflow</p>
+        <p class="clock-state" id="clock-state">Supervisors have days to respond</p>
+      </div>
+      <div class="dial">
+        <label for="pen">Agent-managed deposits</label>
+        <input type="range" id="pen" min="1" max="60" step="1" value="4" aria-describedby="clock-verdict">
+        <output id="pen-out" for="pen">4%</output>
+      </div>
+    </div>
+
+    <div class="track" id="track">
+      <div class="track-fill" id="track-fill"></div>
+      <div class="window" id="window"><span>Supervisory response window</span></div>
+      <div class="track-read" id="track-read">53 hours</div>
+    </div>
+    <div class="track-scale"><span>0 h</span><span>24 h</span><span>48 h</span><span>72 h</span></div>
+
+    <p class="verdict" id="clock-verdict">At 2026 penetration a drain of this size took more than two days, which is comfortably inside the window a liquidity facility can be assembled in.</p>
+
+    <p class="caption">Stylised model, not a supervisory estimate. It holds the trigger constant and varies only the share of retail deposits under automated management, to isolate what penetration alone does to the clock. Current penetration is roughly 19 percent.</p>
+  </section>
+
+  <!-- ===== SECTION D - ARTICLE ===== -->
+  <article>
+    <div class="col">
+      <p class="lede">The outflow at Buckeye Commerce Bank began at 9.12 on a Tuesday morning and was substantially over by lunch. There was no queue, no rumour, no viral post, and no moment at which anybody panicked. A competitor two states away had repriced its savings product by 40 basis points at nine o'clock. By 9.12 the first agents had finished their arithmetic. By 1.30 the bank had lost 14 percent of its retail deposit base.</p>
+
+      <p>Nobody had decided to run. Several hundred thousand pieces of software had independently concluded that a better rate was available, that the switching cost was nil, and that their instructions did not include a loyalty term. Each was correct.</p>
+
+      <p>"I keep having to explain to people that this was not a crisis of confidence," says Dana Whitfield, who was the bank's treasurer at the time and is now a consultant. "Confidence never entered into it. Our depositors mostly did not know it happened. Their agents did it, and their agents were right to do it, and the aggregate of ten thousand correct decisions was a bank with a liquidity problem it did not have at breakfast."</p>
+
+      <h2>Two rules, one outcome</h2>
+
+      <p>What happened to Buckeye Commerce was the convergence of two policy decisions that were made separately, for good reasons, by people who were not modelling each other.</p>
+
+      <p>The first was open banking. The data access rules that took effect from 2026 required institutions to give customers, and the third parties customers authorise, secure programmatic access to their own account information and the ability to initiate payments. The intent was to break the data lock-in that let banks hold customers through inertia rather than value. It worked exactly as designed.</p>
+
+      <p>The second was agentic commerce. Once software could hold a balance, evaluate a purchase, and settle it without a human in the loop, the wallet stopped being a place money rested between paydays and became a working position that an agent managed continuously. The agent buying your groceries has an opinion about which account those groceries clear from, and that opinion is refreshed every time anything in the market changes.</p>
+
+      <p><span class="lead-in">Neither rule</span> anticipated the other. Open banking assumed a human at the end of the API, occasionally checking rates. Agentic commerce assumed the funding side was stable and the interesting problem was execution. Put together, they produced a retail deposit base with the behavioural characteristics of institutional hot money and none of the pricing that hot money used to carry.</p>
+
+      <blockquote><p>"Confidence never entered into it. Their agents did it, and their agents were right to do it."</p></blockquote>
+
+      <p>Deposit stickiness, the reliable tendency of ordinary people not to move money even when moving it would pay, was never a service. It was friction. It was the tedium of opening an account, moving direct debits, remembering the password, and getting around to it. Banks priced that friction into every funding assumption they had, and the regulatory framework priced it in too. Software does not experience friction. It experiences a switching cost, and open banking drove that cost to approximately zero.</p>
+
+      <h2>The bidding war</h2>
+
+      <p>The competitive response was, in hindsight, the only one available: banks began bidding.</p>
+
+      <p>Deposit beta, the share of a policy rate move that a bank passes through to its depositors, had for decades been the quiet engine of retail banking profitability. Through most of the 2010s it ran around 0.3 to 0.4 on the way up. Banks captured the majority of a rate rise and passed on a minority, and the gap was funded by the depositors who were not paying attention. By 2031 the blended figure across institutions with meaningful agent penetration is 0.94.</p>
+    </div>
+
+    <!-- ===== SECTION E - MODULE: DEPOSIT BETA ===== -->
+    <div class="col">
+      <section class="beta" aria-label="Deposit pricing pass-through">
+        <div class="beta-head">
+          <p>Pass-through of a 100bp policy move</p>
+          <div class="switch" role="group" aria-label="Period">
+            <button type="button" id="btn-old" aria-pressed="true">2019</button>
+            <button type="button" id="btn-new" aria-pressed="false">2031</button>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Passed to depositors</p>
+          <div class="bar-row">
+            <span class="bar-tag">Beta</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-beta"></span></span>
+            <span class="bar-value" id="txt-beta">36 bp</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Retained as net interest margin</p>
+          <div class="bar-row">
+            <span class="bar-tag">Kept</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-kept"></span></span>
+            <span class="bar-value" id="txt-kept">64 bp</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-name">Median repricing lag after a competitor moves</p>
+          <div class="bar-row">
+            <span class="bar-tag">Lag</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-lag"></span></span>
+            <span class="bar-value" id="txt-lag">31 days</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>The lag figure is the one that treasurers find hardest to live with. A bank that repriced a month after its competitor used to lose a trickle of rate-sensitive money and keep everyone else. A bank that reprices four hours after its competitor now loses whatever its competitor's agents can reach in four hours, which on a well-connected retail book is a great deal.</p>
+
+      <p>So the banks automated their side too. Most large institutions and a growing number of regional ones now run counter-agents: systems that monitor competitor pricing, detect outflow in progress, and reprice automatically inside a governance envelope the treasury committee sets in advance. The deposit market has become, functionally, machines quoting at machines, with humans setting the boundaries once a quarter and watching.</p>
+
+      <p>"We are running a market-making desk against our own funding base," says the head of treasury at a $60bn regional, who asked not to be named because the bank has not disclosed the extent of the automation. "That is not what a deposit franchise was supposed to be. But if you quote by hand against somebody quoting by machine, you find out very quickly that you are the liquidity."</p>
+
+      <h2>What the banks tried</h2>
+
+      <p>The defensive playbook that has emerged is an attempt to manufacture, contractually, the stickiness that behaviour no longer supplies. Some of it works.</p>
+    </div>
+
+    <!-- ===== SECTION F - MODULE: THE DEFENCES LEDGER ===== -->
+    <div class="col">
+      <section class="ledger" aria-label="Deposit defence measures">
+        <div class="ledger-head">
+          <h3>The defences, and what they cost</h3>
+          <p>Practice survey &middot; institutions above $10bn &middot; 2031</p>
+        </div>
+        <div id="ledger-rows"></div>
+        <p class="ledger-foot">Effectiveness is measured against agent-initiated outflow specifically, not against total deposit attrition.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <h2>The insurance that does not bind</h2>
+
+      <p>The deeper problem, and the one regulators have found hardest to address, is that deposit insurance was engineered against a failure mode that no longer dominates.</p>
+
+      <p>The guarantee exists to break a coordination problem. If your money is protected regardless of what anyone else does, you have no rational reason to withdraw ahead of them, and the run does not start. It is an elegant solution to a psychological pathology, and for ninety years it worked.</p>
+
+      <p>An agent does not run because it fears loss. It moves because a threshold in its instructions was crossed, and the thresholds people set are almost never about solvency. They are about yield, and about risk indicators that trip far above the level at which insurance becomes relevant. A ratings outlook change, two quarters of elevated charge-offs, an unusual movement in a funding metric: any of these can move money out of a fully solvent, fully insured institution, because the agent was told to optimise and nobody told it that a hundred percent insured deposit needs no defending.</p>
+
+      <p><span class="lead-in">The regulatory response</span> has come in three parts, none of which touches the underlying dynamic. Agent platforms serving retail customers must now stagger and randomise large-scale movements, which buys hours rather than days. Institutions above a size threshold report agent-managed deposit share monthly, which gives supervisors visibility without giving them a lever. And the liquidity coverage framework has been recalibrated with new outflow assumptions for agent-managed retail balances, which is prudent and expensive and pushes the cost of the whole arrangement into lending spreads.</p>
+
+      <p>"You cannot regulate this away without telling consumers they may not use software to get a better rate on their savings," says a senior official involved in the recalibration, who spoke on condition of anonymity because the assumptions are still being finalised. "That is not a rule anybody is going to write. So we are left managing the consequences of a thing we are not willing to stop, which is most of what this job has ever been."</p>
+
+      <h2>The dividend, and who pays for it</h2>
+
+      <p>It should be said plainly that consumers have won here, and won substantially.</p>
+
+      <p>Households using agent-managed cash earn an average of 1.4 percentage points more on liquid savings than comparable households that do not. On a $40,000 balance that is $560 a year, transferred from bank margin to household income, and it is money that was previously being extracted through the mechanism of inconvenience. The competitive pressure has lifted rates even for the customers who never adopted an agent, because banks cannot easily run two prices.</p>
+
+      <p>The cost lands in two places. The first is lending spreads, where the funding cost increase is partly recovered, which means borrowers are paying for savers. The second is the smaller institutions that cannot afford counter-agent infrastructure and cannot match on price, for whom the choice is a shrinking deposit base or a funding cost that eliminates the margin. Community bank funding has shifted markedly toward brokered and wholesale sources, which are stable, contractual, and considerably more expensive than the inert retail money they replaced.</p>
+
+      <p>Buckeye Commerce survived. It drew on its facility, repriced within the day, and recovered most of the balances within a fortnight, which tells you something useful: the money was not fleeing, it was shopping. Whitfield notes that a majority of the deposits that left returned once the rate matched, and left again eleven weeks later when it did not.</p>
+
+      <p>"They come back," she says. "That is the part people miss. It is not a run in the old sense, because there is no fear in it and no finality. It is just that the money is awake now. It was asleep for a hundred years and we built the entire industry on the assumption that it would stay asleep."</p>
+
+      <p>The industry is now discovering what it costs to fund a bank with money that is paying attention.</p>
+
+      <p class="endmark">&#9632;</p>
+    </div>
+  </article>
+
+  <!-- ===== SECTION F2 - THE FORWARD FILE (in-series navigation) ===== -->
+  <nav class="ff" aria-label="More from the forward file">
+    <p class="ff-eyebrow">The forward file</p>
+    <h2 class="ff-title">Six dispatches from a decade that has not happened</h2>
+    <p class="ff-note">Filed in sequence from 2027 to 2032. <a href="ledger-index.html">Open the full file</a>.</p>
+  <ol class="ff-grid">
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-press-start-to-pay.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2027</span> <span>Chartering</span></p>
+      <p class="ff-h">Press start to pay</p>
+      <p class="ff-sum">An entertainment company asks the OCC for bank powers and the right to issue its own dollar.</p>
+    </a>
+  </li>
+  <li class="ff-item is-here" aria-current="page">
+    <div class="ff-card">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Deposits</span></p>
+      <p class="ff-h">Nothing sits still</p>
+      <p class="ff-sum">Open banking and agentic commerce turn the retail deposit base into a spot market.</p>
+      <span class="ff-here">You are here</span>
+    </div>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-examiner-who-never-leaves.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Supervision</span></p>
+      <p class="ff-h">The examiner who never leaves</p>
+      <p class="ff-sum">Continuous supervision replaces the periodic exam, and four thousand banks manage to one dashboard.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nobodys-on-the-file.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Mortgage</span></p>
+      <p class="ff-h">Nobody's on the file</p>
+      <p class="ff-sum">Underwriting automation takes the cost, the jobs, and the point of a licensing regime.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="Standard_Setting.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Third-party risk</span></p>
+      <p class="ff-h">Assessed once, trusted often</p>
+      <p class="ff-sum">One assessment, published to a registry, makes it rational for a small bank to try something new.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-wallet-woke-up.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Cryptography</span></p>
+      <p class="ff-h">The wallet woke up</p>
+      <p class="ff-sum">Coins dormant since 2009 move, and the transfer itself is the announcement that the mathematics failed.</p>
+    </a>
+  </li>
+  </ol>
+  <div class="ff-turn">
+    <a class="ff-prev" href="ledger-press-start-to-pay.html"><span class="ff-turn-lab">Previous dispatch</span><span class="ff-turn-h">Press start to pay</span></a>
+    <a class="ff-next" href="ledger-the-examiner-who-never-leaves.html"><span class="ff-turn-lab">Next dispatch</span><span class="ff-turn-h">The examiner who never leaves</span></a>
+  </div>
+  </nav>
+
+  <!-- ===== SECTION G - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>This is a work of narrative fiction set in 2031. Open banking data access rules, historical deposit beta ranges, and the structure of federal deposit insurance are drawn from the real record. Buckeye Commerce Bank, Dana Whitfield, the drain model, the practice survey, and all outcomes described after 2026 are fictional extrapolations.</p>
+  </footer>
+
+</div>
+
+<script>
+/* ==========================================================================
+   SECTION 1 - THEME
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - READING PROGRESS
+   ========================================================================== */
+(function(){
+  var bar = document.getElementById('progress');
+  function update(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+  }
+  document.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ==========================================================================
+   SECTION 3 - SIGNATURE MODULE: THE DRAIN CLOCK
+   hours = 400 / penetration^1.25, plotted on a 72 hour track against a 12
+   hour supervisory response window. Stylised, and labelled as such on page.
+   ========================================================================== */
+(function(){
+  var SPAN = 72;      // track length in hours
+  var WINDOW = 12;    // hours needed to assemble a response
+  var pen = document.getElementById('pen');
+  var out = document.getElementById('pen-out');
+  var fill = document.getElementById('track-fill');
+  var read = document.getElementById('track-read');
+  var win = document.getElementById('window');
+  var state = document.getElementById('clock-state');
+  var verdict = document.getElementById('clock-verdict');
+
+  win.style.left = ((WINDOW / SPAN) * 100) + '%';
+
+  function hoursFor(p){
+    return 400 / Math.pow(p, 1.25);
+  }
+
+  function fmt(h){
+    if (h >= 48) return (h / 24).toFixed(1) + ' days';
+    if (h >= 1)  return h.toFixed(h < 10 ? 1 : 0) + ' hours';
+    return Math.round(h * 60) + ' minutes';
+  }
+
+  function render(){
+    var p = Number(pen.value);
+    var h = hoursFor(p);
+    var inside = h <= WINDOW;
+
+    out.textContent = p + '%';
+    read.textContent = fmt(h);
+    fill.style.width = Math.min(100, (h / SPAN) * 100).toFixed(1) + '%';
+    fill.classList.toggle('past', inside);
+
+    state.textContent = inside
+      ? 'The drain finishes before anyone can answer it'
+      : 'Supervisors still have time to respond';
+
+    verdict.classList.toggle('bad', inside);
+    verdict.textContent = inside
+      ? 'At ' + p + ' percent penetration the outflow completes in ' + fmt(h) + ', inside the window a liquidity facility can be assembled in. The institution is illiquid before the first call is returned.'
+      : 'At ' + p + ' percent penetration the outflow takes ' + fmt(h) + ', which leaves room for a facility to be drawn and a repricing decision to be made by people.';
+  }
+
+  pen.addEventListener('input', render);
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 4 - MODULE: DEPOSIT BETA
+   ========================================================================== */
+(function(){
+  var DATA = {
+    old: {
+      beta: {v:36, label:'36 bp',   max:100},
+      kept: {v:64, label:'64 bp',   max:100},
+      lag:  {v:31, label:'31 days', max:35}
+    },
+    now: {
+      beta: {v:94, label:'94 bp',   max:100},
+      kept: {v:6,  label:'6 bp',    max:100},
+      lag:  {v:0.17, label:'4 hours', max:35}
+    }
+  };
+  var KEYS = ['beta','kept','lag'];
+  var bOld = document.getElementById('btn-old');
+  var bNew = document.getElementById('btn-new');
+  var era = 'old';
+
+  function render(){
+    var set = DATA[era];
+    var after = era === 'now';
+    KEYS.forEach(function(k){
+      var d = set[k];
+      var bar = document.getElementById('bar-' + k);
+      var txt = document.getElementById('txt-' + k);
+      bar.style.width = Math.max(1.5, (d.v / d.max) * 100).toFixed(1) + '%';
+      bar.classList.toggle('after', after);
+      bar.classList.toggle('before', !after);
+      txt.textContent = d.label;
+    });
+    bOld.setAttribute('aria-pressed', String(!after));
+    bNew.setAttribute('aria-pressed', String(after));
+  }
+
+  bOld.addEventListener('click', function(){ era = 'old'; render(); });
+  bNew.addEventListener('click', function(){ era = 'now'; render(); });
+
+  var section = document.querySelector('.beta');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting){ render(); io.disconnect(); } });
+    }, {threshold:0.25});
+    io.observe(section);
+  } else { render(); }
+})();
+
+/* ==========================================================================
+   SECTION 5 - MODULE: THE DEFENCES LEDGER
+   ========================================================================== */
+(function(){
+  var ITEMS = [
+    {
+      name:'Automated rate matching',
+      cat:'Counter-agent pricing',
+      status:'holds', label:'Holds',
+      works:['Stops the outflow inside minutes','Removes the repricing lag entirely','Scales without headcount'],
+      costs:['Deposit beta approaches 1.0','Margin competed away by design','Governance envelope set quarterly, tested daily'],
+      note:'Effective and self-defeating. It retains the balance by surrendering the spread that made the balance worth holding.'
+    },
+    {
+      name:'Term deposits with penalty-free windows',
+      cat:'Contractual lock',
+      status:'partial', label:'Partial',
+      works:['Removes the balance from daily optimisation','Gives treasury a known maturity ladder','Priced above savings but below wholesale'],
+      costs:['Agents cluster withdrawals at each window','Maturity walls form on predictable dates','Uptake concentrated in older customers'],
+      note:'Works until the window opens. Several institutions now stagger window dates across the book specifically to avoid a synchronised exit.'
+    },
+    {
+      name:'Relationship bundling',
+      cat:'Cross-product pricing',
+      status:'partial', label:'Partial',
+      works:['Raises the true switching cost above zero','Agents can price a bundle and often keep it','Ties deposits to mortgage and card economics'],
+      costs:['Only binds customers with multiple products','Complex to price and to disclose','Unwinds entirely if the customer refinances'],
+      note:'The one defence that restores genuine friction rather than paying to overcome it, and the hardest to sell to a single-product customer.'
+    },
+    {
+      name:'Loyalty and reward overlays',
+      cat:'Non-rate inducement',
+      status:'failed', label:'Failed',
+      works:['Cheap to launch','Markets well to human customers'],
+      costs:['Agents value the reward in basis points and move anyway','No effect on agent-initiated outflow in survey data','Consumes marketing budget that could fund rate'],
+      note:'Comprehensively defeated. An agent converts a reward to yield and compares it. If the conversion is unfavourable, the reward is simply a worse rate wearing a hat.'
+    },
+    {
+      name:'Wholesale and brokered substitution',
+      cat:'Funding mix',
+      status:'holds', label:'Holds',
+      works:['Contractual maturity, no overnight flight risk','Deep and available at scale','Predictable for liquidity planning'],
+      costs:['Materially more expensive than retail was','Supervisory scrutiny of concentration','Abandons the deposit franchise rather than defending it'],
+      note:'The honest surrender. Increasingly the default at institutions that cannot fund counter-agent infrastructure.'
+    }
+  ];
+
+  var host = document.getElementById('ledger-rows');
+
+  function cell(title, items){
+    var d = document.createElement('div');
+    d.className = 'detail-cell';
+    var h = document.createElement('h4');
+    h.textContent = title;
+    var ul = document.createElement('ul');
+    items.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    d.appendChild(h); d.appendChild(ul);
+    return d;
+  }
+
+  ITEMS.forEach(function(v){
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'row-btn';
+    btn.setAttribute('aria-expanded', 'false');
+
+    var nameWrap = document.createElement('span');
+    var name = document.createElement('span');
+    name.className = 'row-name';
+    name.textContent = v.name;
+    var cat = document.createElement('span');
+    cat.className = 'row-cat';
+    cat.textContent = v.cat;
+    nameWrap.appendChild(name); nameWrap.appendChild(cat);
+
+    var badge = document.createElement('span');
+    badge.className = 'badge ' + v.status;
+    badge.textContent = v.label;
+
+    var chev = document.createElement('span');
+    chev.className = 'chev';
+    chev.textContent = '\u203A';
+
+    btn.appendChild(nameWrap); btn.appendChild(badge); btn.appendChild(chev);
+
+    var detail = document.createElement('div');
+    detail.className = 'row-detail';
+    var grid = document.createElement('div');
+    grid.className = 'detail-grid';
+    grid.appendChild(cell('What it buys', v.works));
+    grid.appendChild(cell('What it costs', v.costs));
+    detail.appendChild(grid);
+
+    var note = document.createElement('p');
+    note.className = 'detail-note';
+    note.textContent = v.note;
+    detail.appendChild(note);
+
+    btn.addEventListener('click', function(){
+      var open = row.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+
+    row.appendChild(btn); row.appendChild(detail);
+    host.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>

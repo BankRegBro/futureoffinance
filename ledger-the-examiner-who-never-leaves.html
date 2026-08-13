@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The examiner who never leaves &middot; The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+}
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+#progress{position:fixed; top:0; left:0; height:2px; width:0%; background:var(--copper); z-index:60}
+
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+}
+.nameplate{
+  margin-top:1.6rem; border-top:3px solid var(--ink); padding:1.5rem 1.4rem 1.3rem;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(122,31,43,.18), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(180,100,15,.24), transparent 62%),
+    linear-gradient(180deg,#e7dbc3 0%,#ebe2ce 55%,#f0e8d7 100%);
+}
+html.night .nameplate{
+  border-top-color:var(--copper);
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(224,89,108,.10), transparent 60%),
+    radial-gradient(120% 180% at 100% 100%, rgba(246,200,30,.12), transparent 62%),
+    linear-gradient(180deg,#0d1327 0%,#0b1024 55%,#0a0f20 100%);
+}
+.np-top{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.1rem}
+.np-brand{font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.05rem; letter-spacing:.03em; text-transform:uppercase; margin:0}
+.np-brand .the{color:var(--oxblood)}
+.np-meta{font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft); margin:0}
+.np-meta .dot{color:var(--copper)}
+.kicker{font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood); font-weight:700; margin:0 0 .85rem}
+h1{
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; font-size:var(--step-4); line-height:.95;
+  letter-spacing:-.02em; margin:0 0 1rem; max-width:15ch;
+}
+.deck{font-family:"Archivo",system-ui,sans-serif; font-weight:400; font-size:var(--step-1); line-height:1.45; color:var(--ink-soft); max-width:47ch; margin:0}
+.dateline{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:1.4rem 0 0; border-top:1px solid var(--rule-strong); padding-top:.8rem}
+
+/* ==========================================================================
+   SECTION 4 - SHARED MODULE CHROME
+   ========================================================================== */
+.mod{margin:2.5rem 0 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:1.5rem 0 1.75rem}
+.mod-head{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between; align-items:flex-end; margin-bottom:1.2rem}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:0}
+.mod-state{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-weight:600; font-size:var(--step-2); line-height:1.12; margin:.35rem 0 0; max-width:26ch;
+}
+.switch{display:flex; border:1px solid var(--ink); background:var(--raised)}
+.switch button{font-family:"JetBrains Mono",monospace; font-size:.63rem; letter-spacing:.1em; text-transform:uppercase; padding:.6rem .95rem; border:0; background:transparent; color:var(--ink-soft); cursor:pointer; white-space:nowrap}
+.switch button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.dial{display:flex; align-items:center; gap:.9rem; min-width:min(100%,20rem)}
+.dial label{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+.dial input[type=range]{flex:1; accent-color:var(--copper); min-width:8rem}
+.dial output{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.1rem; min-width:4.4rem; text-align:right; font-variant-numeric:tabular-nums}
+.stage{position:relative; width:100%; aspect-ratio:16/7; min-height:230px; background:var(--raised); border:1px solid var(--rule)}
+.stage svg{position:absolute; inset:0; width:100%; height:100%}
+.readout{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); border-top:0}
+.rcell{background:var(--raised); padding:.85rem .9rem}
+.rcell dt{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .35rem}
+.rcell dd{margin:0; font-family:"Archivo",sans-serif; font-weight:800; font-size:1.5rem; line-height:1; font-variant-numeric:tabular-nums}
+.rcell.hot dd{color:var(--oxblood)}
+.rcell.good dd{color:var(--copper)}
+.caption{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.65; color:var(--ink-faint); margin:.85rem 0 0; max-width:64ch}
+
+/* ==========================================================================
+   SECTION 5 - ARTICLE BODY
+   ========================================================================== */
+article{padding:3rem 0 0}
+article p{margin:0 0 1.15rem}
+p.lede::first-letter{
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 144;
+  font-weight:600; float:left; font-size:4rem; line-height:.8;
+  padding:.34rem .5rem 0 0; color:var(--oxblood);
+}
+h2{
+  font-family:"JetBrains Mono",monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink);
+  border-top:1px solid var(--ink); padding-top:.65rem; margin:2.75rem 0 1.1rem;
+}
+.lead-in{font-weight:700}
+blockquote{
+  margin:2rem 0; padding:0 0 0 1.35rem; border-left:3px solid var(--oxblood);
+  font-family:"Fraunces",serif; font-variation-settings:"SOFT" 0,"WONK" 1,"opsz" 60;
+  font-size:1.4rem; line-height:1.3; font-weight:500;
+}
+blockquote p{margin:0}
+
+/* ==========================================================================
+   SECTION 6 - INLINE PANEL MODULE
+   ========================================================================== */
+.panel{margin:2.5rem 0; border:1px solid var(--rule); background:var(--raised)}
+.panel-head{display:flex; flex-wrap:wrap; gap:.75rem; justify-content:space-between; align-items:center; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule)}
+.panel-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint)}
+.panel-body{padding:1.1rem}
+.metric{padding:1.1rem; border-bottom:1px solid var(--rule)}
+.metric:last-of-type{border-bottom:0}
+.metric-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.82rem; color:var(--ink-soft); margin:0 0 .75rem}
+.bar-row{display:flex; align-items:center; gap:.8rem; margin-bottom:.45rem}
+.bar-track{flex:1; height:1.5rem; background:var(--sunk); border:1px solid var(--rule); position:relative}
+.bar-fill{position:absolute; inset:0 auto 0 0; width:0; transition:width .85s cubic-bezier(.6,0,.2,1)}
+.bar-fill.before{background:var(--ink-soft)}
+.bar-fill.after{background:var(--copper)}
+.bar-fill.bad{background:var(--oxblood)}
+.bar-value{font-family:"JetBrains Mono",monospace; font-size:.76rem; font-weight:500; min-width:8.5rem; text-align:right; font-variant-numeric:tabular-nums}
+.bar-tag{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); min-width:4.2rem}
+
+/* ==========================================================================
+   SECTION 7 - LEDGER MODULE
+   ========================================================================== */
+.ledger{margin:2.5rem 0; border:1px solid var(--ink)}
+.ledger-head{padding:1rem 1.1rem; background:var(--ink); color:var(--paper)}
+.ledger-head h3{font-family:"Archivo",sans-serif; font-weight:800; font-size:1.15rem; margin:0 0 .25rem}
+.ledger-head p{margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.filters{display:flex; flex-wrap:wrap; gap:.4rem; padding:.8rem 1.1rem; border-bottom:1px solid var(--rule); background:var(--raised)}
+.chip{font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem .7rem; cursor:pointer; border:1px solid var(--rule-strong); background:transparent; color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.row{border-bottom:1px solid var(--rule); background:var(--raised)}
+.row:last-child{border-bottom:0}
+.row-btn{width:100%; display:grid; grid-template-columns:1fr auto auto; gap:.9rem; align-items:center; text-align:left; padding:.85rem 1.1rem; border:0; background:transparent; cursor:pointer; font-family:inherit; color:inherit}
+.row-btn:hover{background:var(--sunk)}
+.row-name{font-family:"Archivo",sans-serif; font-weight:600; font-size:.95rem}
+.row-cat{display:block; font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-top:.2rem}
+.badge{font-family:"JetBrains Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; padding:.28rem .55rem; white-space:nowrap}
+.badge.low{background:var(--live-wash); color:var(--live)}
+.badge.mid{background:var(--hold-wash); color:var(--hold)}
+.badge.high{background:var(--dead-wash); color:var(--oxblood)}
+.chev{font-family:"JetBrains Mono",monospace; color:var(--ink-faint); font-size:.8rem}
+.row-detail{display:none; padding:0 1.1rem 1.1rem; background:var(--sunk)}
+.row.open .row-detail{display:block}
+.row.open .chev{transform:rotate(90deg); display:inline-block}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.detail-cell{background:var(--raised); padding:.85rem}
+.detail-cell h4{font-family:"JetBrains Mono",monospace; font-size:.58rem; letter-spacing:.11em; text-transform:uppercase; margin:0 0 .5rem; color:var(--ink-faint)}
+.detail-cell ul{margin:0; padding-left:1.05rem; font-size:.88rem; line-height:1.55}
+.detail-cell li{margin-bottom:.3rem}
+.detail-note{font-family:"JetBrains Mono",monospace; font-size:.68rem; line-height:1.65; color:var(--ink-soft); margin:.85rem 0 0; padding-left:.7rem; border-left:2px solid var(--rule-strong)}
+.ledger-foot{padding:.8rem 1.1rem; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.07em; color:var(--ink-faint); border-top:1px solid var(--rule); background:var(--raised); margin:0}
+
+/* ==========================================================================
+   SECTION 8 - CLOSING + THEME TOGGLE
+   ========================================================================== */
+.endmark{color:var(--oxblood); font-size:.85rem; margin-bottom:1.6rem}
+footer{margin:3.5rem 0 0; border-top:3px solid var(--ink); padding:1.25rem 0 5rem}
+footer p{font-family:"JetBrains Mono",monospace; font-size:.64rem; line-height:1.75; color:var(--ink-faint); margin:0 0 .9rem; max-width:80ch}
+footer .sig{color:var(--ink-soft)}
+#theme{position:fixed; right:1rem; bottom:1rem; z-index:60; font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; padding:.6rem .8rem; cursor:pointer; background:var(--raised); color:var(--ink-soft); border:1px solid var(--rule-strong)}
+#theme:hover{color:var(--ink); border-color:var(--copper)}
+
+/* ==========================================================================
+   SECTION 9 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .readout{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .row-btn{grid-template-columns:1fr auto; gap:.5rem}
+  .chev{display:none}
+  .bar-value{min-width:6.5rem; font-size:.7rem}
+  p.lede::first-letter{font-size:3.1rem}
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
+
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+
+/* ==========================================================================
+   SECTION 10 - THE FORWARD FILE (in-series navigation)
+   Plain links, no ids, no script. The strip carries the whole series so a
+   reader can see where this dispatch sits in the sequence and step either way.
+   ========================================================================== */
+.ff{margin:3.4rem auto 0; width:min(100%,52rem); border-top:3px solid var(--ink); padding-top:1.1rem}
+.ff-eyebrow{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--oxblood);
+}
+.ff-title{
+  margin:.35rem 0 .3rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:var(--step-1); line-height:1.2; letter-spacing:-.01em;
+}
+.ff-note{margin:0 0 1.3rem; font-size:.86rem; color:var(--ink-faint)}
+.ff-note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.ff-note a:hover{border-bottom-color:var(--oxblood)}
+
+.ff-grid{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr)); gap:.6rem;
+}
+.ff-item{margin:0}
+.ff-card{
+  display:block; height:100%; text-decoration:none; color:inherit;
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  padding:.75rem .85rem .85rem;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+a.ff-card:hover,a.ff-card:focus-visible{
+  border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px);
+}
+.ff-meta{
+  display:flex; gap:.5rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.ff-year{color:var(--copper); font-weight:700}
+.ff-h{
+  margin:.35rem 0 .25rem; font-family:"Archivo",system-ui,sans-serif;
+  font-weight:800; font-size:1rem; line-height:1.22; letter-spacing:-.01em;
+}
+.ff-sum{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-soft)}
+.ff-item.is-here .ff-card{
+  background:var(--sunk); border-left-color:var(--oxblood); cursor:default;
+}
+.ff-here{
+  display:inline-block; margin-top:.45rem;
+  font-family:"JetBrains Mono",monospace; font-size:.58rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--oxblood);
+}
+
+.ff-turn{
+  display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-top:1.1rem; padding-top:.8rem; border-top:1px solid var(--rule);
+}
+.ff-turn a{
+  max-width:22rem; text-decoration:none; color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-weight:600; font-size:.86rem;
+  line-height:1.3;
+}
+.ff-turn a:hover .ff-turn-h{border-bottom-color:var(--oxblood)}
+.ff-turn-lab{
+  display:block; font-family:"JetBrains Mono",monospace; font-weight:400;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:.2rem;
+}
+.ff-turn-h{border-bottom:1px solid var(--rule-strong); transition:border-color .18s ease}
+.ff-next{text-align:right; margin-left:auto}
+@media (max-width:640px){
+  .ff{margin-top:2.6rem}
+  .ff-turn{flex-direction:column}
+  .ff-next{text-align:left; margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" role="presentation"></div>
+<button type="button" id="theme">Night</button>
+
+<div class="wrap">
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span><a href="ledger-index.html">The forward file</a> &middot; Speculative &middot; Supervision</span>
+  </div>
+
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Dispatch &#8470; TBD <span class="dot">&middot;</span> Vol. I</p>
+    </div>
+    <p class="kicker">Forward file &middot; Supervision</p>
+    <h1>The examiner who never leaves</h1>
+    <p class="deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
+    <p class="dateline">Washington, Topeka and Columbus, Ohio &middot; Filed from 2031</p>
+  </header>
+
+  <!-- ===== SECTION C - SIGNATURE MODULE: THE DETECTION CLOCK ===== -->
+  <section class="mod" aria-labelledby="det-state">
+    <div class="mod-head">
+      <div>
+        <p class="eyebrow">From first deterioration to supervisory response</p>
+        <p class="mod-state" id="det-state">Both regimes catch it in time</p>
+      </div>
+      <div class="switch" role="group" aria-label="Stress scenario">
+        <button type="button" id="btn-slow" aria-pressed="true">Credit stress</button>
+        <button type="button" id="btn-fast" aria-pressed="false">Liquidity run</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <svg id="det" viewBox="0 0 320 140" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+
+    <dl class="readout">
+      <div class="rcell" id="c-old"><dt>Periodic exam responds</dt><dd id="v-old">187 days</dd></div>
+      <div class="rcell" id="c-new"><dt>Continuous feed responds</dt><dd id="v-new">11 days</dd></div>
+      <div class="rcell" id="c-fail"><dt>Institution fails at</dt><dd id="v-fail">Day 240</dd></div>
+    </dl>
+
+    <p class="caption">Two stress paths on the same axis. Slow credit deterioration gives both regimes room. A liquidity run does not, which is the finding the whole framework was built on. Stylised, and compressed to a common scale.</p>
+  </section>
+
+  <!-- ===== SECTION D - ARTICLE ===== -->
+  <article>
+    <div class="col">
+      <p class="lede">For most of its 160-year history the bank examination ran on a rhythm a nineteenth-century regulator would recognise. Examiners arrive. They request loan files, board minutes, policies, capital calculations. They spend weeks on site building a picture of the institution's health from evidence that is already months old by the time they see it. They issue a report. They leave. They come back in twelve to eighteen months, and in between the bank is largely on its own.</p>
+
+      <p>That is no longer how supervision works in the United States, or increasingly anywhere else.</p>
+
+      <p>Since the phased rollout of the Continuous Supervision Framework, which began in 2028 and reached institutions below $1bn in 2029, the periodic examination has been replaced for most routine purposes by a permanent automated feed from every regulated institution to its primary supervisor. The regulator is not a visitor. It is a presence that never leaves, reading the vital signs continuously, every day of the year.</p>
+
+      <p>Depending on who you ask this is the most significant improvement in banking safety since deposit insurance, an unconscionable intrusion into private institutions, a burden relief so substantial it handed compliance departments back to compliance, or the seed of a supervisory monoculture in which every bank is nudged toward identical decisions. With appropriate caveats it is probably all of these at once.</p>
+
+      <h2>What the old system cost</h2>
+
+      <p>The periodic examination was expensive in ways poorly understood outside the industry. A full-scope safety and soundness examination of a mid-sized regional consumed between 8,000 and 14,000 management hours across compliance, finance, risk, legal and executive functions.</p>
+
+      <p>The less visible cost was the shadow it cast. The cycle governed the rhythm of internal risk management. Governance calendars, policy reviews, stress-testing schedules and board reporting were structured as much to produce what examiners would want to see as to manage the risks the documentation described. Something genuinely useful had become, at many institutions, a performance for an audience arriving in twelve months.</p>
+
+      <p>"We had seven people whose primary function was examination management," says the chief compliance officer of a $22bn Ohio regional, who asked that neither she nor her institution be named. "Not compliance. Not risk management. Examination management. Scheduling, document production, examiner liaison, prepping management for interviews. Seven people doing nothing but getting ready for the next exam and recovering from the last one."</p>
+
+      <blockquote><p>"Seven people. Not compliance. Not risk management. Getting ready for the next exam and recovering from the last one."</p></blockquote>
+
+      <p><span class="lead-in">The examiners knew it too.</span> Senior supervisors describe, in retrospect, a model producing increasingly elaborate documentation of processes that may or may not have reflected behaviour. The report captured what the files said about how risk was managed. It was structurally poor at capturing what the institution actually did between visits.</p>
+
+      <p>The 2023 failures of Silicon Valley Bank and Signature Bank were the political catalyst. The post-mortems were consistent: the framework had detected the problems. The examination cycle had produced findings that clearly foreshadowed what came. The failure was timing. By the time a report was written, reviewed, transmitted and acted on, the conditions it described had moved. At SVB they had moved into a liquidity crisis that ran its course in roughly forty-eight hours. The cycle was not built for forty-eight hours.</p>
+
+      <h2>The architecture</h2>
+
+      <p>At its technical core the framework is a standardised API specification, the Supervisory Data Exchange Protocol, implemented in institutions' core systems. It defines fields, formats, update frequencies and authentication for a continuous feed to the primary supervisor: daily capital ratios, intraday and end-of-day liquidity against thresholds, portfolio quality metrics as new information arrives, rate risk across both books, large exposure concentrations, and anomalous patterns flagged by the institution's own systems.</p>
+
+      <p>On the regulatory side the feed is ingested by the Supervisory Intelligence Platform, which monitors each stream against a dynamic threshold framework, raises alerts when metrics breach parameters or move in patterns historically associated with deterioration, and escalates to human examiners.</p>
+
+      <p>The examiner has not disappeared. The function changed. A bank performing well across every monitored dimension may go eighteen months without a visit. A bank whose liquidity has trended toward a threshold for three weeks gets a targeted inquiry within days.</p>
+
+      <p>"The analogy I use is cardiology," says Michael Torres, a senior OCC examiner of twenty-two years who sat on the working group that wrote the specification. "The old model was an ECG once a year, treating whatever the ECG showed. The new model is a continuous monitor. You still need cardiologists. You need them more, because you are seeing things you never saw. You just do not need them to take the ECG."</p>
+    </div>
+
+    <!-- ===== SECTION E - MODULE: OUTCOMES ===== -->
+    <div class="col">
+      <section class="panel" aria-label="Supervisory outcomes">
+        <div class="panel-head">
+          <p>Supervisory outcomes</p>
+          <div class="switch" role="group" aria-label="Regime">
+            <button type="button" id="btn-per" aria-pressed="true">Periodic</button>
+            <button type="button" id="btn-cont" aria-pressed="false">Continuous</button>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">Median days to supervisory response</p>
+          <div class="bar-row">
+            <span class="bar-tag">All</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-resp"></span></span>
+            <span class="bar-value" id="txt-resp">187 days</span>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">Concerns resolved before formal enforcement</p>
+          <div class="bar-row">
+            <span class="bar-tag">Early</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-early"></span></span>
+            <span class="bar-value" id="txt-early">34%</span>
+          </div>
+        </div>
+        <div class="metric">
+          <p class="metric-name">False positive rate on platform alerts</p>
+          <div class="bar-row">
+            <span class="bar-tag">Noise</span>
+            <span class="bar-track"><span class="bar-fill before" id="bar-fp"></span></span>
+            <span class="bar-value" id="txt-fp">n/a</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>The response figures are the framework's strongest evidence and they are genuinely strong. Median time from a deteriorating metric first appearing to a formal supervisory response has fallen from 187 days to 11. For liquidity it is four. Early intervention, meaning concerns closed informally before enforcement, has risen from 34 percent to 71.</p>
+
+      <p>The third bar is the one supervisors are less keen to discuss. Roughly three in ten platform alerts turn out to be reporting artefacts, seasonal patterns, or metrics that moved for a reason nobody thought to encode. That is not a scandal, and the agencies argue reasonably that a false positive costs an examiner a morning while a false negative costs a bank. But a flagged institution experiences the morning as a supervisory contact, and nobody has yet resolved what a flag actually is in administrative terms.</p>
+
+      <p><span class="lead-in">There is no appeal from an alert,</span> because an alert is not a finding. It is an input that may produce a targeted review that may produce a finding, and only the finding is appealable. Institutions that believe they are being flagged repeatedly on a miscalibrated threshold have no procedural route to contest the threshold itself. Several banking lawyers have begun arguing that a system generating recurring supervisory contact on undisclosed parameters is a rule in everything but name, and that the parameters ought to be subject to notice and comment. The agencies disagree, so far without being tested.</p>
+
+      <h2>The privacy argument, and why it lost</h2>
+
+      <p>The industry's initial response was not enthusiastic. The trade associations filed detailed letters arguing the protocol was an unprecedented intrusion, concentrated sensitive data in government systems, and imposed technology costs falling hardest on the smallest institutions.</p>
+
+      <p>The argument was sincerely held and not without merit. What lost it was SVB and the burden relief offered in exchange. In a political environment shaped by depositors unable to reach their money on a Monday morning, the case that continuous data access was an unacceptable intrusion was very difficult to sustain.</p>
+
+      <p>The relief was the persuasive part. The agencies and the state supervisors committed that institutions implementing in good faith would see materially reduced on-site frequency, streamlined periodic filings, and far fewer ad hoc data requests. The seven-person examination management team became a team of two within eighteen months.</p>
+
+      <p>"I was one of the loudest voices against it," the same compliance officer says. "I wrote a letter. I testified. I said it was a fundamental change in the relationship, that it was rushed, that the data security was not adequate." She pauses. "All of that was true. And also I got five people back, doing actual compliance work. I am not going to pretend that does not matter."</p>
+
+      <h2>The thing sitting in the middle</h2>
+
+      <p>The security objection was dismissed too quickly, and it has not gone away.</p>
+
+      <p>The framework creates something that did not previously exist: a single continuously updated repository holding the real-time financial position, liquidity path, concentration profile and stress-test output of every insured institution in the country. Under the old model that information existed in four thousand separate places, mostly on paper, mostly stale. It is now in one place, current to the hour, and structured for machine consumption.</p>
+
+      <p>As an intelligence target there is nothing else like it in American finance. An adversary with read access would know which institutions are closest to a threshold, which are most exposed to a given sector, and which would be most damaged by a shock timed to arrive on a particular morning. It would not need to move any money to do enormous harm.</p>
+
+      <blockquote><p>"We spent a decade telling banks not to put all of it in one place. Then we built the place."</p></blockquote>
+
+      <p>The agencies have treated the platform accordingly, and the controls are said by people who have reviewed them to be serious. But the framework's designers acknowledge privately that they have concentrated risk in exchange for speed, that this was a deliberate trade, and that it has never been publicly argued on those terms.</p>
+
+      <h2>Managing to the dashboard</h2>
+
+      <p>The second unresolved problem is older than the framework and has a name.</p>
+
+      <p>When a measure becomes a target it stops being a good measure. Institutions know which metrics are transmitted, roughly where the thresholds sit, and what a breach costs in supervisory attention. The rational response is to manage the metric. Some of that is exactly what supervisors want: a bank that reduces a concentration because the number was drifting has done the right thing for a slightly cynical reason.</p>
+
+      <p>The rest is window dressing at machine speed. Positions moved before a reporting boundary and moved back after. Exposures restructured so they land in a category the feed treats more gently. Nothing false is transmitted. The feed is accurate and the picture it produces is arranged.</p>
+
+      <p><span class="lead-in">The deeper version</span> is the convergence problem. When every institution manages toward the same thresholds, published by the same platform, the diversity of approach that historically gave the system resilience quietly disappears. Each individual decision is prudent. The aggregate is four thousand banks holding increasingly similar books and responding identically to the same signal.</p>
+
+      <p>"The framework's mandate is the safety and soundness of individual institutions," one economist involved in the Basel work puts it. "It is achieving that. Nobody's mandate is the variety of the system, and variety is what stops a common shock from being a common failure."</p>
+
+      <h2>The examiner's new job</h2>
+
+      <p>The workforce transition has been more humane than the industry feared. Federal commissioned examiner headcount fell about 12 percent between 2028 and 2031, achieved mostly through attrition as a cohort near retirement declined to learn an unfamiliar model.</p>
+
+      <p>The deeper change is in the work. The junior examiner of 2025 spent their time on document review: loan file sampling, policy testing, Call Report verification, board minutes. Painstaking, largely manual, requiring diligence more than judgment, and in the candid assessment of most senior supervisors not an effective use of trained professionals, since the documents were historical by definition.</p>
+
+      <p>The junior examiner of 2031 interprets data. Whether a breached threshold is an emerging risk or an artefact. Building the case for a targeted intervention. Running the focused reviews the alerts generate. It demands stronger quantitative skills and a different judgment, oriented toward live situations rather than completed ones.</p>
+
+      <p>"The people who are good at it are not always the people who were good at the old job," Torres says. "And the people who were good at the old job are not always comfortable with the new one."</p>
+
+      <p><span class="lead-in">Senior examiners</span> face a subtler loss. The examiner who knew from fifteen years at the same institution exactly which credit officer's portfolio to open first, and which board member's appetite would drive the concentration, still holds something valuable. It is no longer the primary currency. Several states have created advisory roles for exactly this knowledge, brought in when the data flags something that needs history to read correctly. It is a sensible adaptation and an admission that something real is harder to keep in a system optimised for breadth.</p>
+
+      <h2>What the feed cannot see</h2>
+
+      <p>The platform is trained on historical supervisory data, which makes it an instrument for recognising institutions that resemble past problems. It is weaker on institutions whose vulnerability is genuinely novel, because novel patterns are absent from the training data by definition. The next crisis will have features this generation of the system has not been taught.</p>
+
+      <p>And the protocol carries financial metrics with great granularity while carrying nothing about the things that historically precede slow institutional failure.</p>
+    </div>
+
+    <!-- ===== SECTION F - MODULE: WHAT THE FEED SEES ===== -->
+    <div class="col">
+      <section class="ledger" aria-label="Supervisory visibility by dimension">
+        <div class="ledger-head">
+          <h3>What the feed sees, and what it does not</h3>
+          <p>Framework assessment &middot; 2031</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filter by visibility">
+          <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="low" aria-pressed="false">Captured</button>
+          <button type="button" class="chip" data-filter="mid" aria-pressed="false">Partial</button>
+          <button type="button" class="chip" data-filter="high" aria-pressed="false">Invisible</button>
+        </div>
+        <div id="ledger-rows"></div>
+        <p class="ledger-foot">The invisible rows are not gaps in the specification. They are the categories that no protocol can transmit, which is why the culture and governance review still exists on paper.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <p>Regulators are aware of the gap. The implementation guidance requires periodic culture and governance reviews, targeted on-site work aimed squarely at the qualitative dimensions the feed cannot reach. In practice these happen less often and less consistently than the guidance contemplates, partly because the workforce has been reoriented toward data and partly because the framework has produced a culture in which quantitative metrics are the language supervision is conducted in.</p>
+
+      <p>"The danger is not that the machines are wrong," says Dr. Patricia Huang, a former Federal Reserve examiner now teaching financial regulation at Georgetown. "The danger is that we stop asking the questions the machines cannot answer. An institution can have perfect ratios, a pristine portfolio in the data, and a culture of corner-cutting that will produce catastrophic losses the moment conditions turn. The data will not tell you that. An examiner who has been in the building will."</p>
+
+      <h2>The view from Topeka</h2>
+
+      <p>State regulators supervise the majority of American community banks, and their experience of the framework has been the most complicated of anyone's.</p>
+
+      <p>They pushed hard during the design phase, and won two things that mattered. The first was that the burden relief commitment be explicit and reciprocal rather than aspirational, so that an institution meeting its data obligations could rely on reduced on-site frequency as a matter of policy rather than grace. The second was that state supervisors get equivalent platform access for the institutions they charter, rather than receiving federal analysis secondhand.</p>
+
+      <p>What they did not win was a say in threshold calibration. The parameters are set federally, applied uniformly, and tuned against a national dataset dominated by institutions nothing like a $340m bank in rural Kansas. A concentration that would be alarming in a diversified metropolitan portfolio is, for an agricultural lender in a single-crop county, simply what the business is. The platform flags it anyway.</p>
+
+      <p><span class="lead-in">This is the live fight</span> in supervision now, and it is a federalism fight wearing a technical costume. A uniform national threshold applied to a system that deliberately maintains four thousand differently shaped institutions will misjudge the ones furthest from the mean, and the ones furthest from the mean are almost always the small and the local. Several state supervisors have begun publishing their own overlay guidance, which is a polite way of saying they are telling their banks which federal flags to take seriously.</p>
+
+      <p>David Kowalski runs that $340m bank in Kansas and testified against the framework before the Senate Banking Committee in 2027.</p>
+
+      <p>"I said it would be the end of relationship banking, that they would be over our shoulder every minute, that small banks would be buried in technology costs." He looks out at a main street that is, by the standards of rural Kansas in 2031, doing reasonably well. "I was right about the costs for about eighteen months. I was wrong about the rest. My last on-site was fourteen months ago. Day and a half. Three things the system had flagged, we resolved two on the spot."</p>
+
+      <p>He is not wholly converted. "It flags my ag concentration every spring. Every spring I explain that I am a bank in a farming county. Somewhere there is a threshold that has never met a farmer."</p>
+
+      <h2>What the next recession will settle</h2>
+
+      <p>The framework is achieving what it set out to achieve. Detection is faster, intervention earlier, and the probability that any individual institution fails without warning is materially lower than it was. Those are real gains and the people who fought hardest against the thing mostly concede them.</p>
+
+      <p>The open questions are not about whether it works. They are about what it costs in ways the framework does not measure: a data concentration nobody has argued for publicly on its actual terms, a threshold regime that behaves like a rule without the procedure of one, and a convergence of behaviour that looks like prudence at every institution and like fragility across all of them.</p>
+
+      <p>None of that can be settled from here. It needs a full credit cycle, and the cycle has not turned since the framework came up. The next recession is the test, and it will grade the parts nobody has been able to score.</p>
+
+      <p>In the meantime the examiner who never leaves is watching, the institutions are adjusting to being watched, and the question of whether constant observation changes the behaviour being observed is the one that keeps the thoughtful supervisors up, in the quiet hours between alerts.</p>
+
+      <p class="endmark">&#9632;</p>
+    </div>
+  </article>
+
+  <!-- ===== SECTION F2 - THE FORWARD FILE (in-series navigation) ===== -->
+  <nav class="ff" aria-label="More from the forward file">
+    <p class="ff-eyebrow">The forward file</p>
+    <h2 class="ff-title">Six dispatches from a decade that has not happened</h2>
+    <p class="ff-note">Filed in sequence from 2027 to 2032. <a href="ledger-index.html">Open the full file</a>.</p>
+  <ol class="ff-grid">
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-press-start-to-pay.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2027</span> <span>Chartering</span></p>
+      <p class="ff-h">Press start to pay</p>
+      <p class="ff-sum">An entertainment company asks the OCC for bank powers and the right to issue its own dollar.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nothing-sits-still.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Deposits</span></p>
+      <p class="ff-h">Nothing sits still</p>
+      <p class="ff-sum">Open banking and agentic commerce turn the retail deposit base into a spot market.</p>
+    </a>
+  </li>
+  <li class="ff-item is-here" aria-current="page">
+    <div class="ff-card">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Supervision</span></p>
+      <p class="ff-h">The examiner who never leaves</p>
+      <p class="ff-sum">Continuous supervision replaces the periodic exam, and four thousand banks manage to one dashboard.</p>
+      <span class="ff-here">You are here</span>
+    </div>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-nobodys-on-the-file.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2031</span> <span>Mortgage</span></p>
+      <p class="ff-h">Nobody's on the file</p>
+      <p class="ff-sum">Underwriting automation takes the cost, the jobs, and the point of a licensing regime.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="Standard_Setting.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Third-party risk</span></p>
+      <p class="ff-h">Assessed once, trusted often</p>
+      <p class="ff-sum">One assessment, published to a registry, makes it rational for a small bank to try something new.</p>
+    </a>
+  </li>
+  <li class="ff-item">
+    <a class="ff-card" href="ledger-the-wallet-woke-up.html">
+      <p class="ff-meta"><span class="ff-year">Filed from 2032</span> <span>Cryptography</span></p>
+      <p class="ff-h">The wallet woke up</p>
+      <p class="ff-sum">Coins dormant since 2009 move, and the transfer itself is the announcement that the mathematics failed.</p>
+    </a>
+  </li>
+  </ol>
+  <div class="ff-turn">
+    <a class="ff-prev" href="ledger-nothing-sits-still.html"><span class="ff-turn-lab">Previous dispatch</span><span class="ff-turn-h">Nothing sits still</span></a>
+    <a class="ff-next" href="ledger-nobodys-on-the-file.html"><span class="ff-turn-lab">Next dispatch</span><span class="ff-turn-h">Nobody's on the file</span></a>
+  </div>
+  </nav>
+
+  <!-- ===== SECTION G - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>This is a work of narrative fiction set in 2031. The 2023 failures of Silicon Valley Bank and Signature Bank, the structure of the federal and state supervisory system, and the long-standing critique of measures that become targets are drawn from the real record. The Continuous Supervision Framework, the Supervisory Data Exchange Protocol, the Supervisory Intelligence Platform, all figures, and all named individuals are fictional constructs.</p>
+  </footer>
+
+</div>
+
+<script>
+
+/* ==========================================================================
+   SECTION 6 - LEDGER DATA
+   ========================================================================== */
+window.LEDGER_HEADS = ['What the protocol carries', 'What has to be inferred'];
+window.LEDGER_ITEMS = [
+  {
+    name:'Capital and liquidity position',
+    cat:'Balance sheet',
+    status:'low', label:'Captured',
+    left:['Daily ratios and every component','Intraday liquidity against thresholds','Reserve position and funding mix'],
+    right:['Nothing material','Reporting timing at period boundaries'],
+    note:'The framework does this superbly. It is the category the whole specification was designed around and the reason response times collapsed.'
+  },
+  {
+    name:'Concentration and exposure',
+    cat:'Portfolio',
+    status:'low', label:'Captured',
+    left:['Large exposures above defined thresholds','Sector and geographic distribution','Rate sensitivity across both books'],
+    right:['Whether a concentration reflects risk or a local economy','Relationship history behind a large exposure'],
+    note:'Captured accurately and interpreted uniformly, which is the whole complaint from banks whose markets are nothing like the national mean.'
+  },
+  {
+    name:'Credit quality trajectory',
+    cat:'Asset quality',
+    status:'mid', label:'Partial',
+    left:['Delinquency and migration as reported','Charge-off and recovery flows','Model outputs as they run'],
+    right:['Whether a workout is genuine or a maturity extension','Underwriting drift inside stated policy','Quality of the collateral assessment'],
+    note:'The numbers arrive intact. What produced them is a judgment the feed reports the result of without describing.'
+  },
+  {
+    name:'Governance and board effectiveness',
+    cat:'Institutional',
+    status:'high', label:'Invisible',
+    left:['Nothing'],
+    right:['Whether dissent reaches the board','Whether risk reporting is read or received','Whether management is candid under pressure'],
+    note:'Historically among the most predictive factors in slow institutional failure and completely absent from the protocol. This is what the culture and governance review exists for, and it is the review most often deferred.'
+  },
+  {
+    name:'Risk culture and internal norms',
+    cat:'Institutional',
+    status:'high', label:'Invisible',
+    left:['Nothing'],
+    right:['The gap between written policy and actual practice','Whether exceptions are rare or routine','Whether staff escalate or absorb problems'],
+    note:'An institution can transmit a pristine feed for years while operating on norms that will produce catastrophic losses the moment conditions turn. The data will not say so.'
+  },
+  {
+    name:'Novel risk formations',
+    cat:'Model limitation',
+    status:'high', label:'Invisible',
+    left:['Patterns resembling past supervisory events'],
+    right:['Vulnerabilities with no historical analogue','Combinations absent from the training data','Risks arising from the framework itself'],
+    note:'The platform recognises institutions that look like past problems. The next crisis will not look like the last one, and the system is structurally least equipped for exactly that.'
+  }
+];
+
+/* ==========================================================================
+   SECTION 1 - THEME
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - READING PROGRESS
+   ========================================================================== */
+(function(){
+  var bar = document.getElementById('progress');
+  function update(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+  }
+  document.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ==========================================================================
+   SECTION 3 - LEDGER MODULE (shared builder)
+   Rows expand into a two-column split plus a note. Filter chips narrow by
+   the status field. Consumers set window.LEDGER_ITEMS and the column heads.
+   ========================================================================== */
+(function(){
+  var ITEMS = window.LEDGER_ITEMS || [];
+  var HEADS = window.LEDGER_HEADS || ['Left', 'Right'];
+  var host = document.getElementById('ledger-rows');
+  if (!host) return;
+  var filter = 'all';
+
+  function cell(title, items){
+    var d = document.createElement('div');
+    d.className = 'detail-cell';
+    var h = document.createElement('h4');
+    h.textContent = title;
+    var ul = document.createElement('ul');
+    items.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    d.appendChild(h); d.appendChild(ul);
+    return d;
+  }
+
+  function build(){
+    host.innerHTML = '';
+    var shown = ITEMS.filter(function(v){
+      return filter === 'all' || v.status === filter;
+    });
+
+    if (shown.length === 0){
+      var empty = document.createElement('p');
+      empty.className = 'ledger-foot';
+      empty.textContent = 'Nothing matches this filter.';
+      host.appendChild(empty);
+      return;
+    }
+
+    shown.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'row-btn';
+      btn.setAttribute('aria-expanded', 'false');
+
+      var nameWrap = document.createElement('span');
+      var name = document.createElement('span');
+      name.className = 'row-name';
+      name.textContent = v.name;
+      var cat = document.createElement('span');
+      cat.className = 'row-cat';
+      cat.textContent = v.cat;
+      nameWrap.appendChild(name); nameWrap.appendChild(cat);
+
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + v.status;
+      badge.textContent = v.label;
+
+      var chev = document.createElement('span');
+      chev.className = 'chev';
+      chev.textContent = '\u203A';
+
+      btn.appendChild(nameWrap); btn.appendChild(badge); btn.appendChild(chev);
+
+      var detail = document.createElement('div');
+      detail.className = 'row-detail';
+      var grid = document.createElement('div');
+      grid.className = 'detail-grid';
+      grid.appendChild(cell(HEADS[0], v.left));
+      grid.appendChild(cell(HEADS[1], v.right));
+      detail.appendChild(grid);
+
+      var note = document.createElement('p');
+      note.className = 'detail-note';
+      note.textContent = v.note;
+      detail.appendChild(note);
+
+      btn.addEventListener('click', function(){
+        var open = row.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+
+      row.appendChild(btn); row.appendChild(detail);
+      host.appendChild(row);
+    });
+  }
+
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      filter = c.getAttribute('data-filter');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', String(o === c)); });
+      build();
+    });
+  });
+
+  build();
+})();
+
+
+/* ==========================================================================
+   SECTION 4 - SIGNATURE MODULE: THE DETECTION CLOCK
+   A stress curve on a common 320-unit axis. Response markers sit where each
+   regime acts. The failure marker moves with the scenario, so a liquidity
+   run puts the periodic response on the wrong side of it.
+   ========================================================================== */
+(function(){
+  var svg = document.getElementById('det');
+  var NS = 'http://www.w3.org/2000/svg';
+  var W = 320, H = 140;
+
+  var SCEN = {
+    slow: {
+      label:'Credit stress',
+      unit:'days', span:280,
+      old:187, now:11, fail:240,
+      curve:2.1
+    },
+    fast: {
+      label:'Liquidity run',
+      unit:'hours', span:96,
+      old:4488, now:96, fail:52,
+      curve:5.0
+    }
+  };
+
+  var mode = 'slow';
+
+  function css(n){
+    return getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  }
+
+  var area = document.createElementNS(NS, 'path');
+  svg.appendChild(area);
+
+  var line = document.createElementNS(NS, 'path');
+  line.setAttribute('fill', 'none');
+  line.setAttribute('stroke-width', '1.6');
+  svg.appendChild(line);
+
+  function marker(){
+    var g = document.createElementNS(NS, 'g');
+    var l = document.createElementNS(NS, 'line');
+    l.setAttribute('y1', 0); l.setAttribute('y2', H);
+    l.setAttribute('stroke-width', '1.2');
+    var t = document.createElementNS(NS, 'text');
+    t.setAttribute('font-size', '5');
+    t.setAttribute('font-family', 'JetBrains Mono, monospace');
+    t.setAttribute('letter-spacing', '0.4');
+    g.appendChild(l); g.appendChild(t);
+    svg.appendChild(g);
+    return {g:g, line:l, text:t};
+  }
+
+  var mFail = marker(), mOld = marker(), mNow = marker();
+
+  function place(m, frac, label, colour, dash, anchorLeft){
+    var x = Math.max(0, Math.min(1, frac)) * W;
+    m.line.setAttribute('x1', x); m.line.setAttribute('x2', x);
+    m.line.setAttribute('stroke', colour);
+    m.line.setAttribute('stroke-dasharray', dash ? '3 3' : '');
+    m.text.setAttribute('x', anchorLeft ? x - 3 : x + 3);
+    m.text.setAttribute('text-anchor', anchorLeft ? 'end' : 'start');
+    m.text.setAttribute('y', 11);
+    m.text.setAttribute('fill', colour);
+    m.text.textContent = label;
+    m.g.setAttribute('opacity', frac > 1.02 ? '0.25' : '1');
+  }
+
+  function render(){
+    var s = SCEN[mode];
+    var ox = css('--oxblood');
+    var cop = css('--copper');
+    var faint = css('--ink-faint');
+
+    /* Severity curve: gentle then accelerating, steeper for the run. */
+    var pts = [];
+    for (var i = 0; i <= 64; i++){
+      var t = i / 64;
+      var y = H - (Math.pow(t, s.curve) * (H - 14)) - 6;
+      pts.push((t * W).toFixed(1) + ',' + y.toFixed(1));
+    }
+    line.setAttribute('d', 'M' + pts.join(' L'));
+    line.setAttribute('stroke', ox);
+    area.setAttribute('d', 'M0,' + H + ' L' + pts.join(' L') + ' L' + W + ',' + H + ' Z');
+    area.setAttribute('fill', ox);
+    area.setAttribute('opacity', '0.10');
+
+    place(mFail, s.fail / s.span, 'FAILURE', ox, false, true);
+    place(mOld,  s.old  / s.span, 'PERIODIC', faint, true, false);
+    place(mNow,  s.now  / s.span, 'CONTINUOUS', cop, true, false);
+
+    var oldLate = s.old > s.fail;
+    var newLate = s.now > s.fail;
+
+    document.getElementById('v-old').textContent =
+      mode === 'slow' ? '187 days' : 'Never';
+    document.getElementById('v-new').textContent =
+      mode === 'slow' ? '11 days' : '4 hours';
+    document.getElementById('v-fail').textContent =
+      mode === 'slow' ? 'Day 240' : 'Hour 52';
+
+    document.getElementById('c-old').classList.toggle('hot', oldLate);
+    document.getElementById('c-new').classList.toggle('good', !newLate);
+
+    document.getElementById('det-state').textContent = oldLate
+      ? 'The old cycle arrives after the institution is gone'
+      : 'Both regimes catch it in time';
+
+    document.getElementById('btn-slow').setAttribute('aria-pressed', String(mode === 'slow'));
+    document.getElementById('btn-fast').setAttribute('aria-pressed', String(mode === 'fast'));
+  }
+
+  document.getElementById('btn-slow').addEventListener('click', function(){ mode='slow'; render(); });
+  document.getElementById('btn-fast').addEventListener('click', function(){ mode='fast'; render(); });
+  document.getElementById('theme').addEventListener('click', function(){ setTimeout(render, 30); });
+  render();
+})();
+
+/* ==========================================================================
+   SECTION 5 - MODULE: OUTCOMES
+   ========================================================================== */
+(function(){
+  var DATA = {
+    per:  {
+      resp:  {v:187, label:'187 days', max:200, bad:true},
+      early: {v:34,  label:'34%',      max:100, bad:false},
+      fp:    {v:0,   label:'n/a',      max:100, bad:false}
+    },
+    cont: {
+      resp:  {v:11,  label:'11 days',  max:200, bad:false},
+      early: {v:71,  label:'71%',      max:100, bad:false},
+      fp:    {v:29,  label:'29%',      max:100, bad:true}
+    }
+  };
+  var KEYS = ['resp','early','fp'];
+  var bPer = document.getElementById('btn-per');
+  var bCont = document.getElementById('btn-cont');
+  var era = 'per';
+
+  function render(){
+    var set = DATA[era];
+    var cont = era === 'cont';
+    KEYS.forEach(function(k){
+      var d = set[k];
+      var bar = document.getElementById('bar-' + k);
+      var txt = document.getElementById('txt-' + k);
+      bar.style.width = Math.max(d.v > 0 ? 1.5 : 0, (d.v / d.max) * 100).toFixed(1) + '%';
+      bar.classList.toggle('bad', d.bad);
+      bar.classList.toggle('after', cont && !d.bad);
+      bar.classList.toggle('before', !cont && !d.bad);
+      txt.textContent = d.label;
+    });
+    bPer.setAttribute('aria-pressed', String(!cont));
+    bCont.setAttribute('aria-pressed', String(cont));
+  }
+
+  bPer.addEventListener('click', function(){ era='per'; render(); });
+  bCont.addEventListener('click', function(){ era='cont'; render(); });
+
+  var section = document.querySelector('.panel');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ render(); io.disconnect(); } });
+    }, {threshold:0.25});
+    io.observe(section);
+  } else { render(); }
+})();
+
+</script>
+</body>
+</html>

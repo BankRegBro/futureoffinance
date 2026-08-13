@@ -1,784 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Financial Future — A Fiction Anthology</title>
-<meta name="description" content="Five speculative fiction stories from the future of financial services, set in 2028.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The forward file &middot; The Ledger</title>
+<meta name="description" content="The Ledger forward file: six speculative dispatches on American banking, filed from 2027 to 2032.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --navy-900: #020c1b;
-  --navy-800: #04111f;
-  --navy-700: #071a30;
-  --navy-600: #0d2647;
-  --blue-500: #1255a8;
-  --blue-400: #1a6bcc;
-  --blue-300: #2d8ef0;
-  --blue-200: #6ab8f7;
-  --blue-100: #b8d9fb;
-  --blue-50:  #dbeafe;
-  --white:    #ffffff;
-  --off-white:#f0f6ff;
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--off-white);
-  color: var(--navy-800);
-  overflow-x: hidden;
-}
-
-/* NAV */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 0 3rem; height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
-  transition: background 0.35s ease, box-shadow 0.35s ease;
-}
-.nav.scrolled {
-  background: rgba(4,17,31,0.94);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.05);
-}
-.nav-logo {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em;
-  color: var(--white); text-decoration: none;
-}
-.nav-logo em { font-style: italic; color: var(--blue-200); }
-.nav-links { display: flex; gap: 2.5rem; list-style: none; }
-.nav-links a {
-  color: rgba(255,255,255,0.6); text-decoration: none;
-  font-size: 0.8rem; font-weight: 400; letter-spacing: 0.1em;
-  text-transform: uppercase; transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--white); }
-
-/* HERO */
-.hero {
-  min-height: 100vh;
-  background: var(--navy-800);
-  position: relative; display: flex; align-items: center;
-  overflow: hidden;
-}
-.hero-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(29,107,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(29,107,255,0.06) 1px, transparent 1px);
-  background-size: 64px 64px;
-  animation: gridDrift 24s linear infinite;
-}
-@keyframes gridDrift {
-  0%   { background-position: 0 0; }
-  100% { background-position: 64px 64px; }
-}
-.hero-orb {
-  position: absolute; border-radius: 50%;
-  filter: blur(80px); pointer-events: none;
-}
-.hero-orb-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(26,107,204,0.18) 0%, transparent 70%);
-  top: -120px; right: -80px;
-}
-.hero-orb-2 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(45,142,240,0.12) 0%, transparent 70%);
-  bottom: 60px; left: 5%;
-}
-.hero-chart {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 240px;
-  opacity: 0.18;
-}
-.hero-chart-path {
-  stroke-dasharray: 2400; stroke-dashoffset: 2400;
-  animation: drawLine 2.8s cubic-bezier(0.4,0,0.2,1) 0.6s forwards;
-}
-@keyframes drawLine { to { stroke-dashoffset: 0; } }
-.hero-content {
-  position: relative; z-index: 2;
-  width: 100%; max-width: 960px;
-  margin: 0 auto; padding: 0 3rem;
-  text-align: center;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 0.85rem;
-  color: var(--blue-200); font-size: 0.72rem; font-weight: 400;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  margin-bottom: 1.75rem;
-  animation: fadeUp 0.9s ease-out both;
-}
-.hero-eyebrow::before, .hero-eyebrow::after {
-  content: ''; display: block; width: 44px; height: 1px;
-  background: var(--blue-200); opacity: 0.45;
-}
-.hero-title {
-  font-family: 'Cormorant Garant', serif;
-  font-size: clamp(3.8rem, 9vw, 7.5rem);
-  font-weight: 300; color: var(--white);
-  line-height: 0.95; letter-spacing: -0.025em;
-  margin-bottom: 1.75rem;
-  animation: fadeUp 0.9s ease-out 0.15s both;
-}
-.hero-title em { font-style: italic; color: var(--blue-200); }
-.hero-sub {
-  font-size: 1.05rem; font-weight: 300;
-  color: rgba(255,255,255,0.5);
-  max-width: 560px; margin: 0 auto 3.5rem;
-  line-height: 1.75;
-  animation: fadeUp 0.9s ease-out 0.3s both;
-}
-.hero-markers {
-  display: flex; justify-content: center;
-  animation: fadeUp 0.9s ease-out 0.45s both;
-}
-.hero-marker {
-  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-  padding: 0.75rem 1.6rem; text-decoration: none;
-  border-left: 1px solid rgba(255,255,255,0.08);
-  transition: background 0.25s;
-}
-.hero-marker:first-child { border-left: none; }
-.hero-marker:hover { background: rgba(255,255,255,0.03); }
-.hero-marker:hover .m-roman { color: var(--blue-200); }
-.m-roman {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 1.7rem; font-weight: 300;
-  color: rgba(255,255,255,0.32);
-  transition: color 0.2s;
-}
-.m-label {
-  font-size: 0.58rem; color: rgba(255,255,255,0.18);
-  letter-spacing: 0.06em; text-align: center;
-  max-width: 86px; line-height: 1.35;
-}
-.scroll-cue {
-  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  color: rgba(255,255,255,0.25); font-size: 0.68rem;
-  letter-spacing: 0.12em; text-transform: uppercase;
-}
-.scroll-arrow { animation: arrowBounce 2s ease-in-out infinite; }
-@keyframes arrowBounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(6px); }
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
 }
 
-/* STORIES SECTION */
-.stories-section { background: var(--white); padding: 6rem 3rem; }
-.section-header {
-  max-width: 1200px; margin: 0 auto 3.5rem;
-  display: flex; align-items: baseline; justify-content: space-between;
-  border-bottom: 1px solid rgba(7,26,48,0.07); padding-bottom: 1.25rem;
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
 }
-.section-title {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 2rem; font-weight: 400; color: var(--navy-800);
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.col{width:min(100%,var(--measure)); margin-inline:auto}
+.skip{
+  position:absolute; left:-9999px; top:0; background:var(--oxblood);
+  color:var(--on-accent); padding:.6rem .9rem; z-index:70;
+  font-family:"Archivo",system-ui,sans-serif; font-size:.85rem;
 }
-.section-meta { font-size: 0.78rem; color: rgba(7,26,48,0.35); letter-spacing: 0.08em; }
+.skip:focus{left:.75rem; top:.75rem}
 
-/* FEATURED */
-.story-featured {
-  max-width: 1200px; margin: 0 auto 2.5rem;
-  display: grid; grid-template-columns: 1.15fr 0.85fr;
-  min-height: 480px; border-radius: 14px; overflow: hidden;
-  box-shadow: 0 4px 48px rgba(4,17,31,0.10);
-  text-decoration: none; color: inherit; cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.3s;
+/* ==========================================================================
+   SECTION 3 - MASTHEAD
+   ========================================================================== */
+.brandbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0 .7rem; border-bottom:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
 }
-.story-featured:hover {
-  box-shadow: 0 12px 60px rgba(4,17,31,0.18);
-  transform: translateY(-3px);
+.brandbar a{color:inherit; text-decoration:none; border-bottom:1px solid transparent}
+.brandbar a:hover{border-bottom-color:var(--copper); color:var(--ink)}
+.nameplate{
+  margin-top:1.6rem; border-top:3px solid var(--ink); border-bottom:1px solid var(--rule);
+  padding:1.4rem 1.6rem 1.5rem; background:
+    radial-gradient(120% 140% at 12% 0%, color-mix(in srgb,var(--oxblood) 12%,transparent) 0%, transparent 62%),
+    radial-gradient(90% 120% at 96% 8%, color-mix(in srgb,var(--copper) 10%,transparent) 0%, transparent 58%),
+    var(--raised);
 }
-.featured-art { background: var(--navy-700); position: relative; overflow: hidden; }
-.featured-art svg { width: 100%; height: 100%; display: block; transition: transform 0.5s ease; }
-.story-featured:hover .featured-art svg { transform: scale(1.03); }
-.featured-body {
-  background: var(--navy-800); padding: 3.5rem;
-  display: flex; flex-direction: column; justify-content: center;
-  position: relative; overflow: hidden;
+.np-top{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  flex-wrap:wrap; margin-bottom:1.1rem;
 }
-.featured-body::before {
-  content: ''; position: absolute;
-  top: -80px; right: -80px; width: 260px; height: 260px;
-  border-radius: 50%; background: rgba(29,107,255,0.07);
-  pointer-events: none;
+.np-brand{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+  font-size:1.15rem; letter-spacing:-.02em; text-transform:uppercase;
 }
-.story-num {
-  font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--blue-200); margin-bottom: 0.85rem;
+.np-brand .the{
+  font-family:"Fraunces",Georgia,serif; font-weight:300; font-style:italic;
+  text-transform:none; letter-spacing:0; margin-right:.18rem;
 }
-.story-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.35rem; }
-.pill {
-  font-size: 0.67rem; letter-spacing: 0.07em; text-transform: uppercase;
-  color: var(--blue-200); background: rgba(45,142,240,0.13);
-  border: 1px solid rgba(45,142,240,0.22);
-  padding: 0.2rem 0.65rem; border-radius: 100px;
+.np-meta{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
 }
-.featured-title {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 2.5rem; font-weight: 400; color: var(--white);
-  line-height: 1.12; letter-spacing: -0.01em; margin-bottom: 1.25rem;
+.np-meta .dot{margin:0 .4rem; color:var(--rule-strong)}
+.kicker{
+  margin:0 0 .5rem; font-family:"JetBrains Mono",monospace; font-size:.66rem;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--oxblood);
 }
-.featured-excerpt {
-  font-size: 0.92rem; font-weight: 300;
-  color: rgba(255,255,255,0.5); line-height: 1.78; margin-bottom: 2rem;
+h1{
+  margin:0 0 .7rem; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+  font-size:var(--step-4); line-height:.94; letter-spacing:-.035em;
+  max-width:19ch;
 }
-.featured-meta { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.75rem; }
-.meta-chip {
-  font-size: 0.76rem; color: rgba(255,255,255,0.3);
-  display: flex; align-items: center; gap: 0.4rem;
+.deck{
+  margin:0 0 .9rem; font-size:var(--step-1); line-height:1.42; color:var(--ink-soft);
+  max-width:46ch; font-weight:300;
 }
-.read-cta {
-  display: inline-flex; align-items: center; gap: 0.55rem;
-  font-size: 0.76rem; font-weight: 500;
-  color: var(--blue-200); letter-spacing: 0.1em; text-transform: uppercase;
-  transition: gap 0.25s;
-}
-.story-featured:hover .read-cta { gap: 1rem; }
-.watermark-year {
-  position: absolute; bottom: 1.75rem; right: 2rem;
-  font-family: 'Cormorant Garant', serif;
-  font-size: 5rem; font-weight: 300;
-  color: rgba(255,255,255,0.04);
-  line-height: 1; letter-spacing: -0.04em;
-  user-select: none; pointer-events: none;
+.standing{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
 }
 
-/* GRID */
-.story-grid {
-  max-width: 1200px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+/* ==========================================================================
+   SECTION 4 - THE FILE (entry list)
+   Each entry is a plate on a year rail. The rail carries the filed-from date
+   because the sequence, not the publication order, is the spine of the series.
+   ========================================================================== */
+.filehead{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:1rem;
+  flex-wrap:wrap; margin:2.6rem 0 .9rem;
 }
-.story-card {
-  background: var(--white); border: 1px solid rgba(7,26,48,0.08);
-  border-radius: 14px; overflow: hidden;
-  text-decoration: none; color: inherit; cursor: pointer;
-  display: flex; flex-direction: column;
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+.filehead h2{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:var(--step-2); letter-spacing:-.02em; line-height:1.1;
 }
-.story-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(4,17,31,0.11); }
-.card-art {
-  height: 220px; background: var(--navy-700);
-  overflow: hidden; position: relative; flex-shrink: 0;
+.filehead p{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
 }
-.card-art svg { width: 100%; height: 100%; display: block; transition: transform 0.45s ease; }
-.story-card:hover .card-art svg { transform: scale(1.05); }
-.synopsis-layer {
-  position: absolute; inset: 0;
-  background: rgba(4,17,31,0.88);
-  display: flex; align-items: center; justify-content: center;
-  padding: 1.75rem; opacity: 0; transition: opacity 0.3s ease;
+.yearband{
+  margin-top:1.6rem; padding-top:.5rem; border-top:2px solid var(--ink);
+  display:flex; align-items:baseline; gap:.7rem;
 }
-.story-card:hover .synopsis-layer { opacity: 1; }
-.synopsis-q {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 1.1rem; font-style: italic;
-  color: rgba(255,255,255,0.85); text-align: center; line-height: 1.6;
+.yearband span:first-child{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.5rem;
+  letter-spacing:-.03em; color:var(--copper);
 }
-.card-body { padding: 1.5rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
-.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.1rem; }
-.year-tag { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; color: var(--blue-400); }
-.rt { font-size: 0.7rem; color: rgba(7,26,48,0.32); }
-.card-title {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 1.6rem; font-weight: 600; color: var(--navy-800);
-  line-height: 1.12; letter-spacing: -0.01em;
+.yearband span:last-child{
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-faint);
 }
-.card-excerpt { font-size: 0.86rem; font-weight: 300; color: rgba(7,26,48,0.52); line-height: 1.68; }
-.card-foot {
-  margin-top: auto; padding-top: 0.85rem;
-  border-top: 1px solid rgba(7,26,48,0.06);
-  display: flex; align-items: center; justify-content: space-between;
+.entries{list-style:none; margin:.7rem 0 0; padding:0; display:grid; gap:.7rem}
+.entry{
+  background:var(--raised); border:1px solid var(--rule);
+  border-left:3px solid var(--rule-strong);
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
 }
-.tag-row { display: flex; gap: 0.4rem; }
-.mini-tag {
-  font-size: 0.63rem; letter-spacing: 0.06em; text-transform: uppercase;
-  color: rgba(7,26,48,0.38); background: rgba(7,26,48,0.05);
-  padding: 0.2rem 0.5rem; border-radius: 4px;
+.entry:hover{border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px)}
+.entry a{display:block; color:inherit; text-decoration:none; padding:1rem 1.1rem 1.05rem}
+.e-meta{
+  display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:baseline;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);
 }
-.cta-arrow {
-  font-size: 0.73rem; font-weight: 500; color: var(--blue-400);
-  display: flex; align-items: center; gap: 0.3rem; transition: gap 0.22s;
+.e-topic{color:var(--oxblood); font-weight:700}
+.e-h{
+  margin:.4rem 0 .35rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:clamp(1.25rem,3.1vw,1.6rem); line-height:1.1; letter-spacing:-.025em;
 }
-.story-card:hover .cta-arrow { gap: 0.6rem; }
+.entry a:hover .e-h{color:var(--oxblood)}
+.e-deck{margin:0 0 .7rem; font-size:.93rem; line-height:1.55; color:var(--ink-soft); max-width:62ch}
+.e-foot{
+  display:flex; flex-wrap:wrap; gap:.45rem .8rem; align-items:center;
+  padding-top:.6rem; border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);
+}
+.chip{
+  display:inline-block; padding:.16rem .45rem; background:var(--sunk);
+  border:1px solid var(--rule); color:var(--ink-soft);
+}
+.e-open{margin-left:auto; color:var(--copper); font-weight:700}
 
-/* ABOUT */
-.about-section { background: var(--navy-800); padding: 6rem 3rem; }
-.about-inner { max-width: 680px; margin: 0 auto; text-align: center; }
-.about-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blue-200); margin-bottom: 1.5rem; }
-.about-title {
-  font-family: 'Cormorant Garant', serif;
-  font-size: 2.6rem; font-weight: 300; color: var(--white);
-  margin-bottom: 1.5rem; line-height: 1.2;
+/* ==========================================================================
+   SECTION 5 - READING NOTE
+   ========================================================================== */
+.note{
+  margin:2.6rem 0 0; padding:1.1rem 1.2rem; background:var(--sunk);
+  border-left:3px solid var(--copper);
 }
-.about-divider { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
-.about-divider span { width: 5px; height: 5px; border-radius: 50%; background: var(--blue-200); opacity: 0.35; }
-.about-divider span:nth-child(2) { opacity: 0.65; }
-.about-body { font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.45); line-height: 1.85; }
-.about-body + .about-body { margin-top: 1rem; }
-
-/* FOOTER */
-.footer {
-  background: var(--navy-900); padding: 2.25rem 3rem;
-  display: flex; align-items: center; justify-content: space-between;
-  border-top: 1px solid rgba(255,255,255,0.04);
+.note h3{
+  margin:0 0 .4rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:1rem; letter-spacing:-.01em;
 }
-.footer-brand { font-family: 'Cormorant Garant', serif; font-size: 1.05rem; color: rgba(255,255,255,0.35); }
-.footer-brand em { font-style: italic; color: var(--blue-200); opacity: 0.7; }
-.footer-note { font-size: 0.75rem; color: rgba(255,255,255,0.18); }
+.note p{margin:0; font-size:.92rem; line-height:1.6; color:var(--ink-soft); max-width:70ch}
+.note p + p{margin-top:.6rem}
+.note a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
+.note a:hover{border-bottom-color:var(--oxblood)}
 
-/* REVEAL */
-.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.reveal.in { opacity: 1; transform: translateY(0); }
-.d1 { transition-delay: 0.08s; }
-.d2 { transition-delay: 0.18s; }
-.d3 { transition-delay: 0.28s; }
-.d4 { transition-delay: 0.38s; }
-
-@media (max-width: 900px) {
-  .story-featured { grid-template-columns: 1fr; }
-  .featured-art { height: 260px; }
-  .story-grid { grid-template-columns: 1fr; }
-  .nav { padding: 0 1.5rem; }
-  .nav-links { display: none; }
-  .stories-section, .about-section { padding-left: 1.5rem; padding-right: 1.5rem; }
-  .hero-content { padding: 0 1.5rem; }
-  .hero-marker { padding: 0.65rem 1rem; }
-  .m-roman { font-size: 1.3rem; }
-  .footer { padding: 1.75rem 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+/* ==========================================================================
+   SECTION 6 - FOOTER + THEME TOGGLE
+   ========================================================================== */
+footer{
+  margin:3.2rem 0 0; padding:1.4rem 0 3rem; border-top:1px solid var(--rule);
+  font-size:.8rem; line-height:1.6; color:var(--ink-faint); max-width:72ch;
 }
+footer .sig{
+  font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-soft); margin:0 0 .6rem;
+}
+footer p{margin:0 0 .6rem}
+#theme{
+  position:fixed; right:1rem; bottom:1rem; z-index:60;
+  background:var(--raised); color:var(--ink-soft);
+  border:1px solid var(--rule-strong); padding:.42rem .7rem;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase; cursor:pointer;
+}
+#theme:hover{color:var(--ink); border-color:var(--oxblood)}
+
+/* ==========================================================================
+   SECTION 7 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .nameplate{padding:1.2rem 1rem 1.1rem}
+  .e-open{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important; animation-duration:.01ms !important}}
 </style>
 </head>
 <body>
+<a class="skip" href="#file">Skip to the file</a>
+<button type="button" id="theme">Night</button>
 
-<nav class="nav" id="main-nav" aria-label="Primary navigation">
-  <a href="#" class="nav-logo">Financial <em>Futures</em></a>
-  <ul class="nav-links">
-    <li><a href="#stories">Stories</a></li>
-    <li><a href="#about">About</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section class="hero" aria-label="Hero">
-  <div class="hero-grid" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
-  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
-  <svg class="hero-chart" viewBox="0 0 1440 240" preserveAspectRatio="none" aria-hidden="true">
-    <path class="hero-chart-path"
-          d="M0,200 C100,185 150,165 260,148 C370,131 390,162 500,145 C610,128 635,92 750,78 C865,64 885,105 1000,96 C1115,87 1135,55 1250,44 C1340,35 1395,48 1440,42"
-          fill="none" stroke="rgba(45,142,240,0.55)" stroke-width="1.8"/>
-    <path d="M0,200 C100,185 150,165 260,148 C370,131 390,162 500,145 C610,128 635,92 750,78 C865,64 885,105 1000,96 C1115,87 1135,55 1250,44 C1340,35 1395,48 1440,42 L1440,240 L0,240 Z"
-          fill="rgba(29,107,255,0.04)"/>
-  </svg>
-  <div class="hero-content">
-    <div class="hero-eyebrow">A Speculative Fiction Anthology · 2028</div>
-    <h1 class="hero-title">Financial<br><em>Futures</em></h1>
-    <p class="hero-sub">Five stories from a year when stablecoins go corporate, examiners never sleep, trust gets redefined, the locks break, and machines start making the loans.</p>
-    <nav class="hero-markers" aria-label="Jump to story">
-      <a href="#story-1" class="hero-marker"><span class="m-roman">I</span><span class="m-label">Press Play to Pay</span></a>
-      <a href="#story-2" class="hero-marker"><span class="m-roman">II</span><span class="m-label">The Examiner Who Never Leaves</span></a>
-      <a href="#story-3" class="hero-marker"><span class="m-roman">III</span><span class="m-label">Trust in Name Only</span></a>
-      <a href="#story-4" class="hero-marker"><span class="m-roman">IV</span><span class="m-label">The Day the Keys Fell</span></a>
-      <a href="#story-5" class="hero-marker"><span class="m-roman">V</span><span class="m-label">The Silicon Subprime</span></a>
-    </nav>
-  </div>
-  <div class="scroll-cue" aria-hidden="true">
-    <span>Scroll</span>
-    <svg class="scroll-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M7 2v10M3 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
-</section>
-
-<!-- STORIES -->
-<section class="stories-section" id="stories">
-  <div class="section-header reveal">
-    <h2 class="section-title">The Collection</h2>
-    <span class="section-meta">Five Stories · 2028</span>
+<div class="wrap">
+  <!-- ===== SECTION A - BRAND BAR ===== -->
+  <div class="brandbar">
+    <span>BankRegWire</span>
+    <span>Speculative &middot; The forward file</span>
   </div>
 
-  <!-- FEATURED: Story I -->
-  <a href="press-play-to-pay.html" class="story-featured reveal" id="story-1" aria-label="Read Press Play to Pay">
-    <div class="featured-art" aria-hidden="true">
-      <svg viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-        <rect width="640" height="480" fill="#071a30"/>
-        <ellipse cx="320" cy="250" rx="210" ry="170" fill="rgba(26,107,204,0.09)"/>
-        <!-- Controller body -->
-        <path d="M162,215 C158,180 172,155 200,148 L260,142 C275,140 288,133 320,133 C352,133 365,140 380,142 L440,148 C468,155 482,180 478,215 L474,295 C472,325 458,345 438,350 C418,355 400,340 390,318 L374,280 H266 L250,318 C240,340 222,355 202,350 C182,345 168,325 166,295 Z"
-              fill="rgba(255,255,255,0.06)" stroke="rgba(45,142,240,0.38)" stroke-width="1.2"/>
-        <!-- D-pad -->
-        <rect x="210" y="225" width="13" height="38" rx="3" fill="rgba(255,255,255,0.22)"/>
-        <rect x="196" y="238" width="40"  height="13" rx="3" fill="rgba(255,255,255,0.22)"/>
-        <!-- Action buttons with currency symbols -->
-        <circle cx="405" cy="234" r="12" fill="rgba(45,142,240,0.26)" stroke="rgba(45,142,240,0.55)" stroke-width="1"/>
-        <text x="405" y="238" font-family="Georgia,serif" font-size="12" fill="rgba(255,255,255,0.85)" text-anchor="middle" dominant-baseline="middle">$</text>
-        <circle cx="427" cy="251" r="12" fill="rgba(45,142,240,0.20)" stroke="rgba(45,142,240,0.45)" stroke-width="1"/>
-        <text x="427" y="255" font-family="Georgia,serif" font-size="11" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">¥</text>
-        <circle cx="383" cy="251" r="12" fill="rgba(45,142,240,0.20)" stroke="rgba(45,142,240,0.45)" stroke-width="1"/>
-        <text x="383" y="255" font-family="Georgia,serif" font-size="11" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">€</text>
-        <circle cx="405" cy="268" r="12" fill="rgba(45,142,240,0.20)" stroke="rgba(45,142,240,0.45)" stroke-width="1"/>
-        <text x="405" y="272" font-family="Georgia,serif" font-size="11" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">₿</text>
-        <!-- Center touchpad with stablecoin logo -->
-        <rect x="285" y="218" width="70" height="44" rx="6" fill="rgba(45,142,240,0.18)" stroke="rgba(45,142,240,0.40)" stroke-width="0.8"/>
-        <circle cx="320" cy="240" r="14" fill="rgba(45,142,240,0.55)" stroke="rgba(106,184,247,0.70)" stroke-width="1"/>
-        <text x="320" y="244" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="rgba(255,255,255,0.90)" text-anchor="middle" dominant-baseline="middle">S¥</text>
-        <!-- Shoulder buttons -->
-        <rect x="174" y="180" width="55" height="16" rx="8" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.15)" stroke-width="0.7"/>
-        <rect x="411" y="180" width="55" height="16" rx="8" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.15)" stroke-width="0.7"/>
-        <!-- Thumbsticks -->
-        <circle cx="248" cy="280" r="20" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
-        <circle cx="248" cy="280" r="9"  fill="rgba(255,255,255,0.12)"/>
-        <circle cx="362" cy="280" r="20" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
-        <circle cx="362" cy="280" r="9"  fill="rgba(255,255,255,0.12)"/>
-        <!-- Network spokes -->
-        <line x1="320" y1="133" x2="320" y2="68"  stroke="rgba(45,142,240,0.30)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <line x1="440" y1="155" x2="514" y2="110" stroke="rgba(45,142,240,0.24)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <line x1="478" y1="250" x2="560" y2="250" stroke="rgba(45,142,240,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <line x1="162" y1="250" x2="80"  y2="250" stroke="rgba(45,142,240,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <line x1="200" y1="155" x2="128" y2="110" stroke="rgba(45,142,240,0.24)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <line x1="320" y1="360" x2="320" y2="424" stroke="rgba(45,142,240,0.24)" stroke-width="0.8" stroke-dasharray="4,3"/>
-        <!-- Network nodes -->
-        <circle cx="320" cy="62"  r="10" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="1"/>
-        <text x="320" y="66" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.75)" text-anchor="middle" dominant-baseline="middle">PSN</text>
-        <circle cx="520" cy="106" r="10" fill="rgba(45,142,240,0.36)" stroke="rgba(106,184,247,0.45)" stroke-width="1"/>
-        <text x="520" y="110" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">MERCH</text>
-        <circle cx="564" cy="250" r="10" fill="rgba(45,142,240,0.30)" stroke="rgba(106,184,247,0.40)" stroke-width="1"/>
-        <text x="564" y="254" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,0.60)" text-anchor="middle" dominant-baseline="middle">BANK</text>
-        <circle cx="76"  cy="250" r="10" fill="rgba(45,142,240,0.30)" stroke="rgba(106,184,247,0.40)" stroke-width="1"/>
-        <text x="76"  y="254" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,0.60)" text-anchor="middle" dominant-baseline="middle">PEER</text>
-        <circle cx="122" cy="106" r="10" fill="rgba(45,142,240,0.36)" stroke="rgba(106,184,247,0.45)" stroke-width="1"/>
-        <text x="122" y="110" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">GAME</text>
-        <circle cx="320" cy="430" r="10" fill="rgba(45,142,240,0.36)" stroke="rgba(106,184,247,0.45)" stroke-width="1"/>
-        <text x="320" y="434" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,0.65)" text-anchor="middle" dominant-baseline="middle">SONY</text>
-        <!-- Ticker -->
-        <rect x="40" y="452" width="560" height="18" rx="2" fill="rgba(45,142,240,0.08)"/>
-        <text x="60" y="465" font-family="monospace" font-size="8" fill="rgba(45,142,240,0.60)">SONY-USD  1.0000  ▲0.00%  ·  24H VOL $4.2B  ·  WALLETS 340M  ·  ISSUANCE LIVE</text>
-        <text x="600" y="474" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.13)" text-anchor="end" font-style="italic">2028</text>
-      </svg>
+  <!-- ===== SECTION B - NAMEPLATE ===== -->
+  <header class="nameplate">
+    <div class="np-top">
+      <p class="np-brand"><span class="the">The</span> Ledger</p>
+      <p class="np-meta">Index <span class="dot">&middot;</span> Vol. I</p>
     </div>
-    <div class="featured-body">
-      <div class="story-num">Story I · Featured</div>
-      <div class="story-pills">
-        <span class="pill">Stablecoin</span>
-        <span class="pill">Big Tech Finance</span>
-        <span class="pill">Payments</span>
-      </div>
-      <h2 class="featured-title">Press Play to Pay</h2>
-      <p class="featured-excerpt">When Sony launches SONY-USD across its 340 million PlayStation Network accounts, it doesn't announce a financial product. It announces the end of the payment card as the default rail of consumer commerce — and regulators have 48 hours to decide what that means.</p>
-      <div class="featured-meta">
-        <span class="meta-chip">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1"/><path d="M6.5 3.5V6.5l1.5 1.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
-          13 min read
-        </span>
-        <span class="meta-chip">2028</span>
-      </div>
-      <span class="read-cta">Read Story
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      <div class="watermark-year" aria-hidden="true">2028</div>
+    <p class="kicker">Forward file &middot; Index</p>
+    <h1>The forward file</h1>
+    <p class="deck">Six dispatches on American banking, each written from inside a year that has not arrived. Every one of them starts from something already on the record in 2026 and follows it to the place it plausibly ends.</p>
+    <p class="standing">Six dispatches &middot; Filed from 2027 to 2032 &middot; Read in any order</p>
+  </header>
+
+  <!-- ===== SECTION C - THE FILE ===== -->
+  <main id="file">
+    <div class="filehead">
+      <h2>The file, in sequence</h2>
+      <p>Ordered by the year each piece is filed from</p>
     </div>
-  </a>
 
-  <!-- GRID -->
-  <div class="story-grid">
+    <!-- --- 2027 ---------------------------------------------------------- -->
+    <div class="yearband"><span>2027</span><span>The charter question</span></div>
+    <ol class="entries">
+      <li class="entry">
+        <a href="ledger-press-start-to-pay.html">
+          <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; TBD</span><span>Tokyo, New York and Washington, D.C.</span></p>
+          <p class="e-h">Press start to pay</p>
+          <p class="e-deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
+          <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Trust charters</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+    </ol>
 
-    <!-- Story II -->
-    <a href="examiner-who-never-leaves.html" class="story-card reveal d1" id="story-2" aria-label="Read The Examiner Who Never Leaves">
-      <div class="card-art" aria-hidden="true">
-        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <rect width="580" height="220" fill="#071a30"/>
-          <!-- Monitor frame -->
-          <rect x="55"  y="22" width="232" height="160" rx="5" fill="rgba(4,17,31,0.7)" stroke="rgba(45,142,240,0.35)" stroke-width="1.2"/>
-          <rect x="63"  y="30" width="216" height="144" rx="3" fill="rgba(45,142,240,0.06)"/>
-          <!-- Bar chart inside monitor -->
-          <rect x="74"  y="122" width="14" height="44" rx="2" fill="rgba(45,142,240,0.70)"/>
-          <rect x="94"  y="106" width="14" height="60" rx="2" fill="rgba(45,142,240,0.60)"/>
-          <rect x="114" y="92"  width="14" height="74" rx="2" fill="rgba(45,142,240,0.75)"/>
-          <rect x="134" y="114" width="14" height="52" rx="2" fill="rgba(45,142,240,0.55)"/>
-          <rect x="154" y="84"  width="14" height="82" rx="2" fill="rgba(45,142,240,0.82)"/>
-          <rect x="174" y="102" width="14" height="64" rx="2" fill="rgba(45,142,240,0.62)"/>
-          <rect x="194" y="74"  width="14" height="92" rx="2" fill="rgba(45,142,240,0.88)"/>
-          <rect x="214" y="96"  width="14" height="70" rx="2" fill="rgba(45,142,240,0.68)"/>
-          <rect x="234" y="56"  width="14" height="110" rx="2" fill="rgba(45,142,240,0.92)"/>
-          <rect x="254" y="82"  width="14" height="84" rx="2" fill="rgba(45,142,240,0.72)"/>
-          <!-- LIVE badge -->
-          <rect x="69" y="36" width="34" height="14" rx="7" fill="rgba(220,60,60,0.75)"/>
-          <text x="86" y="47" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,0.92)" text-anchor="middle">LIVE</text>
-          <text x="120" y="47" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.32)">24 / 7 / 365</text>
-          <!-- Monitor stand -->
-          <rect x="153" y="182" width="16" height="14" rx="1" fill="rgba(255,255,255,0.08)"/>
-          <rect x="137" y="196" width="48" height="5"  rx="2" fill="rgba(255,255,255,0.06)"/>
-          <!-- API feed right -->
-          <circle cx="318" cy="42"  r="4" fill="rgba(0,220,120,0.70)"/>
-          <circle cx="318" cy="66"  r="4" fill="rgba(0,220,120,0.55)"/>
-          <circle cx="318" cy="90"  r="4" fill="rgba(0,220,120,0.70)"/>
-          <circle cx="318" cy="114" r="4" fill="rgba(0,220,120,0.55)"/>
-          <circle cx="318" cy="138" r="4" fill="rgba(220,160,0,0.75)"/>
-          <circle cx="318" cy="162" r="4" fill="rgba(0,220,120,0.55)"/>
-          <text x="330" y="46"  font-family="monospace" font-size="8" fill="rgba(45,142,240,0.55)">GET  /transactions/stream</text>
-          <text x="330" y="70"  font-family="monospace" font-size="8" fill="rgba(45,142,240,0.48)">GET  /deposits/realtime</text>
-          <text x="330" y="94"  font-family="monospace" font-size="8" fill="rgba(45,142,240,0.55)">GET  /loans/exceptions</text>
-          <text x="330" y="118" font-family="monospace" font-size="8" fill="rgba(45,142,240,0.42)">GET  /capital/ratio</text>
-          <text x="330" y="142" font-family="monospace" font-size="8" fill="rgba(45,142,240,0.55)">POST /flags/review</text>
-          <text x="330" y="166" font-family="monospace" font-size="8" fill="rgba(45,142,240,0.36)">GET  /sar/pending</text>
-          <!-- Always-open eye -->
-          <ellipse cx="170" cy="210" rx="46" ry="13" fill="none" stroke="rgba(45,142,240,0.18)" stroke-width="0.8"/>
-          <circle  cx="170" cy="210" r="7" fill="rgba(45,142,240,0.35)" stroke="rgba(106,184,247,0.60)" stroke-width="0.8"/>
-          <circle  cx="170" cy="210" r="3" fill="rgba(255,255,255,0.55)"/>
-          <text x="555" y="210" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.12)" text-anchor="end" font-style="italic">2028</text>
-        </svg>
-        <div class="synopsis-layer">
-          <p class="synopsis-q">"The old model was like giving a patient an ECG once a year and treating whatever the ECG showed. The new model is a continuous heart monitor."</p>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-head"><span class="year-tag">2028</span><span class="rt">15 min read</span></div>
-        <h3 class="card-title">The Examiner Who Never Leaves</h3>
-        <p class="card-excerpt">Banking regulators deploy a continuous-access API that streams live data from every supervised institution. For the bank's compliance director, the examination never ends — but it feels like a lighter touch.</p>
-        <div class="card-foot">
-          <div class="tag-row"><span class="mini-tag">Regulation</span><span class="mini-tag">APIs</span><span class="mini-tag">Supervision</span></div>
-          <span class="cta-arrow">Read <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-      </div>
-    </a>
+    <!-- --- 2031 ---------------------------------------------------------- -->
+    <div class="yearband"><span>2031</span><span>The machinery in place</span></div>
+    <ol class="entries">
+      <li class="entry">
+        <a href="ledger-nothing-sits-still.html">
+          <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; TBD</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
+          <p class="e-h">Nothing sits still</p>
+          <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
+          <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+      <li class="entry">
+        <a href="ledger-the-examiner-who-never-leaves.html">
+          <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; TBD</span><span>Washington, Topeka and Columbus, Ohio</span></p>
+          <p class="e-h">The examiner who never leaves</p>
+          <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
+          <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+      <li class="entry">
+        <a href="ledger-nobodys-on-the-file.html">
+          <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; TBD</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
+          <p class="e-h">Nobody's on the file</p>
+          <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
+          <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+    </ol>
 
-    <!-- Story III -->
-    <a href="trust-in-name.html" class="story-card reveal d2" id="story-3" aria-label="Read Trust in Name Only">
-      <div class="card-art" aria-hidden="true">
-        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <rect width="580" height="220" fill="#071a30"/>
-          <!-- Scale fulcrum -->
-          <line x1="290" y1="55" x2="290" y2="168" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
-          <polygon points="278,168 302,168 290,154" fill="rgba(255,255,255,0.14)"/>
-          <rect x="262" y="166" width="56" height="8" rx="2" fill="rgba(255,255,255,0.09)"/>
-          <!-- Beam tilted: lending side heavier (right, lower) -->
-          <line x1="98" y1="76" x2="482" y2="56" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
-          <!-- Left pan: TRUST (elevated) -->
-          <line x1="98" y1="76" x2="98" y2="108" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
-          <line x1="76" y1="108" x2="120" y2="108" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
-          <rect x="62" y="108" width="72" height="52" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.14)" stroke-width="0.8"/>
-          <text x="98" y="128" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.44)" text-anchor="middle">TRUST</text>
-          <text x="98" y="144" font-family="Georgia,serif" font-size="8"  fill="rgba(255,255,255,0.22)" text-anchor="middle">fiduciary</text>
-          <text x="98" y="156" font-family="Georgia,serif" font-size="8"  fill="rgba(255,255,255,0.16)" text-anchor="middle">custodian</text>
-          <!-- Right pan: LENDING (lower, heavier) -->
-          <line x1="482" y1="56" x2="482" y2="98" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
-          <line x1="458" y1="98" x2="506" y2="98" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
-          <rect x="443" y="98" width="78" height="60" rx="4" fill="rgba(45,142,240,0.22)" stroke="rgba(45,142,240,0.55)" stroke-width="1"/>
-          <text x="482" y="118" font-family="Georgia,serif" font-size="10" fill="rgba(106,184,247,0.82)" text-anchor="middle">LENDING</text>
-          <text x="482" y="134" font-family="monospace" font-size="7"   fill="rgba(45,142,240,0.70)" text-anchor="middle">OCC APPROVED</text>
-          <text x="482" y="147" font-family="monospace" font-size="7"   fill="rgba(45,142,240,0.55)" text-anchor="middle">Interp. Ltr.</text>
-          <text x="482" y="158" font-family="monospace" font-size="7"   fill="rgba(45,142,240,0.50)" text-anchor="middle">2028-04</text>
-          <!-- OCC seal -->
-          <circle cx="290" cy="200" r="14" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
-          <circle cx="290" cy="200" r="10" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>
-          <text x="290" y="204" font-family="monospace" font-size="6" fill="rgba(255,255,255,0.22)" text-anchor="middle">OCC</text>
-          <!-- Historical limits annotation -->
-          <text x="165" y="190" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,0.09)">no deposits · no loans · no leverage</text>
-          <text x="555" y="210" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.12)" text-anchor="end" font-style="italic">2028</text>
-        </svg>
-        <div class="synopsis-layer">
-          <p class="synopsis-q">"The OCC called it an interpretive letter. The state regulators called it a declaration of war."</p>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-head"><span class="year-tag">2028</span><span class="rt">14 min read</span></div>
-        <h3 class="card-title">Trust in Name Only</h3>
-        <p class="card-excerpt">When the OCC issues a corporate decision allowing national trust companies to originate commercial loans, it rewrites a century of fiduciary law — and hands one ambitious fintech the charter it has been waiting for.</p>
-        <div class="card-foot">
-          <div class="tag-row"><span class="mini-tag">OCC</span><span class="mini-tag">Trust Charter</span><span class="mini-tag">Lending</span></div>
-          <span class="cta-arrow">Read <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-      </div>
-    </a>
+    <!-- --- 2032 ---------------------------------------------------------- -->
+    <div class="yearband"><span>2032</span><span>What held and what did not</span></div>
+    <ol class="entries">
+      <li class="entry">
+        <a href="Standard_Setting.html">
+          <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; TBD</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
+          <p class="e-h">Assessed once, trusted often</p>
+          <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
+          <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+      <li class="entry">
+        <a href="ledger-the-wallet-woke-up.html">
+          <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; TBD</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
+          <p class="e-h">The wallet woke up</p>
+          <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+          <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
+        </a>
+      </li>
+    </ol>
 
-    <!-- Story IV -->
-    <a href="day-the-keys.html" class="story-card reveal d3" id="story-4" aria-label="Read The Day the Keys Fell">
-      <div class="card-art" aria-hidden="true">
-        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <rect width="580" height="220" fill="#071a30"/>
-          <!-- Key shaft -->
-          <rect x="52" y="102" width="130" height="16" rx="3" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.22)" stroke-width="0.7"/>
-          <!-- Key bow -->
-          <circle cx="72" cy="110" r="26" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="10"/>
-          <circle cx="72" cy="110" r="14" fill="#071a30"/>
-          <!-- Teeth -->
-          <rect x="144" y="90"  width="10" height="12" rx="2" fill="rgba(255,255,255,0.18)"/>
-          <rect x="160" y="90"  width="10" height="18" rx="2" fill="rgba(255,255,255,0.18)"/>
-          <rect x="176" y="90"  width="10" height="10" rx="2" fill="rgba(255,255,255,0.18)"/>
-          <!-- Fracture lines -->
-          <line x1="200" y1="76"  x2="176" y2="144" stroke="rgba(220,60,60,0.72)" stroke-width="1.5"/>
-          <line x1="216" y1="80"  x2="196" y2="148" stroke="rgba(220,60,60,0.50)" stroke-width="1"/>
-          <line x1="194" y1="94"  x2="232" y2="130" stroke="rgba(220,60,60,0.38)" stroke-width="0.8"/>
-          <!-- Shattered fragments -->
-          <rect x="232" y="84"  width="42" height="12" rx="2" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.14)" stroke-width="0.6" transform="rotate(-12,253,90)"/>
-          <rect x="290" y="112" width="28" height="9"  rx="2" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.10)" stroke-width="0.6" transform="rotate(18,304,116)"/>
-          <rect x="262" y="142" width="22" height="8"  rx="2" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.09)" stroke-width="0.6" transform="rotate(-25,273,146)"/>
-          <rect x="322" y="76"  width="16" height="6"  rx="2" fill="rgba(255,255,255,0.06)" transform="rotate(35,330,79)"/>
-          <rect x="358" y="132" width="12" height="5"  rx="2" fill="rgba(255,255,255,0.05)" transform="rotate(-15,364,134)"/>
-          <rect x="342" y="96"  width="9"  height="4"  rx="1" fill="rgba(255,255,255,0.04)" transform="rotate(40,346,98)"/>
-          <!-- Warning readout -->
-          <text x="396" y="64"  font-family="monospace" font-size="8.5" fill="rgba(220,60,60,0.64)">MYTHOS BREACH DETECTED</text>
-          <text x="396" y="81"  font-family="monospace" font-size="8"   fill="rgba(220,60,60,0.44)">RSA-4096 → compromised</text>
-          <text x="396" y="97"  font-family="monospace" font-size="8"   fill="rgba(45,142,240,0.52)">AES-256  → rotating…</text>
-          <text x="396" y="113" font-family="monospace" font-size="8"   fill="rgba(45,142,240,0.44)">HSM pool → offline</text>
-          <text x="396" y="129" font-family="monospace" font-size="8"   fill="rgba(220,160,0,0.56)">FIDO2    → suspended</text>
-          <text x="396" y="145" font-family="monospace" font-size="8"   fill="rgba(220,60,60,0.52)">PQ-KYBER → deploying</text>
-          <text x="396" y="161" font-family="monospace" font-size="8"   fill="rgba(220,160,0,0.44)">Incident #2028-0317</text>
-          <!-- Breach pulse -->
-          <circle cx="200" cy="110" r="19" fill="none" stroke="rgba(220,60,60,0.22)" stroke-width="1"/>
-          <circle cx="200" cy="110" r="11" fill="none" stroke="rgba(220,60,60,0.36)" stroke-width="1"/>
-          <circle cx="200" cy="110" r="5"  fill="rgba(220,60,60,0.52)"/>
-          <!-- Status bar -->
-          <rect x="40" y="192" width="500" height="16" rx="3" fill="rgba(220,60,60,0.08)" stroke="rgba(220,60,60,0.20)" stroke-width="0.5"/>
-          <text x="290" y="204" font-family="monospace" font-size="7.5" fill="rgba(220,60,60,0.52)" text-anchor="middle">CRITICAL — CRYPTOGRAPHIC INFRASTRUCTURE FAILURE — SECTOR 7 BANKS ISOLATED</text>
-          <text x="555" y="215" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.12)" text-anchor="end" font-style="italic">2028</text>
-        </svg>
-        <div class="synopsis-layer">
-          <p class="synopsis-q">"Mythos didn't steal the money. It just made every lock in the building stop working at once."</p>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-head"><span class="year-tag">2028</span><span class="rt">17 min read</span></div>
-        <h3 class="card-title">The Day the Keys Fell</h3>
-        <p class="card-excerpt">When the Mythos threat actor deploys a quantum-assisted cryptographic attack against banks, the question isn't whether the money is safe — it's whether anyone can prove it is.</p>
-        <div class="card-foot">
-          <div class="tag-row"><span class="mini-tag">Cybersecurity</span><span class="mini-tag">Quantum</span><span class="mini-tag">Banking</span></div>
-          <span class="cta-arrow">Read <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-      </div>
-    </a>
+    <!-- ===== SECTION D - READING NOTE ===== -->
+    <div class="note">
+      <h3>How to read the file</h3>
+      <p>The pieces are independent. Each one carries its own reporting, its own interactive modules and its own disclaimer, and none of them depends on the others for its argument.</p>
+      <p>They do share a world. The charter question in 2027 sets up the deposit market of 2031, and the supervisory framework built to catch the failures of 2023 is the thing that is still running when the cryptography gives way in 2032. Read in sequence, the file is one argument about how quickly the plumbing changes and how slowly the rules follow.</p>
+    </div>
+  </main>
 
-    <!-- Story V -->
-    <a href="silicon-subprime.html" class="story-card reveal d4" id="story-5" aria-label="Read The Silicon Subprime">
-      <div class="card-art" aria-hidden="true">
-        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <rect width="580" height="220" fill="#071a30"/>
-          <!-- Input layer nodes -->
-          <circle cx="72" cy="52"  r="9" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="0.8"/>
-          <circle cx="72" cy="86"  r="9" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="0.8"/>
-          <circle cx="72" cy="120" r="9" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="0.8"/>
-          <circle cx="72" cy="154" r="9" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="0.8"/>
-          <circle cx="72" cy="188" r="9" fill="rgba(45,142,240,0.42)" stroke="rgba(106,184,247,0.55)" stroke-width="0.8"/>
-          <text x="35" y="55"  font-family="monospace" font-size="7" fill="rgba(255,255,255,0.30)" text-anchor="middle">FICO</text>
-          <text x="35" y="89"  font-family="monospace" font-size="7" fill="rgba(255,255,255,0.30)" text-anchor="middle">DTI</text>
-          <text x="35" y="123" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.30)" text-anchor="middle">LTV</text>
-          <text x="35" y="157" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.30)" text-anchor="middle">SOC</text>
-          <text x="35" y="191" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.30)" text-anchor="middle">ALT</text>
-          <!-- Hidden layer 1 -->
-          <circle cx="180" cy="69"  r="9" fill="rgba(45,142,240,0.32)" stroke="rgba(45,142,240,0.50)" stroke-width="0.8"/>
-          <circle cx="180" cy="103" r="9" fill="rgba(45,142,240,0.32)" stroke="rgba(45,142,240,0.50)" stroke-width="0.8"/>
-          <circle cx="180" cy="137" r="9" fill="rgba(45,142,240,0.32)" stroke="rgba(45,142,240,0.50)" stroke-width="0.8"/>
-          <circle cx="180" cy="171" r="9" fill="rgba(45,142,240,0.32)" stroke="rgba(45,142,240,0.50)" stroke-width="0.8"/>
-          <!-- Hidden layer 2 -->
-          <circle cx="275" cy="82"  r="9" fill="rgba(45,142,240,0.24)" stroke="rgba(45,142,240,0.40)" stroke-width="0.8"/>
-          <circle cx="275" cy="120" r="9" fill="rgba(45,142,240,0.24)" stroke="rgba(45,142,240,0.40)" stroke-width="0.8"/>
-          <circle cx="275" cy="158" r="9" fill="rgba(45,142,240,0.24)" stroke="rgba(45,142,240,0.40)" stroke-width="0.8"/>
-          <!-- Output node -->
-          <circle cx="370" cy="120" r="14" fill="rgba(45,142,240,0.55)" stroke="rgba(106,184,247,0.75)" stroke-width="1.5"/>
-          <text x="370" y="124" font-family="monospace" font-size="7" fill="rgba(255,255,255,0.90)" text-anchor="middle">FUND</text>
-          <!-- Connections input→h1 -->
-          <line x1="81" y1="52"  x2="171" y2="69"  stroke="rgba(45,142,240,0.18)" stroke-width="0.5"/>
-          <line x1="81" y1="52"  x2="171" y2="103" stroke="rgba(45,142,240,0.12)" stroke-width="0.5"/>
-          <line x1="81" y1="86"  x2="171" y2="69"  stroke="rgba(45,142,240,0.16)" stroke-width="0.5"/>
-          <line x1="81" y1="86"  x2="171" y2="103" stroke="rgba(45,142,240,0.20)" stroke-width="0.5"/>
-          <line x1="81" y1="86"  x2="171" y2="137" stroke="rgba(45,142,240,0.12)" stroke-width="0.5"/>
-          <line x1="81" y1="120" x2="171" y2="103" stroke="rgba(45,142,240,0.18)" stroke-width="0.5"/>
-          <line x1="81" y1="120" x2="171" y2="137" stroke="rgba(45,142,240,0.22)" stroke-width="0.5"/>
-          <line x1="81" y1="120" x2="171" y2="171" stroke="rgba(45,142,240,0.13)" stroke-width="0.5"/>
-          <line x1="81" y1="154" x2="171" y2="137" stroke="rgba(45,142,240,0.18)" stroke-width="0.5"/>
-          <line x1="81" y1="154" x2="171" y2="171" stroke="rgba(45,142,240,0.22)" stroke-width="0.5"/>
-          <line x1="81" y1="188" x2="171" y2="171" stroke="rgba(45,142,240,0.20)" stroke-width="0.5"/>
-          <line x1="81" y1="188" x2="171" y2="137" stroke="rgba(45,142,240,0.12)" stroke-width="0.5"/>
-          <!-- h1→h2 -->
-          <line x1="189" y1="69"  x2="266" y2="82"  stroke="rgba(45,142,240,0.16)" stroke-width="0.5"/>
-          <line x1="189" y1="69"  x2="266" y2="120" stroke="rgba(45,142,240,0.11)" stroke-width="0.5"/>
-          <line x1="189" y1="103" x2="266" y2="82"  stroke="rgba(45,142,240,0.18)" stroke-width="0.5"/>
-          <line x1="189" y1="103" x2="266" y2="120" stroke="rgba(45,142,240,0.20)" stroke-width="0.5"/>
-          <line x1="189" y1="137" x2="266" y2="120" stroke="rgba(45,142,240,0.18)" stroke-width="0.5"/>
-          <line x1="189" y1="137" x2="266" y2="158" stroke="rgba(45,142,240,0.22)" stroke-width="0.5"/>
-          <line x1="189" y1="171" x2="266" y2="120" stroke="rgba(45,142,240,0.13)" stroke-width="0.5"/>
-          <line x1="189" y1="171" x2="266" y2="158" stroke="rgba(45,142,240,0.20)" stroke-width="0.5"/>
-          <!-- h2→output -->
-          <line x1="284" y1="82"  x2="356" y2="120" stroke="rgba(45,142,240,0.28)" stroke-width="0.8"/>
-          <line x1="284" y1="120" x2="356" y2="120" stroke="rgba(45,142,240,0.36)" stroke-width="0.8"/>
-          <line x1="284" y1="158" x2="356" y2="120" stroke="rgba(45,142,240,0.28)" stroke-width="0.8"/>
-          <!-- Output spokes -->
-          <line x1="384" y1="120" x2="432" y2="88"  stroke="rgba(45,142,240,0.38)" stroke-width="0.8"/>
-          <line x1="384" y1="120" x2="432" y2="120" stroke="rgba(45,142,240,0.42)" stroke-width="0.8"/>
-          <line x1="384" y1="120" x2="432" y2="153" stroke="rgba(45,142,240,0.38)" stroke-width="0.8"/>
-          <!-- Result boxes -->
-          <rect x="432" y="70"  width="84" height="30" rx="3" fill="rgba(45,142,240,0.20)" stroke="rgba(45,142,240,0.45)" stroke-width="0.7"/>
-          <text x="474" y="89" font-family="monospace" font-size="7.5" fill="rgba(106,184,247,0.82)" text-anchor="middle">$2.1B funded</text>
-          <rect x="432" y="105" width="84" height="30" rx="3" fill="rgba(45,142,240,0.16)" stroke="rgba(45,142,240,0.38)" stroke-width="0.7"/>
-          <text x="474" y="124" font-family="monospace" font-size="7.5" fill="rgba(106,184,247,0.70)" text-anchor="middle">0 humans</text>
-          <rect x="432" y="140" width="84" height="30" rx="3" fill="rgba(220,60,60,0.14)" stroke="rgba(220,60,60,0.40)" stroke-width="0.7"/>
-          <text x="474" y="159" font-family="monospace" font-size="7.5" fill="rgba(220,100,100,0.78)" text-anchor="middle">NPL: rising</text>
-          <!-- Bubble motif (2008 echo) -->
-          <circle cx="102" cy="205" r="6"  fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.6"/>
-          <circle cx="120" cy="208" r="4"  fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>
-          <circle cx="134" cy="204" r="7"  fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.6"/>
-          <circle cx="154" cy="207" r="5"  fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.6"/>
-          <circle cx="169" cy="205" r="8"  fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>
-          <circle cx="190" cy="208" r="4"  fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.6"/>
-          <text x="555" y="210" font-family="Georgia,serif" font-size="10" fill="rgba(255,255,255,0.12)" text-anchor="end" font-style="italic">2028</text>
-        </svg>
-        <div class="synopsis-layer">
-          <p class="synopsis-q">"It is a story about the velocity of obsolescence—the terrifying speed at which the economy can reclassify a career from "highly compensated professional" to "structural casualty" in the eighteen to twenty-four months it takes a thirty-year mortgage to move from origination to seasoning."</p>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-head"><span class="year-tag">2028</span><span class="rt">19 min read</span></div>
-        <h3 class="card-title">The Silicon Subprime</h3>
-        <p class="card-excerpt">The models, it turned out, were extraordinarily good at the things that had always been measured. Credit scores. Debt-to-income ratios. Appraisal variances. Two years of W-2 history. Payment shock calculations. They ingested and synthesized this data with a speed and consistency no underwriter pool could match, and they made decisions that, by traditional metrics, looked impeccably sound.</p>
-        <div class="card-foot">
-          <div class="tag-row"><span class="mini-tag">AI Lending</span><span class="mini-tag">Credit Risk</span><span class="mini-tag">Systemic</span></div>
-          <span class="cta-arrow">Read <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-      </div>
-    </a>
+  <!-- ===== SECTION E - FOOTER ===== -->
+  <footer>
+    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
+    <p>Every dispatch in this file is a work of narrative fiction. Each one identifies, in its own footer, which elements are drawn from the real record and which are extrapolation. Named institutions, individuals, figures and outcomes dated after 2026 are fictional constructs unless a piece says otherwise.</p>
+  </footer>
 
-  </div><!-- /story-grid -->
-</section>
-
-<!-- ABOUT -->
-<section class="about-section" id="about">
-  <div class="about-inner reveal">
-    <p class="about-label">About this Collection</p>
-    <h2 class="about-title">Fiction as a lens for the near future of finance</h2>
-    <div class="about-divider"><span></span><span></span><span></span></div>
-    <p class="about-body">These five stories are set in the near future — close enough to feel inevitable, far enough to feel like warning. They explore the collision of technology and regulation: a corporate stablecoin that outgrows its issuer, a federal examiner that never goes home, a century-old trust doctrine quietly rewritten, a cryptographic failure no one believed possible, and a lending model that is almost right.</p>
-    <p class="about-body">Each story stands alone. They share a world, and a question: when finance moves faster than the rules governing it, who decides what happens next?</p>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-brand">Financial <em>Futures</em></div>
-  <div class="footer-note">Speculative fiction · 2028 · All institutions, persons, and incidents are entirely fictional</div>
-</footer>
+</div>
 
 <script>
-  const nav = document.getElementById('main-nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 50);
-  }, { passive: true });
-
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  revealEls.forEach(el => io.observe(el));
+/* ==========================================================================
+   SECTION 1 - THEME
+   Matches the site convention: bottom-right toggle, localStorage brw-theme.
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
 </script>
 </body>
 </html>
