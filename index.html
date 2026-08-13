@@ -571,9 +571,12 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   poster.addEventListener('error', function(){ poster.style.display = 'none'; assetCheck(); });
   setTimeout(assetCheck, 2500);
 
+  /* On end the video holds its own last frame, so the poster must stay hidden.
+     Dropping the playing class here would fade the opening workshop back over
+     the city. Repoint the poster instead, so any later reveal is the city too. */
   v.addEventListener('ended', function(){
     done = true;
-    hero.classList.remove('playing');
+    poster.src = 'hero-ledger-end.jpg';
     replay.classList.add('show');
   });
   v.addEventListener('play', function(){
@@ -587,6 +590,10 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     poster.style.display = '';
     hero.classList.remove('playing');
   }
+  /* A replay after a blocked first attempt has to put the video back on top. */
+  function showVideo(){
+    if (videoOk) hero.classList.add('playing');
+  }
 
   /* play() returns undefined on older engines, so the promise is optional. */
   function tryPlay(){
@@ -598,10 +605,10 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   }
 
   replay.addEventListener('click', function(){
-    poster.src = 'hero-ledger-poster.jpg';
     try { v.currentTime = 0; } catch (e) {}
     done = false;
     replay.classList.remove('show');
+    showVideo();
     tryPlay();
   });
 
