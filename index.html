@@ -251,13 +251,6 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 }
 .e-open{margin-left:auto; color:var(--copper); font-weight:700}
 
-/* --- SECTION 5b - card trace canvas -------------------------------------
-   Fixed to the viewport and re-read from the live rect each frame, so a page
-   that shifts under it cannot leave a ghost outline behind. Sleeps when no
-   card is hovered.
-   ------------------------------------------------------------------------ */
-#cardfx{position:fixed; inset:0; z-index:5; pointer-events:none}
-
 /* ==========================================================================
    SECTION 6 - READING NOTE + FOOTER
    ========================================================================== */
@@ -304,14 +297,12 @@ footer a:hover{border-bottom-color:var(--oxblood)}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:.01ms !important; animation-duration:.01ms !important}
-  #cardfx{display:none}
 }
 </style>
 </head>
 <body>
 <a class="skip" href="#file">Skip to the file</a>
 <button type="button" id="theme">Night</button>
-<canvas id="cardfx" aria-hidden="true"></canvas>
 
 <!-- ===== SECTION A - MARQUEE HERO ===== -->
 <section class="hero" id="hero">
@@ -623,76 +614,6 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   }
 })();
 
-/* ==========================================================================
-   SECTION 3 - CARD TRACE
-   A hairline that runs the perimeter of the hovered plate. The rect is read
-   live every frame and the canvas sleeps when nothing is hovered, so a page
-   that shifts underneath cannot strand a painted outline.
-   ========================================================================== */
-(function(){
-  var cv = document.getElementById('cardfx');
-  if (!cv || !cv.getContext) return;
-  var reduce = false;
-  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
-  if (reduce) return;
-
-  var ctx = cv.getContext('2d');
-  if (!ctx) return;
-  var target = null, t0 = 0, raf = 0;
-
-  function size(){
-    var d = Math.min(window.devicePixelRatio || 1, 2);
-    cv.width = Math.floor(window.innerWidth * d);
-    cv.height = Math.floor(window.innerHeight * d);
-    ctx.setTransform(d, 0, 0, d, 0, 0);
-  }
-  size();
-  window.addEventListener('resize', size);
-
-  function accent(){
-    var v = getComputedStyle(document.documentElement).getPropertyValue('--copper');
-    return (v || '#b4640f').trim();
-  }
-  function clear(){ ctx.clearRect(0, 0, cv.width, cv.height); }
-
-  function frame(now){
-    if (!target){ clear(); raf = 0; return; }
-    var r = target.getBoundingClientRect();
-    var per = 2 * (r.width + r.height);
-    var head = ((now - t0) / 1400) % 1;
-    var len = per * 0.34;
-    clear();
-    ctx.save();
-    ctx.strokeStyle = accent();
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.85;
-    ctx.setLineDash([len, per - len]);
-    ctx.lineDashOffset = -head * per;
-    ctx.strokeRect(r.left + 0.5, r.top + 0.5, r.width - 1, r.height - 1);
-    ctx.restore();
-    raf = requestAnimationFrame(frame);
-  }
-
-  function start(el){
-    target = el;
-    t0 = performance.now();
-    if (!raf) raf = requestAnimationFrame(frame);
-  }
-  function stop(){
-    target = null;
-    if (raf){ cancelAnimationFrame(raf); raf = 0; }
-    clear();
-  }
-
-  [].slice.call(document.querySelectorAll('.entry')).forEach(function(el){
-    el.addEventListener('mouseenter', function(){ start(el); });
-    el.addEventListener('mouseleave', stop);
-    el.addEventListener('focusin', function(){ start(el); });
-    el.addEventListener('focusout', stop);
-  });
-  window.addEventListener('blur', stop);
-  window.addEventListener('scroll', function(){ if (!target) clear(); }, { passive: true });
-})();
 </script>
 </body>
 </html>
