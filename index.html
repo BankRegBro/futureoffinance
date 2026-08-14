@@ -177,6 +177,22 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 #replay.show{display:inline-flex}
 #replay:hover{color:var(--plate-ink); border-color:var(--plate-copper)}
 
+/* --- SECTION 3a - PLATE FIDUCIALS ----------------------------------------
+   Corner registration marks and a film-edge code, so the held frame reads as
+   an archival plate from the future rather than a paused video. ------------ */
+.fids{position:absolute; inset:0; z-index:3; pointer-events:none}
+.fid{position:absolute; width:14px; height:14px; opacity:.5}
+.f-tl{top:3.7rem; left:1rem; border-top:1px solid var(--plate-ink); border-left:1px solid var(--plate-ink)}
+.f-tr{top:3.7rem; right:1rem; border-top:1px solid var(--plate-ink); border-right:1px solid var(--plate-ink)}
+.f-bl{bottom:1rem; left:1rem; border-bottom:1px solid var(--plate-ink); border-left:1px solid var(--plate-ink)}
+.fcode{
+  position:absolute; left:.45rem; top:50%;
+  transform:rotate(180deg) translateY(50%); writing-mode:vertical-rl;
+  font-family:"JetBrains Mono",monospace; font-size:.52rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--plate-soft); opacity:.55; white-space:nowrap;
+}
+@media (max-width:640px){.fcode{display:none}}
+
 /* ==========================================================================
    SECTION 3b - HERO PULLQUOTE RAIL
    One rotating line drawn from the six pieces, so the fold has one deliberate
@@ -218,6 +234,54 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 .thumb .tk-fill{fill:var(--copper); opacity:.85}
 .thumb .tk-ox{fill:var(--oxblood)}
 .entry:hover .thumb{border-color:var(--rule-strong)}
+
+/* ==========================================================================
+   SECTION 3d - STICKY NAV
+   Condensed bar that slides in once the hero has scrolled past. Scroll-spy
+   marks the year currently in view.
+   ========================================================================== */
+html{scroll-behavior:smooth}
+.topnav{
+  position:fixed; top:0; left:0; right:0; z-index:70;
+  background:color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--rule);
+  transform:translateY(-100%); transition:transform .28s ease;
+}
+.topnav.show{transform:none}
+.tn-in{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.6rem 0}
+.tn-brand{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:.85rem;
+  letter-spacing:.02em; text-transform:uppercase; color:var(--ink); text-decoration:none;
+}
+.tn-brand span{
+  font-family:"JetBrains Mono",monospace; font-weight:400; font-size:.62rem;
+  letter-spacing:.15em; color:var(--ink-faint);
+}
+.tn-links{display:flex; align-items:center; gap:.2rem}
+.tn-links a{
+  font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-faint); text-decoration:none;
+  padding:.35rem .55rem; border-bottom:2px solid transparent;
+}
+.tn-links a:hover{color:var(--ink)}
+.tn-links a.spy{color:var(--oxblood); border-bottom-color:var(--oxblood)}
+.tn-links a.tn-out{color:var(--copper)}
+#top{position:absolute; top:0}
+@media (max-width:640px){
+  .tn-brand{white-space:nowrap; font-size:.78rem}
+  .tn-brand span{display:none}
+  .tn-links a{padding:.35rem .4rem; white-space:nowrap}
+  .tn-links a[data-spy="note"]{display:none}
+}
+
+/* ==========================================================================
+   SECTION 3e - CARD REVEAL
+   Entries rise in as they enter the viewport. The rv-init class is added by
+   script, so without JS every card is simply visible.
+   ========================================================================== */
+.rv-init .entry{opacity:0; transform:translateY(14px)}
+.rv-init .entry.rv{opacity:1; transform:none; transition:opacity .5s ease, transform .5s ease}
 
 /* ==========================================================================
    SECTION 4 - STANDING STRIP
@@ -350,6 +414,96 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 @media (hover:none){.kbdhint{display:none}}
 
 /* ==========================================================================
+   SECTION 5c - THE THROUGH LINE
+   A vertical spine down the file: the reader's position on it is how far into
+   the future they have traveled. Year bands are stations, dispatches are
+   stops, and an oxblood thread draws down it with scroll. Desktop only.
+   ========================================================================== */
+#file{position:relative}
+.spine,.spine-fill{
+  position:absolute; top:2.1rem; bottom:.4rem; left:.55rem; width:2px;
+  background:var(--rule); display:none;
+}
+.spine-fill{background:var(--oxblood); bottom:auto; height:0; z-index:1}
+.origin{
+  display:none; margin:2.4rem 0 -1rem; position:relative;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-faint);
+}
+.o-dot{
+  position:absolute; width:9px; height:9px; border-radius:50%;
+  background:var(--ink); top:.05rem;
+}
+@media (min-width:900px){
+  #file{padding-left:2.6rem}
+  .spine,.spine-fill,.origin{display:block}
+  .origin{padding-left:0}
+  .o-dot{left:-2.34rem}
+  .yearband{position:relative}
+  .yearband::before{
+    content:""; position:absolute; left:-2.37rem; top:.62rem;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--copper); z-index:2;
+  }
+  .entry{position:relative}
+  .entry::before{
+    content:""; position:absolute; left:-2.3rem; top:1.55rem;
+    width:7px; height:7px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--tint); z-index:2;
+  }
+}
+
+/* ==========================================================================
+   SECTION 5d - GHOST NUMERALS
+   The dispatch number as a huge outlined archival numeral in the card's empty
+   right band, in the card's own tint. Desktop only; sits behind the content.
+   ========================================================================== */
+@media (min-width:900px){
+  .entry::after{
+    content:attr(data-no); position:absolute; right:1.4rem; top:50%;
+    transform:translateY(-52%);
+    font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+    font-size:8.6rem; line-height:1; letter-spacing:-.04em;
+    color:transparent;
+    -webkit-text-stroke:2px color-mix(in srgb, var(--tint) 26%, transparent);
+    pointer-events:none; z-index:0;
+  }
+  .entry:hover::after{-webkit-text-stroke-color:color-mix(in srgb, var(--tint) 40%, transparent)}
+  .entry > a{position:relative; z-index:1}
+}
+
+/* ==========================================================================
+   SECTION 5e - SELF-DRAWING THUMBNAILS
+   The signature-module previews draw themselves once on hover or focus: the
+   instrument line strokes in, marks and bars arrive after it.
+   ========================================================================== */
+.thumb .tk-line{stroke-dasharray:1 0}
+@media (prefers-reduced-motion:no-preference){
+  .entry:hover .thumb .tk-line,
+  .entry:focus-within .thumb .tk-line{
+    stroke-dasharray:1; stroke-dashoffset:1;
+    animation:tkdraw .55s ease forwards;
+  }
+  .entry:hover .thumb circle,
+  .entry:focus-within .thumb circle{
+    opacity:0; animation:tkmark .25s ease .4s forwards;
+  }
+  .entry:hover .thumb rect,
+  .entry:focus-within .thumb rect{
+    transform-box:fill-box; transform-origin:bottom;
+    transform:scaleY(0); animation:tkrise .4s ease forwards;
+  }
+  .entry:hover .thumb rect:nth-of-type(2){animation-delay:.07s}
+  .entry:hover .thumb rect:nth-of-type(3){animation-delay:.14s}
+  .entry:hover .thumb rect:nth-of-type(4){animation-delay:.21s}
+  .entry:hover .thumb rect:nth-of-type(5){animation-delay:.28s}
+  .entry:hover .thumb rect:nth-of-type(6){animation-delay:.35s}
+}
+@keyframes tkdraw{to{stroke-dashoffset:0}}
+@keyframes tkmark{to{opacity:1}}
+@keyframes tkrise{to{transform:scaleY(1)}}
+
+/* ==========================================================================
    SECTION 6 - READING NOTE + FOOTER
    ========================================================================== */
 .note{
@@ -363,16 +517,38 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 .note p{margin:0; font-size:.92rem; line-height:1.6; color:var(--ink-soft); max-width:70ch}
 .note p + p{margin-top:.6rem}
 footer{
-  margin:3.2rem 0 0; padding:1.4rem 0 3.2rem; border-top:1px solid var(--rule);
-  font-size:.8rem; line-height:1.6; color:var(--ink-faint); max-width:72ch;
+  margin:3.2rem 0 0; padding:1.6rem 0 3.2rem; border-top:2px solid var(--ink);
+  font-size:.8rem; line-height:1.6; color:var(--ink-faint);
 }
+.fgrid{
+  display:grid; grid-template-columns:1.6fr 1fr .8fr; gap:2rem;
+}
+.fabout p{max-width:52ch}
+.fhead{
+  margin:0 0 .55rem; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);
+}
+.flist{list-style:none; margin:0; padding:0; display:grid; gap:.35rem}
+.flist a{
+  color:var(--ink-soft); text-decoration:none; border-bottom:1px solid transparent;
+}
+.flist a:hover{color:var(--oxblood); border-bottom-color:var(--rule-strong)}
+.flist a span{
+  font-family:"JetBrains Mono",monospace; font-size:.66rem; color:var(--copper);
+  margin-right:.3rem;
+}
+.fbase{
+  margin:1.8rem 0 0; padding-top:.9rem; border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.15em;
+  text-transform:uppercase;
+}
+@media (max-width:760px){.fgrid{grid-template-columns:1fr; gap:1.4rem}}
 footer .sig{
   font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em;
   text-transform:uppercase; color:var(--ink-soft); margin:0 0 .6rem;
 }
 footer p{margin:0 0 .6rem}
-footer a{color:var(--oxblood); text-decoration:none; border-bottom:1px solid var(--rule-strong)}
-footer a:hover{border-bottom-color:var(--oxblood)}
+
 #theme{
   position:fixed; right:1rem; bottom:1rem; z-index:60;
   background:var(--raised); color:var(--ink-soft);
@@ -395,6 +571,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   .standing .sright{margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
   *{transition-duration:.01ms !important; animation-duration:.01ms !important}
   .hero::after{transition:none}
 }
@@ -402,10 +579,29 @@ footer a:hover{border-bottom-color:var(--oxblood)}
 </head>
 <body>
 <a class="skip" href="#file">Skip to the file</a>
+
+<!-- ===== SECTION A0 - STICKY NAV (appears after the hero) ===== -->
+<nav class="topnav" id="topnav" aria-label="File navigation">
+  <div class="wrap tn-in">
+    <a class="tn-brand" href="#top">The Ledger <span>&middot; Forward file</span></a>
+    <div class="tn-links">
+      <a href="#y2027" data-spy="y2027">2027</a>
+      <a href="#y2031" data-spy="y2031">2031</a>
+      <a href="#y2032" data-spy="y2032">2032</a>
+      <a href="#note" data-spy="note">How to read</a>
+      <a class="tn-out" href="https://bankregwire.com/">BankRegWire</a>
+    </div>
+  </div>
+</nav>
 <button type="button" id="theme">Night</button>
 
 <!-- ===== SECTION A - MARQUEE HERO ===== -->
 <section class="hero" id="hero">
+  <span id="top"></span>
+  <div class="fids" aria-hidden="true">
+    <i class="fid f-tl"></i><i class="fid f-tr"></i><i class="fid f-bl"></i>
+    <span class="fcode">LDGR &middot; FWD FILE &middot; PLATE I &middot; 2027&ndash;2032 &middot; 24 FPS</span>
+  </div>
   <video id="bg" muted playsinline preload="auto" aria-hidden="true">
     <source src="hero-ledger-1080.webm" type="video/webm">
     <source src="hero-ledger-1080.mp4" type="video/mp4">
@@ -415,7 +611,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   <div class="htop">
     <div class="wrap">
       <p><strong>The Ledger</strong> &middot; Forward file</p>
-      <p><a href="/">BankRegWire</a></p>
+      <p><a href="https://bankregwire.com/">BankRegWire</a></p>
     </div>
   </div>
 
@@ -461,6 +657,9 @@ footer a:hover{border-bottom-color:var(--oxblood)}
 <div class="wrap">
   <!-- ===== SECTION C - THE FILE ===== -->
   <main id="file">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="spine-fill" id="spinefill" aria-hidden="true"></div>
+    <p class="origin"><span class="o-dot" aria-hidden="true"></span>2026 &middot; The record as it stands</p>
     <div class="filehead">
       <h2>The file, in sequence</h2>
       <p>Ordered by the year each piece is filed from</p>
@@ -468,9 +667,9 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     <p class="kbdhint">Read by keyboard: <kbd>&uarr;</kbd> <kbd>&darr;</kbd> to move, <kbd>Enter</kbd> to open</p>
 
     <!-- --- 2027 ---------------------------------------------------------- -->
-    <div class="yearband"><span>2027</span><span>The charter question</span></div>
+    <div class="yearband" id="y2027"><span>2027</span><span>The charter question</span></div>
     <ol class="entries">
-      <li class="entry t-charter">
+      <li class="entry t-charter" data-no="37">
         <a href="ledger-press-start-to-pay.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -481,12 +680,12 @@ footer a:hover{border-bottom-color:var(--oxblood)}
             </svg></span>
             <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
               <path class="tk-soft" d="M10 12h72M10 25h72M10 38h72"></path>
-              <path class="tk-line" d="M14 38C30 38 30 12 46 12S62 38 78 38"></path>
+              <path class="tk-line" pathLength="1" d="M14 38C30 38 30 12 46 12S62 38 78 38"></path>
               <circle class="tk-ox" cx="46" cy="12" r="3"></circle>
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; TBD</span><span>Tokyo, New York and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; 37</span><span>Tokyo, New York and Washington, D.C.</span></p>
             <p class="e-h">Press start to pay</p>
             <p class="e-deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
             <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Trust charters</span><span class="e-open">Open &rarr;</span></p>
@@ -496,9 +695,9 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     </ol>
 
     <!-- --- 2031 ---------------------------------------------------------- -->
-    <div class="yearband"><span>2031</span><span>The machinery in place</span></div>
+    <div class="yearband" id="y2031"><span>2031</span><span>The machinery in place</span></div>
     <ol class="entries">
-      <li class="entry t-deposit">
+      <li class="entry t-deposit" data-no="38">
         <a href="ledger-nothing-sits-still.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -508,20 +707,20 @@ footer a:hover{border-bottom-color:var(--oxblood)}
               <path d="M32 20l6 6-6 6M34 26h8"></path>
             </svg></span>
             <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
-              <path class="tk-line" d="M10 12H54L82 42"></path>
+              <path class="tk-line" pathLength="1" d="M10 12H54L82 42"></path>
               <path class="tk-soft" d="M54 12v30"></path>
               <circle class="tk-ox" cx="82" cy="42" r="3"></circle>
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; TBD</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; 38</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
             <p class="e-h">Nothing sits still</p>
             <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
             <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
           </span>
         </a>
       </li>
-      <li class="entry t-exam">
+      <li class="entry t-exam" data-no="39">
         <a href="ledger-the-examiner-who-never-leaves.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -531,20 +730,20 @@ footer a:hover{border-bottom-color:var(--oxblood)}
             </svg></span>
             <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
               <path class="tk-soft" d="M10 40h72"></path>
-              <path class="tk-line" d="M12 40C40 40 52 16 80 12"></path>
+              <path class="tk-line" pathLength="1" d="M12 40C40 40 52 16 80 12"></path>
               <circle class="tk-fill" cx="26" cy="35" r="2.6"></circle>
               <circle class="tk-ox" cx="66" cy="16" r="2.6"></circle>
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; TBD</span><span>Washington, Topeka and Columbus, Ohio</span></p>
+            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; 39</span><span>Washington, Topeka and Columbus, Ohio</span></p>
             <p class="e-h">The examiner who never leaves</p>
             <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
             <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
           </span>
         </a>
       </li>
-      <li class="entry t-mortgage">
+      <li class="entry t-mortgage" data-no="55">
         <a href="ledger-nobodys-on-the-file.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -563,7 +762,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; TBD</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; 55</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
             <p class="e-h">Nobody's on the file</p>
             <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
             <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
@@ -573,9 +772,9 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     </ol>
 
     <!-- --- 2032 ---------------------------------------------------------- -->
-    <div class="yearband"><span>2032</span><span>What held and what did not</span></div>
+    <div class="yearband" id="y2032"><span>2032</span><span>What held and what did not</span></div>
     <ol class="entries">
-      <li class="entry t-standard">
+      <li class="entry t-standard" data-no="63">
         <a href="Standard_Setting.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -594,18 +793,18 @@ footer a:hover{border-bottom-color:var(--oxblood)}
               <circle class="tk-fill" cx="14" cy="40" r="2"></circle>
               <circle class="tk-fill" cx="30" cy="8" r="2"></circle>
               <circle class="tk-fill" cx="30" cy="42" r="2"></circle>
-              <path class="tk-line" d="M58 25h22"></path>
+              <path class="tk-line" pathLength="1" d="M58 25h22"></path>
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; TBD</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; 63</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
             <p class="e-h">Assessed once, trusted often</p>
             <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
             <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
           </span>
         </a>
       </li>
-      <li class="entry t-wallet">
+      <li class="entry t-wallet" data-no="64">
         <a href="ledger-the-wallet-woke-up.html">
           <span class="media" aria-hidden="true">
             <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -616,12 +815,12 @@ footer a:hover{border-bottom-color:var(--oxblood)}
             </svg></span>
             <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
               <path class="tk-soft" d="M10 38h72"></path>
-              <path class="tk-line" d="M10 34v8M26 34v8M42 10v32M58 30v12M74 26v16"></path>
+              <path class="tk-line" pathLength="1" d="M10 34v8M26 34v8M42 10v32M58 30v12M74 26v16"></path>
               <circle class="tk-ox" cx="42" cy="10" r="3"></circle>
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; TBD</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; 64</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
             <p class="e-h">The wallet woke up</p>
             <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
             <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
@@ -631,7 +830,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     </ol>
 
     <!-- ===== SECTION D - READING NOTE ===== -->
-    <div class="note">
+    <div class="note" id="note">
       <h3>How to read the file</h3>
       <p>The pieces are independent. Each carries its own reporting, its own interactive modules and its own disclaimer, and none depends on the others for its argument.</p>
       <p>They do share a world. The charter question in 2027 sets up the deposit market of 2031, and the supervisory framework built to catch the failures of 2023 is the thing still running when the cryptography gives way in 2032. Read in sequence, the file is one argument about how fast the plumbing changes and how slowly the rules follow.</p>
@@ -639,10 +838,33 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   </main>
 
   <!-- ===== SECTION E - FOOTER ===== -->
-  <footer>
-    <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
-    <p>Every dispatch in this file is a work of narrative fiction. Each one identifies, in its own footer, which elements are drawn from the real record and which are extrapolation. Named institutions, individuals, figures and outcomes dated after 2026 are fictional constructs unless a piece says otherwise.</p>
-    <p><a href="/">Back to BankRegWire</a></p>
+  <footer class="ftr">
+    <div class="fgrid">
+      <div class="fcol fabout">
+        <p class="sig">The Ledger &middot; Forward file</p>
+        <p>Speculative pieces built from primary-source reporting, filed from a date that has not happened yet. Every dispatch is a work of narrative fiction; each identifies, in its own footer, which elements are drawn from the real record and which are extrapolation. Named institutions, individuals, figures and outcomes dated after 2026 are fictional constructs unless a piece says otherwise.</p>
+      </div>
+      <div class="fcol">
+        <p class="fhead">The dispatches</p>
+        <ul class="flist">
+          <li><a href="ledger-press-start-to-pay.html"><span>&#8470; 37</span> Press start to pay</a></li>
+          <li><a href="ledger-nothing-sits-still.html"><span>&#8470; 38</span> Nothing sits still</a></li>
+          <li><a href="ledger-the-examiner-who-never-leaves.html"><span>&#8470; 39</span> The examiner who never leaves</a></li>
+          <li><a href="ledger-nobodys-on-the-file.html"><span>&#8470; 55</span> Nobody's on the file</a></li>
+          <li><a href="Standard_Setting.html"><span>&#8470; 63</span> Assessed once, trusted often</a></li>
+          <li><a href="ledger-the-wallet-woke-up.html"><span>&#8470; 64</span> The wallet woke up</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <p class="fhead">Elsewhere</p>
+        <ul class="flist">
+          <li><a href="https://bankregwire.com/">BankRegWire</a></li>
+          <li><a href="https://bankregwire.com/catalogue.html">The catalogue</a></li>
+          <li><a href="https://bankregwire.com/navigator.html">The Navigator</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fbase">The Ledger is an instrument of BankRegWire.</p>
   </footer>
 </div>
 
@@ -858,6 +1080,89 @@ footer a:hover{border-bottom-color:var(--oxblood)}
       idx = n; el.classList.add('kbd');
     });
   });
+})();
+
+/* ==========================================================================
+   SECTION 5 - STICKY NAV + SCROLL SPY
+   The bar slides in once the hero is mostly gone; the year link for the band
+   nearest the top of the viewport carries the marker.
+   ========================================================================== */
+(function(){
+  var nav = document.getElementById('topnav');
+  var hero = document.getElementById('hero');
+  if (!nav || !hero) return;
+
+  function onScroll(){
+    var gone = hero.getBoundingClientRect().bottom < 80;
+    nav.classList.toggle('show', gone);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var links = [].slice.call(nav.querySelectorAll('[data-spy]'));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.spy); }).filter(Boolean);
+  function spy(){
+    var pick = null;
+    targets.forEach(function(t){
+      if (t.getBoundingClientRect().top <= 140) pick = t.id;
+    });
+    links.forEach(function(a){ a.classList.toggle('spy', a.dataset.spy === pick); });
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  spy();
+})();
+
+/* ==========================================================================
+   SECTION 6 - CARD REVEAL
+   Entries rise in on first approach. Skipped under reduced motion and on
+   engines without IntersectionObserver, where cards are simply visible.
+   ========================================================================== */
+(function(){
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+  if (reduce || !('IntersectionObserver' in window)) return;
+
+  document.body.classList.add('rv-init');
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('rv'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+
+  [].slice.call(document.querySelectorAll('.entry')).forEach(function(el){ io.observe(el); });
+})();
+
+/* ==========================================================================
+   SECTION 7 - THE THROUGH LINE
+   The oxblood thread draws down the spine with scroll: reading depth is
+   travel depth. Skipped on small screens and under reduced motion, where the
+   static spine alone remains.
+   ========================================================================== */
+(function(){
+  var fill = document.getElementById('spinefill');
+  var file = document.getElementById('file');
+  if (!fill || !file) return;
+  var reduce = false, wide = false;
+  try {
+    reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wide = window.matchMedia('(min-width: 900px)').matches;
+  } catch (e) { return; }
+  if (reduce) return;
+
+  var spine = document.querySelector('.spine');
+  function update(){
+    if (!window.matchMedia('(min-width: 900px)').matches){ fill.style.height = '0px'; return; }
+    var r = spine.getBoundingClientRect();
+    if (r.height <= 0) return;
+    /* Anchor at 55% of the viewport: the thread reaches a stop as it reads. */
+    var anchor = window.innerHeight * 0.55;
+    var p = (anchor - r.top) / r.height;
+    p = Math.max(0, Math.min(1, p));
+    fill.style.height = (p * r.height) + 'px';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 })();
 
 </script>
