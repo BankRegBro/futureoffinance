@@ -36,6 +36,8 @@
   /* Hero plate is dark in both themes, so it carries its own tokens. */
   --plate:#0a0e1c; --plate-ink:#e9e4d8; --plate-soft:#a9a293;
   --plate-rule:#2a3350; --plate-copper:#f6c81e; --plate-oxblood:#e0596c;
+  /* Scrim: navy in paper mode. --scrim-v is scaled live per scene (0.85-1.35). */
+  --scrim-rgb:10,14,28; --scrim-v:1;
 }
 /* --- SECTION 1b - night theme ------------------------------------------- */
 html.night{
@@ -46,6 +48,7 @@ html.night{
   --live:#3ecf8e; --live-wash:#10261f;
   --hold:#f6c81e; --hold-wash:#2a2311;
   --dead-wash:#2b1a1d;
+  --scrim-rgb:7,10,24;
 }
 
 /* ==========================================================================
@@ -85,9 +88,18 @@ body{
 }
 .hero::after{
   content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  /* --scrim-v drives the readability wash; scene phases nudge it live. */
   background:
-    linear-gradient(180deg, rgba(10,14,28,.44) 0%, rgba(10,14,28,.06) 26%, rgba(10,14,28,.26) 58%, rgba(10,14,28,.82) 100%),
-    linear-gradient(90deg, rgba(10,14,28,.44) 0%, rgba(10,14,28,.08) 46%, transparent 74%);
+    linear-gradient(180deg,
+      rgba(var(--scrim-rgb),calc(.44 * var(--scrim-v))) 0%,
+      rgba(var(--scrim-rgb),calc(.06 * var(--scrim-v))) 26%,
+      rgba(var(--scrim-rgb),calc(.26 * var(--scrim-v))) 58%,
+      rgba(var(--scrim-rgb),calc(.82 * var(--scrim-v))) 100%),
+    linear-gradient(90deg,
+      rgba(var(--scrim-rgb),calc(.46 * var(--scrim-v))) 0%,
+      rgba(var(--scrim-rgb),calc(.08 * var(--scrim-v))) 46%,
+      transparent 74%);
+  transition:background .6s ease;
 }
 #bg,#poster{
   position:absolute; inset:0; width:100%; height:100%;
@@ -166,6 +178,48 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 #replay:hover{color:var(--plate-ink); border-color:var(--plate-copper)}
 
 /* ==========================================================================
+   SECTION 3b - HERO PULLQUOTE RAIL
+   One rotating line drawn from the six pieces, so the fold has one deliberate
+   moving element under the headline. Sits inside phase 2 only.
+   ========================================================================== */
+.pullrail{
+  margin-top:1.5rem; padding-top:1rem; border-top:1px solid rgba(233,228,216,.16);
+  min-height:3.4rem;
+}
+.pull{
+  margin:0; max-width:48ch;
+  opacity:0; transform:translateY(6px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.pull.on{opacity:1; transform:none}
+.pull q{
+  font-family:"Fraunces",Georgia,serif; font-style:italic; font-weight:300;
+  font-size:1.12rem; line-height:1.4; color:var(--plate-ink); quotes:none;
+}
+.pull q::before,.pull q::after{content:""}
+.pull cite{
+  display:block; margin-top:.4rem; font-style:normal;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--plate-copper);
+}
+
+/* ==========================================================================
+   SECTION 3c - DISPATCH THUMBNAILS
+   A tiny static SVG preview of each piece's signature module, seated beside
+   the monoline glyph so a plate previews the interactive inside it.
+   ========================================================================== */
+.thumb{
+  width:4.6rem; height:2.5rem; display:block;
+  background:var(--sunk); border:1px solid var(--rule);
+}
+.thumb svg{width:100%; height:100%; display:block}
+.thumb .tk-line{fill:none; stroke:var(--oxblood); stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round}
+.thumb .tk-soft{fill:none; stroke:var(--rule-strong); stroke-width:1}
+.thumb .tk-fill{fill:var(--copper); opacity:.85}
+.thumb .tk-ox{fill:var(--oxblood)}
+.entry:hover .thumb{border-color:var(--rule-strong)}
+
+/* ==========================================================================
    SECTION 4 - STANDING STRIP
    The count line under the hero, in the manner of the site's status bars.
    ========================================================================== */
@@ -212,15 +266,39 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
 }
 .entries{list-style:none; margin:.7rem 0 0; padding:0; display:grid; gap:.7rem}
 .entry{
-  background:var(--raised); border:1px solid var(--rule);
-  border-left:3px solid var(--rule-strong);
+  /* --tint is set per story below; the wash is a faint top-right corner only,
+     so the body text sits on near-flat raised paper. */
+  --tint:var(--copper);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 9%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 3%, transparent) 34%,
+      transparent 60%),
+    var(--raised);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--tint);
   transition:border-color .18s ease, transform .18s ease, background .18s ease;
 }
-.entry:hover{border-left-color:var(--oxblood); background:var(--paper); transform:translateY(-2px)}
+.entry.t-charter { --tint:var(--copper); }
+.entry.t-deposit { --tint:var(--oxblood); }
+.entry.t-exam    { --tint:var(--live); }
+.entry.t-mortgage{ --tint:var(--rule-strong); }
+.entry.t-standard{ --tint:var(--live); }
+.entry.t-wallet  { --tint:var(--oxblood); }
+.entry:hover{
+  border-left-color:var(--oxblood); transform:translateY(-2px);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 14%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 5%, transparent) 34%,
+      transparent 60%),
+    var(--paper);
+}
 .entry > a{
   display:grid; grid-template-columns:4.6rem 1fr; gap:1rem;
   color:inherit; text-decoration:none; padding:1.05rem 1.15rem 1.1rem;
 }
+.media{display:flex; flex-direction:column; gap:.5rem; align-items:stretch}
 .gwrap{
   width:4.6rem; height:4.6rem; display:grid; place-items:center;
   background:var(--sunk); border:1px solid var(--rule); color:var(--oxblood);
@@ -250,6 +328,26 @@ h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-wi
   border:1px solid var(--rule); color:var(--ink-soft);
 }
 .e-open{margin-left:auto; color:var(--copper); font-weight:700}
+/* Keyboard reader path: arrow keys move a marker between plates. */
+.entry.kbd{
+  border-left-color:var(--copper);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 14%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 5%, transparent) 34%,
+      transparent 60%),
+    var(--paper);
+}
+.entry.kbd .gwrap{color:var(--copper); border-color:var(--copper)}
+.kbdhint{
+  margin:1rem 0 0; font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.kbdhint kbd{
+  font-family:inherit; background:var(--sunk); border:1px solid var(--rule);
+  border-radius:3px; padding:.05rem .35rem; color:var(--ink-soft);
+}
+@media (hover:none){.kbdhint{display:none}}
 
 /* ==========================================================================
    SECTION 6 - READING NOTE + FOOTER
@@ -289,14 +387,16 @@ footer a:hover{border-bottom-color:var(--oxblood)}
    ========================================================================== */
 @media (max-width:640px){
   .hero{min-height:min(78svh,620px); padding-top:4.6rem}
-  .entry > a{grid-template-columns:1fr; gap:.8rem}
+  .entry > a{grid-template-columns:3.4rem 1fr; gap:.85rem; padding:.9rem}
   .gwrap{width:3.4rem; height:3.4rem}
   .gwrap svg{width:1.9rem; height:1.9rem}
+  .thumb{width:3.4rem; height:1.9rem}
   .e-open{margin-left:0}
   .standing .sright{margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:.01ms !important; animation-duration:.01ms !important}
+  .hero::after{transition:none}
 }
 </style>
 </head>
@@ -336,6 +436,12 @@ footer a:hover{border-bottom-color:var(--oxblood)}
         <a class="btn lead" href="#file">Open the file</a>
         <a class="btn" href="ledger-press-start-to-pay.html">Start at 2027</a>
       </div>
+      <div class="pullrail" aria-hidden="true">
+        <figure class="pull on">
+          <q>Nobody had decided to run. Several hundred thousand pieces of software had independently concluded that a better rate was available.</q>
+          <cite>Nothing sits still &middot; 2031</cite>
+        </figure>
+      </div>
     </div>
   </div>
 
@@ -359,19 +465,25 @@ footer a:hover{border-bottom-color:var(--oxblood)}
       <h2>The file, in sequence</h2>
       <p>Ordered by the year each piece is filed from</p>
     </div>
+    <p class="kbdhint">Read by keyboard: <kbd>&uarr;</kbd> <kbd>&darr;</kbd> to move, <kbd>Enter</kbd> to open</p>
 
     <!-- --- 2027 ---------------------------------------------------------- -->
     <div class="yearband"><span>2027</span><span>The charter question</span></div>
     <ol class="entries">
-      <li class="entry">
+      <li class="entry t-charter">
         <a href="ledger-press-start-to-pay.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <rect x="6" y="16" width="36" height="20" rx="8"></rect>
               <path d="M13 22v8M9 26h8"></path>
               <circle cx="33" cy="26" r="6"></circle>
               <path d="M33 22v8M30.5 24.2h5M30.5 27.8h5"></path>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 12h72M10 25h72M10 38h72"></path>
+              <path class="tk-line" d="M14 38C30 38 30 12 46 12S62 38 78 38"></path>
+              <circle class="tk-ox" cx="46" cy="12" r="3"></circle>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; TBD</span><span>Tokyo, New York and Washington, D.C.</span></p>
@@ -386,15 +498,20 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     <!-- --- 2031 ---------------------------------------------------------- -->
     <div class="yearband"><span>2031</span><span>The machinery in place</span></div>
     <ol class="entries">
-      <li class="entry">
+      <li class="entry t-deposit">
         <a href="ledger-nothing-sits-still.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 18l10-6 10 6"></path>
               <path d="M10 18v14M26 18v14M8 34h20"></path>
               <path d="M14 22v8M22 22v8"></path>
               <path d="M32 20l6 6-6 6M34 26h8"></path>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-line" d="M10 12H54L82 42"></path>
+              <path class="tk-soft" d="M54 12v30"></path>
+              <circle class="tk-ox" cx="82" cy="42" r="3"></circle>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; TBD</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
@@ -404,14 +521,20 @@ footer a:hover{border-bottom-color:var(--oxblood)}
           </span>
         </a>
       </li>
-      <li class="entry">
+      <li class="entry t-exam">
         <a href="ledger-the-examiner-who-never-leaves.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 10h-4v28h4M34 10h4v28h-4"></path>
               <path d="M15 24c3-5 6-7.5 9-7.5s6 2.5 9 7.5c-3 5-6 7.5-9 7.5s-6-2.5-9-7.5z"></path>
               <circle cx="24" cy="24" r="3"></circle>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 40h72"></path>
+              <path class="tk-line" d="M12 40C40 40 52 16 80 12"></path>
+              <circle class="tk-fill" cx="26" cy="35" r="2.6"></circle>
+              <circle class="tk-ox" cx="66" cy="16" r="2.6"></circle>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; TBD</span><span>Washington, Topeka and Columbus, Ohio</span></p>
@@ -421,15 +544,23 @@ footer a:hover{border-bottom-color:var(--oxblood)}
           </span>
         </a>
       </li>
-      <li class="entry">
+      <li class="entry t-mortgage">
         <a href="ledger-nobodys-on-the-file.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 8h16l8 8v24H12z"></path>
               <path d="M28 8v8h8"></path>
               <path d="M17 24h14M17 29h14" stroke-dasharray="3 3"></path>
               <path d="M17 34h6"></path>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <rect class="tk-ox" x="12" y="8" width="5" height="34"></rect>
+              <rect class="tk-fill" x="24" y="20" width="5" height="22"></rect>
+              <rect class="tk-fill" x="36" y="28" width="5" height="14"></rect>
+              <rect class="tk-fill" x="48" y="34" width="5" height="8"></rect>
+              <rect class="tk-fill" x="60" y="38" width="5" height="4"></rect>
+              <rect class="tk-fill" x="72" y="40" width="5" height="2"></rect>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; TBD</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
@@ -444,17 +575,27 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     <!-- --- 2032 ---------------------------------------------------------- -->
     <div class="yearband"><span>2032</span><span>What held and what did not</span></div>
     <ol class="entries">
-      <li class="entry">
+      <li class="entry t-standard">
         <a href="Standard_Setting.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="24" cy="24" r="5"></circle>
               <circle cx="10" cy="12" r="2.4"></circle>
               <circle cx="38" cy="12" r="2.4"></circle>
               <circle cx="10" cy="36" r="2.4"></circle>
               <circle cx="38" cy="36" r="2.4"></circle>
               <path d="M12.1 13.8l8 7M35.9 13.8l-8 7M12.1 34.2l8-7M35.9 34.2l-8-7"></path>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M46 25 14 10M46 25 14 25M46 25 14 40M46 25 30 8M46 25 30 42"></path>
+              <circle class="tk-ox" cx="46" cy="25" r="4"></circle>
+              <circle class="tk-fill" cx="14" cy="10" r="2"></circle>
+              <circle class="tk-fill" cx="14" cy="25" r="2"></circle>
+              <circle class="tk-fill" cx="14" cy="40" r="2"></circle>
+              <circle class="tk-fill" cx="30" cy="8" r="2"></circle>
+              <circle class="tk-fill" cx="30" cy="42" r="2"></circle>
+              <path class="tk-line" d="M58 25h22"></path>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; TBD</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
@@ -464,15 +605,20 @@ footer a:hover{border-bottom-color:var(--oxblood)}
           </span>
         </a>
       </li>
-      <li class="entry">
+      <li class="entry t-wallet">
         <a href="ledger-the-wallet-woke-up.html">
-          <span class="gwrap" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <rect x="12" y="24" width="24" height="16" rx="2"></rect>
               <path d="M18 24v-6a6 6 0 0 1 11-3.2"></path>
               <path d="M24 30v4"></path>
               <path d="M33 13l4 4M37 13l-4 4"></path>
-            </svg>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 38h72"></path>
+              <path class="tk-line" d="M10 34v8M26 34v8M42 10v32M58 30v12M74 26v16"></path>
+              <circle class="tk-ox" cx="42" cy="10" r="3"></circle>
+            </svg></span>
           </span>
           <span>
             <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; TBD</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
@@ -539,10 +685,15 @@ footer a:hover{border-bottom-color:var(--oxblood)}
   var reduce = false;
   try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
 
+  /* Scrim intensity per scene. The workshop is already dim, so it needs little
+     wash; the transit blows out bright, so it needs the most; the city holds a
+     middle wash that keeps the payoff copy legible against the skyline. */
+  var SCRIM = { 0: 0.88, 1: 1.32, 2: 1.06 };
   function ph(p){
     if (p === cur) return;
     cur = p;
     lines.forEach(function(l){ l.classList.toggle('on', +l.dataset.ph === p); });
+    hero.style.setProperty('--scrim-v', SCRIM[p] != null ? SCRIM[p] : 1);
   }
   function tick(){
     var t = v.currentTime || 0;
@@ -567,6 +718,7 @@ footer a:hover{border-bottom-color:var(--oxblood)}
      the city. Repoint the poster instead, so any later reveal is the city too. */
   v.addEventListener('ended', function(){
     done = true;
+    ph(2);
     poster.src = 'hero-ledger-end.jpg';
     replay.classList.add('show');
   });
@@ -612,6 +764,100 @@ footer a:hover{border-bottom-color:var(--oxblood)}
     tryPlay();
     requestAnimationFrame(tick);
   }
+})();
+
+/* ==========================================================================
+   SECTION 3 - PULLQUOTE RAIL
+   Rotates one line from the six pieces under the headline. Pauses on hover or
+   focus of the hero, and holds still under reduced motion.
+   ========================================================================== */
+(function(){
+  var fig = document.querySelector('.pull');
+  var hero = document.getElementById('hero');
+  if (!fig || !hero) return;
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+
+  var quotes = [
+    ['Nobody had decided to run. Several hundred thousand pieces of software had independently concluded that a better rate was available.', 'Nothing sits still \u00b7 2031'],
+    ['The activity the licence was written to govern is now performed by software with a person nominally attached.', "Nobody's on the file \u00b7 2031"],
+    ['Buried in section four is a single sentence that has set the payments industry on edge.', 'Press start to pay \u00b7 2027'],
+    ['A liquidity run does not give the regime room, which is the finding the whole framework was built on.', 'The examiner who never leaves \u00b7 2031'],
+    ['The transfer itself was the announcement: the mathematics protecting the financial system had stopped working.', 'The wallet woke up \u00b7 2032'],
+    ['One assessment, refreshed on a cycle and published to a registry any bank can consult.', 'Assessed once, trusted often \u00b7 2032']
+  ];
+  var q = fig.querySelector('q');
+  var cite = fig.querySelector('cite');
+  var i = 0, timer = 0, paused = false;
+
+  function show(n){
+    fig.classList.remove('on');
+    setTimeout(function(){
+      q.textContent = quotes[n][0];
+      cite.textContent = quotes[n][1];
+      fig.classList.add('on');
+    }, reduce ? 0 : 500);
+  }
+  function step(){
+    if (paused) return;
+    i = (i + 1) % quotes.length;
+    show(i);
+  }
+  function play(){ if (!reduce && !timer) timer = setInterval(step, 5200); }
+  function halt(){ if (timer){ clearInterval(timer); timer = 0; } }
+
+  hero.addEventListener('mouseenter', function(){ paused = true; });
+  hero.addEventListener('mouseleave', function(){ paused = false; });
+  hero.addEventListener('focusin', function(){ paused = true; });
+  hero.addEventListener('focusout', function(){ paused = false; });
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) halt(); else play();
+  });
+  play();
+})();
+
+/* ==========================================================================
+   SECTION 4 - KEYBOARD READER PATH
+   Arrow keys move a marker between dispatch plates; Enter opens the marked one.
+   Ignored while typing in a field or when a modifier is held.
+   ========================================================================== */
+(function(){
+  var entries = [].slice.call(document.querySelectorAll('.entry'));
+  if (!entries.length) return;
+  var idx = -1;
+
+  function mark(n, scroll){
+    if (idx >= 0) entries[idx].classList.remove('kbd');
+    idx = (n + entries.length) % entries.length;
+    var el = entries[idx];
+    el.classList.add('kbd');
+    var link = el.querySelector('a');
+    if (link) { try { link.focus({ preventScroll: !scroll }); } catch (e) { link.focus(); } }
+    if (scroll && el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+
+    if (e.key === 'ArrowDown' || e.key === 'j'){
+      e.preventDefault(); mark(idx < 0 ? 0 : idx + 1, true);
+    } else if (e.key === 'ArrowUp' || e.key === 'k'){
+      e.preventDefault(); mark(idx < 0 ? entries.length - 1 : idx - 1, true);
+    } else if (e.key === 'Enter' && idx >= 0){
+      var link = entries[idx].querySelector('a');
+      if (link && document.activeElement !== link){ e.preventDefault(); link.click(); }
+    }
+  });
+
+  /* Keep the marker in step if the reader tabs to a plate directly. */
+  entries.forEach(function(el, n){
+    el.addEventListener('focusin', function(){
+      if (idx >= 0 && idx !== n) entries[idx].classList.remove('kbd');
+      idx = n; el.classList.add('kbd');
+    });
+  });
 })();
 
 </script>
