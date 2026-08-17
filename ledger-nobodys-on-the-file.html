@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nobody's on the file &middot; The Ledger</title>
+<meta name="description" content="Automated underwriting takes the cost, the jobs, and the point of a mortgage licensing regime. A Ledger dispatch filed from 2031.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nobody's on the file · The Ledger">
+<meta property="og:description" content="Automated underwriting takes the cost, the jobs, and the point of a mortgage licensing regime. A Ledger dispatch filed from 2031.">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/ledger-nobodys-on-the-file.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -355,11 +361,11 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <p>Alvarez was laid off fourteen months later, along with most of her branch. She now works in loss mitigation for a servicer, which she describes as the one part of this business that still needs somebody to pick up the telephone.</p>
 
-      <p>She is one of roughly two hundred and fifty thousand people who have left mortgage origination in the United States since 2027. The unique licensed originator count in the national registry has fallen from about 372,000 to under 120,000. It is the fastest contraction of a licensed profession in American financial history, and it happened not because of a crisis or a rate shock but because the work became cheap.</p>
+      <p>She is one of roughly two hundred and fifty thousand people who have left mortgage origination in the United States since 2027. The registry's unique originator count, state-licensed and federally registered together, has fallen from about 372,000 to under 120,000. It is the fastest contraction of a licensed profession in American financial history, and it happened not because of a crisis or a rate shock but because the work became cheap.</p>
 
       <h2>The arithmetic that ended it</h2>
 
-      <p>The cost to originate a conforming mortgage had been climbing for two decades before it collapsed. Post-crisis documentation requirements, ability-to-repay diligence, appraisal independence rules and disclosure timing all added process, and process meant people. By the middle of the 2020s the fully loaded cost of getting one clean loan from application to closing sat somewhere between $8,000 and $9,000 depending on the lender and the quarter.</p>
+      <p>The cost to originate a conforming mortgage had been climbing for two decades before it collapsed. Post-crisis documentation requirements, ability-to-repay diligence, appraisal independence rules and disclosure timing all added process, and process meant people. By the middle of the 2020s the fully loaded cost of getting one clean loan from application to closing sat somewhere between $8,000 and $9,000 depending on the lender and the quarter, on the narrow measure of a clean retail conforming file; the industry's all-in production numbers, which fold in the files that die along the way, ran higher still.</p>
 
       <p>Almost all of that was labour. A single file passed through intake, processing, verification, appraisal coordination, underwriting, quality control, compliance review and closing, and each of those stages was a person with a queue.</p>
     </div>
@@ -391,7 +397,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
           </div>
         </div>
         <div class="metric">
-          <p class="metric-name">Unique licensed originators, national registry</p>
+          <p class="metric-name">Unique originators, national registry (licensed and registered)</p>
           <div class="bar-row">
             <span class="bar-tag">People</span>
             <span class="bar-track"><span class="bar-fill before" id="bar-mlo"></span></span>
@@ -943,6 +949,22 @@ window.LEDGER_ITEMS = [
     }, {threshold:0.25});
     io.observe(section);
   } else { render(); }
+})();
+
+/* ==========================================================================
+   READ MARK - records this dispatch as read for the forward file index
+   ========================================================================== */
+(function(){
+  try {
+    var KEY = 'ledger-read';
+    var me = (location.pathname.split('/').pop() || '').split('#')[0].toLowerCase();
+    if (!me) return;
+    var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (list.indexOf(me) === -1){
+      list.push(me);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    }
+  } catch (e) {}
 })();
 
 </script>

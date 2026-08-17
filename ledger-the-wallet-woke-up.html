@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The wallet woke up &middot; The Ledger</title>
+<meta name="description" content="Coins dormant since 2009 move, and the transfer itself announces that the mathematics failed. A Ledger dispatch filed from 2032.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The wallet woke up · The Ledger">
+<meta property="og:description" content="Coins dormant since 2009 move, and the transfer itself announces that the mathematics failed. A Ledger dispatch filed from 2032.">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/ledger-the-wallet-woke-up.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -326,7 +332,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
     </div>
     <p class="kicker">Forward file &middot; Cryptography</p>
     <h1>The wallet woke up</h1>
-    <p class="deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+    <p class="deck">At 3.14 in the morning, coins that had not moved since 2009 moved. More than a hundred billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
     <p class="dateline">New York, Gaithersburg and Washington, D.C. &middot; Filed from 2032</p>
   </header>
 
@@ -366,7 +372,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
     <div class="col">
       <p class="lede">The first transaction cleared at 3.14 in the morning, London time, and for about forty minutes it was a curiosity that a few hundred people on the internet were arguing about. An address funded in January 2009, holding a block reward that had sat untouched for twenty years, had signed a valid transaction. Then another did. Then eleven more, in a steady unhurried sequence, none of them in any hurry at all.</p>
 
-      <p>By 3.36 the outputs had been consolidated. At 3.41 the consolidated balance, a little over 1.1m bitcoin, was sent in a single transaction to a deposit address at a regulated American exchange. At the prior day's close it was worth a fraction under thirty billion dollars.</p>
+      <p>By 3.36 the outputs had been consolidated. At 3.41 the consolidated balance, a little over 1.1m bitcoin, was sent in a single transaction to a deposit address at a regulated American exchange. At the prior day's close it was worth a little over a hundred and ten billion dollars.</p>
 
       <p>There is no version of this that is a theft in the ordinary sense, and everyone who understood what they were looking at knew it within the hour. The private keys to those addresses are not lost in the way a password is lost. They are gone. The people who held them are dead or vanished or were never identified, and the entire premise of the asset was that a key you do not have is a key nobody can produce.</p>
 
@@ -376,7 +382,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <h2>Why the exchange</h2>
 
-      <p>The choice of destination is the detail that specialists still argue about, because sending thirty billion dollars of unexplained value to a regulated, surveilled, freezable American venue is not what somebody does when they want the money.</p>
+      <p>The choice of destination is the detail that specialists still argue about, because sending more than a hundred billion dollars of unexplained value to a regulated, surveilled, freezable American venue is not what somebody does when they want the money.</p>
 
       <p>The exchange froze the deposit inside three hours, filed with FinCEN, and had Treasury on the phone before the sun was up in New York. None of the balance was liquidated. None of it has been. It sits, in litigation and in limbo, and the most widely held view among the people who have studied the transaction pattern is that this outcome was not merely foreseen but intended.</p>
 
@@ -415,6 +421,8 @@ a.ff-card:hover,a.ff-card:focus-visible{
       <p>The same logic runs through the certificate authorities that vouch for the identity of every institution online, through the attestation chains that let a hardware security module prove it is the module it claims to be, and through the authentication that lets one bank believe a message genuinely came from another. None of this is data confidentiality. It is identity, and identity was the thing that broke.</p>
 
       <p>What followed was the largest coordinated revocation and reissuance in the history of the internet, conducted over a weekend by people who had rehearsed it only as a tabletop exercise. Two card networks paused a settlement window rather than process instructions they could not cryptographically vouch for. It held. It was close, and everyone involved says so.</p>
+
+      <p>The one piece of infrastructure that performed above its design was the supervisory plumbing. The continuous feeds phased in after 2028 gave the agencies sector liquidity and settlement posture in close to real time across the first seventy-two hours, and the response read as coordination rather than scramble in large part because nobody was waiting on a data call.</p>
 
       <blockquote><p>"Confidentiality was the problem we had prepared for. Authenticity was the problem we had."</p></blockquote>
 
@@ -617,15 +625,15 @@ a.ff-card:hover,a.ff-card:focus-visible{
     { h:1,  major:false, stamp:'T+00:27',
       title:'Outputs consolidated into a single balance',
       body:'Chain analysts confirm the addresses include coinbase outputs from January 2009. The consolidated balance is a little over 1.1m bitcoin.',
-      btc:94,  moved:'$30.4bn', status:'Normal' },
+      btc:94,  moved:'$112bn', status:'Normal' },
     { h:2,  major:true,  stamp:'T+00:41',
       title:'The balance is sent to a regulated exchange',
       body:'A single transaction routes the entire consolidated balance to a deposit address at a large American exchange. The destination is surveilled, KYC-bound and freezable, which is immediately read as deliberate.',
-      btc:71,  moved:'$30.4bn', status:'Watching' },
+      btc:71,  moved:'$112bn', status:'Watching' },
     { h:3,  major:false, stamp:'T+02:50',
       title:'Cryptographers converge on the only explanation',
       body:'Three independent groups publish the same conclusion within minutes of each other. The keys were not recovered. They were derived.',
-      btc:52,  moved:'$30.4bn', status:'Watching' },
+      btc:52,  moved:'$112bn', status:'Watching' },
     { h:4,  major:false, stamp:'T+03:06',
       title:'The exchange freezes the deposit',
       body:'The venue halts the balance, files with FinCEN and notifies Treasury. None of it is liquidated. None of it has been since.',
@@ -928,6 +936,22 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
   build();
 })();
+/* ==========================================================================
+   READ MARK - records this dispatch as read for the forward file index
+   ========================================================================== */
+(function(){
+  try {
+    var KEY = 'ledger-read';
+    var me = (location.pathname.split('/').pop() || '').split('#')[0].toLowerCase();
+    if (!me) return;
+    var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (list.indexOf(me) === -1){
+      list.push(me);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    }
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>

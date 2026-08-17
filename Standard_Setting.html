@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Assessed once, trusted often &middot; The Ledger</title>
+<meta name="description" content="One vendor assessment, published to a registry, makes it rational for a small bank to try something new. A Ledger dispatch filed from 2032.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Assessed once, trusted often · The Ledger">
+<meta property="og:description" content="One vendor assessment, published to a registry, makes it rational for a small bank to try something new. A Ledger dispatch filed from 2032.">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/Standard_Setting.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -546,7 +552,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <blockquote><p>"You do that arithmetic once, and then you stop looking at vendors."</p></blockquote>
 
-      <p><span class="lead-in">The collapse of Synapse</span> in April 2024 gave the problem a face. The banking-as-a-service middleware firm's implosion left consumers unable to access roughly $90m in funds held through partner banks, and exposed how little several of those banks had actually understood about the ledgering arrangements they were relying on. The failure was not caused by an absence of diligence requirements. It was caused, in part, by diligence that was extensive on paper, duplicated across institutions, and shallow in the places that turned out to matter.</p>
+      <p><span class="lead-in">The collapse of Synapse</span> in April 2024 gave the problem a face. The banking-as-a-service middleware firm's implosion froze roughly $200m belonging to more than 100,000 consumers for months, left a ledger shortfall near $90m that some were never made whole on, and exposed how little several of those banks had actually understood about the ledgering arrangements they were relying on. The failure was not caused by an absence of diligence requirements. It was caused, in part, by diligence that was extensive on paper, duplicated across institutions, and shallow in the places that turned out to matter.</p>
 
       <p>That combination, burdensome and inadequate at the same time, is the specific pathology that a standard-setting body is designed to cure.</p>
 
@@ -619,7 +625,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <p>But a second pattern has emerged that few anticipated. Community banks have begun deploying technology that large banks have no particular reason to build, because it serves markets too small or too specific to interest them. Agricultural cash-flow forecasting tools calibrated to individual commodity cycles. Tribal lending platforms designed around trust-land title complexities that national underwriting models cannot process. Multilingual account-opening flows for immigrant communities in specific metropolitan corridors. Remittance corridors serving single sending regions.</p>
 
-      <p>"The thing nobody predicted," says Todd Phillips, a former FDIC official now at the Klaros Group, "is that lowering the diligence cost didn't just let small banks buy the same products as big banks. It made it viable for vendors to build products for small banks. If you can sell to four thousand institutions on one certification instead of negotiating four thousand separate reviews, suddenly the community bank market is a market. Before, it was a collection of four thousand individually unprofitable sales cycles."</p>
+      <p>"The thing nobody predicted," says Daniel Marsh, a former FDIC official who helped draft the term sheet and now advises community banks on vendor strategy, "is that lowering the diligence cost didn't just let small banks buy the same products as big banks. It made it viable for vendors to build products for small banks. If you can sell to four thousand institutions on one certification instead of negotiating four thousand separate reviews, suddenly the community bank market is a market. Before, it was a collection of four thousand individually unprofitable sales cycles."</p>
 
       <h2>The examiners adjusted</h2>
 
@@ -738,7 +744,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
   <!-- ===== SECTION G - FOOTER ===== -->
   <footer>
     <p class="sig">The Ledger &middot; Forward file. Speculative pieces built from primary-source reporting, filed from a date that has not happened yet.</p>
-    <p>This is a work of narrative fiction set in 2032. The FDIC's July 2026 draft term sheet for an industry standard-setting body, the trade associations involved, the Synapse collapse, and the voluntary and no-safe-harbour design are drawn from contemporaneous reporting. The Bank Innovation Standards Council, Farmers &amp; Merchants State Bank, Lisa Brandt, the certification registry extract, and all outcomes described after 2026 are fictional extrapolations.</p>
+    <p>This is a work of narrative fiction set in 2032. The FDIC's July 2026 draft term sheet for an industry standard-setting body, the trade associations involved, the Synapse collapse, and the voluntary and no-safe-harbour design are drawn from contemporaneous reporting. The Bank Innovation Standards Council, Farmers &amp; Merchants State Bank, Lisa Brandt, the certification registry extract, all statements attributed to named or unnamed individuals, and all outcomes described after 2026 are fictional extrapolations.</p>
   </footer>
 
 </div>
@@ -1120,6 +1126,22 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
   build();
 })();
+/* ==========================================================================
+   READ MARK - records this dispatch as read for the forward file index
+   ========================================================================== */
+(function(){
+  try {
+    var KEY = 'ledger-read';
+    var me = (location.pathname.split('/').pop() || '').split('#')[0].toLowerCase();
+    if (!me) return;
+    var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (list.indexOf(me) === -1){
+      list.push(me);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    }
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>

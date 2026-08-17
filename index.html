@@ -9,7 +9,8 @@
 <meta property="og:title" content="The forward file &middot; The Ledger">
 <meta property="og:description" content="Six speculative dispatches on American banking, filed from 2027 to 2032.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="hero-ledger-end.jpg">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0e1c'/%3E%3Crect x='6' y='7' width='20' height='2.6' fill='%23f4efe4'/%3E%3Crect x='6' y='13' width='13' height='1.4' fill='%23b4640f'/%3E%3Crect x='6' y='17' width='20' height='1.4' fill='%237a1f2b'/%3E%3Crect x='6' y='21' width='16' height='1.4' fill='%23b4640f'/%3E%3C/svg%3E">
 <link rel="preload" as="image" href="hero-ledger-poster.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -504,6 +505,19 @@ html{scroll-behavior:smooth}
 @keyframes tkrise{to{transform:scaleY(1)}}
 
 /* ==========================================================================
+   SECTION 5f - READ MARKS
+   Dispatches the reader has opened get a small copper tag and, on desktop,
+   a filled node on the through line. Recorded per browser in localStorage.
+   ========================================================================== */
+.entry.read .e-meta::after{
+  content:"Read"; display:inline-block; padding:.1rem .4rem;
+  border:1px solid var(--copper); color:var(--copper); font-weight:700;
+}
+@media (min-width:900px){
+  .entry.read::before{background:var(--tint); border-color:var(--tint)}
+}
+
+/* ==========================================================================
    SECTION 6 - READING NOTE + FOOTER
    ========================================================================== */
 .note{
@@ -685,7 +699,7 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; 1</span><span>Tokyo, New York and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; 1</span><span>Tokyo, New York and Washington, D.C.</span><span>10 min</span></p>
             <p class="e-h">Press start to pay</p>
             <p class="e-deck">Sony has asked the OCC for a national trust charter. If Comptroller Gould grants it, an entertainment company will hold bank powers and issue its own regulated dollar. The arithmetic is compelling. The precedents for this kind of venture are almost uniformly bad.</p>
             <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Trust charters</span><span class="e-open">Open &rarr;</span></p>
@@ -713,7 +727,7 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; 2</span><span>Columbus, Ohio, and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; 2</span><span>Columbus, Ohio, and Washington, D.C.</span><span>8 min</span></p>
             <p class="e-h">Nothing sits still</p>
             <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
             <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
@@ -736,7 +750,7 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; 3</span><span>Washington, Topeka and Columbus, Ohio</span></p>
+            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; 3</span><span>Washington, Topeka and Columbus, Ohio</span><span>13 min</span></p>
             <p class="e-h">The examiner who never leaves</p>
             <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
             <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
@@ -762,7 +776,7 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; 4</span><span>Fort Worth, Sacramento and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; 4</span><span>Fort Worth, Sacramento and Washington, D.C.</span><span>9 min</span></p>
             <p class="e-h">Nobody's on the file</p>
             <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
             <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
@@ -797,7 +811,7 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; 5</span><span>Cedar Falls, Iowa, and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; 5</span><span>Cedar Falls, Iowa, and Washington, D.C.</span><span>10 min</span></p>
             <p class="e-h">Assessed once, trusted often</p>
             <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
             <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
@@ -820,9 +834,9 @@ footer p{margin:0 0 .6rem}
             </svg></span>
           </span>
           <span>
-            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; 6</span><span>New York, Gaithersburg and Washington, D.C.</span></p>
+            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; 6</span><span>New York, Gaithersburg and Washington, D.C.</span><span>9 min</span></p>
             <p class="e-h">The wallet woke up</p>
-            <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. Thirty billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+            <p class="e-deck">At 3.14 in the morning, coins that had not moved since 2009 moved. More than a hundred billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
             <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
           </span>
         </a>
@@ -1163,6 +1177,24 @@ footer p{margin:0 0 .6rem}
   window.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   update();
+})();
+
+
+/* ==========================================================================
+   SECTION 8 - READ MARKS
+   Marks dispatches recorded as read by the pages themselves (localStorage).
+   ========================================================================== */
+(function(){
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem('ledger-read') || '[]'); } catch (e) { return; }
+  if (!list.length) return;
+  var links = document.querySelectorAll('.entry > a[href]');
+  for (var i = 0; i < links.length; i++){
+    var name = (links[i].getAttribute('href') || '').split('/').pop().split('#')[0].toLowerCase();
+    if (name && list.indexOf(name) !== -1){
+      links[i].parentElement.classList.add('read');
+    }
+  }
 })();
 
 </script>

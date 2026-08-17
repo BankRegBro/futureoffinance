@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nothing sits still &middot; The Ledger</title>
+<meta name="description" content="Open banking and agentic commerce turn the retail deposit base into a spot market. A Ledger dispatch filed from 2031.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nothing sits still · The Ledger">
+<meta property="og:description" content="Open banking and agentic commerce turn the retail deposit base into a spot market. A Ledger dispatch filed from 2031.">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/ledger-nothing-sits-still.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -329,25 +335,25 @@ a.ff-card:hover,a.ff-card:focus-visible{
     <div class="clock-head">
       <div>
         <p class="eyebrow">Time to a 30 percent retail outflow</p>
-        <p class="clock-state" id="clock-state">Supervisors have days to respond</p>
+        <p class="clock-state" id="clock-state">The drain finishes before anyone can answer it</p>
       </div>
       <div class="dial">
         <label for="pen">Agent-managed deposits</label>
-        <input type="range" id="pen" min="1" max="60" step="1" value="4" aria-describedby="clock-verdict">
-        <output id="pen-out" for="pen">4%</output>
+        <input type="range" id="pen" min="1" max="60" step="1" value="19" aria-describedby="clock-verdict">
+        <output id="pen-out" for="pen">19%</output>
       </div>
     </div>
 
     <div class="track" id="track">
       <div class="track-fill" id="track-fill"></div>
       <div class="window" id="window"><span>Supervisory response window</span></div>
-      <div class="track-read" id="track-read">53 hours</div>
+      <div class="track-read" id="track-read">10 hours</div>
     </div>
     <div class="track-scale"><span>0 h</span><span>24 h</span><span>48 h</span><span>72 h</span></div>
 
-    <p class="verdict" id="clock-verdict">At 2026 penetration a drain of this size took more than two days, which is comfortably inside the window a liquidity facility can be assembled in.</p>
+    <p class="verdict bad" id="clock-verdict">At 19 percent penetration the outflow completes in 10 hours, inside the window a liquidity facility can be assembled in. The institution is illiquid before the first call is returned.</p>
 
-    <p class="caption">Stylised model, not a supervisory estimate. It holds the trigger constant and varies only the share of retail deposits under automated management, to isolate what penetration alone does to the clock. Current penetration is roughly 19 percent.</p>
+    <p class="caption">Stylised model, not a supervisory estimate. It holds the trigger constant and varies only the share of retail deposits under automated management, to isolate what penetration alone does to the clock. The dial opens at today's penetration, roughly 19 percent; at the 2026 level of 4 percent the same drain took more than two days.</p>
   </section>
 
   <!-- ===== SECTION D - ARTICLE ===== -->
@@ -427,6 +433,8 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <p>"We are running a market-making desk against our own funding base," says the head of treasury at a $60bn regional, who asked not to be named because the bank has not disclosed the extent of the automation. "That is not what a deposit franchise was supposed to be. But if you quote by hand against somebody quoting by machine, you find out very quickly that you are the liquidity."</p>
 
+      <p>The bidding is not only against other banks. The platform dollars chartered after the GENIUS Act sit in the same consideration set, and an agent indifferent between an insured deposit and a fully reserved wallet balance sweetened with content has widened the field the banks are quoting into.</p>
+
       <h2>What the banks tried</h2>
 
       <p>The defensive playbook that has emerged is an attempt to manufacture, contractually, the stickiness that behaviour no longer supplies. Some of it works.</p>
@@ -449,7 +457,7 @@ a.ff-card:hover,a.ff-card:focus-visible{
 
       <p>The deeper problem, and the one regulators have found hardest to address, is that deposit insurance was engineered against a failure mode that no longer dominates.</p>
 
-      <p>The guarantee exists to break a coordination problem. If your money is protected regardless of what anyone else does, you have no rational reason to withdraw ahead of them, and the run does not start. It is an elegant solution to a psychological pathology, and for ninety years it worked.</p>
+      <p>The guarantee exists to break a coordination problem. If your money is protected regardless of what anyone else does, you have no rational reason to withdraw ahead of them, and the run does not start. It is an elegant solution to a psychological pathology, and for nearly a century it worked.</p>
 
       <p>An agent does not run because it fears loss. It moves because a threshold in its instructions was crossed, and the thresholds people set are almost never about solvency. They are about yield, and about risk indicators that trip far above the level at which insurance becomes relevant. A ratings outlook change, two quarters of elevated charge-offs, an unusual movement in a funding metric: any of these can move money out of a fully solvent, fully insured institution, because the agent was told to optimise and nobody told it that a hundred percent insured deposit needs no defending.</p>
 
@@ -791,6 +799,22 @@ a.ff-card:hover,a.ff-card:focus-visible{
     host.appendChild(row);
   });
 })();
+/* ==========================================================================
+   READ MARK - records this dispatch as read for the forward file index
+   ========================================================================== */
+(function(){
+  try {
+    var KEY = 'ledger-read';
+    var me = (location.pathname.split('/').pop() || '').split('#')[0].toLowerCase();
+    if (!me) return;
+    var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (list.indexOf(me) === -1){
+      list.push(me);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    }
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
