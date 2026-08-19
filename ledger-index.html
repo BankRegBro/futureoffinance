@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The forward file &middot; The Ledger</title>
+<meta name="description" content="The Ledger forward file: six speculative dispatches on American banking, each filed from a year that has not happened yet.">
+<meta name="theme-color" content="#0a0e1c">
+<meta property="og:title" content="The forward file &middot; The Ledger">
+<meta property="og:description" content="Six speculative dispatches on American banking, filed from 2031 and 2032.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://bankregbro.github.io/futureoffinance/hero-ledger-end.jpg">
+<meta property="og:url" content="https://bankregbro.github.io/futureoffinance/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0e1c'/%3E%3Crect x='6' y='7' width='20' height='2.6' fill='%23f4efe4'/%3E%3Crect x='6' y='13' width='13' height='1.4' fill='%23b4640f'/%3E%3Crect x='6' y='17' width='20' height='1.4' fill='%237a1f2b'/%3E%3Crect x='6' y='21' width='16' height='1.4' fill='%23b4640f'/%3E%3C/svg%3E">
+<link rel="preload" as="image" href="hero-ledger-poster.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SECTION 1 - TOKENS (warm paper, default)
+   BankRegWire design system. Reference approximation, safe to overwrite with
+   the canonical :root block.
+   ========================================================================== */
+:root{
+  --paper:#f4efe4; --raised:#fbf6ec; --sunk:#ece4d4;
+  --ink:#16150f; --ink-soft:#4a4436; --ink-faint:#7d7462;
+  --rule:#ddd2bd; --rule-strong:#b9ab90;
+  --oxblood:#7a1f2b; --copper:#b4640f; --on-accent:#fbf6ec;
+  --live:#2f6b4f; --live-wash:#e2ebe0;
+  --hold:#8a6a16; --hold-wash:#f2e9d2;
+  --dead-wash:#ece0dc;
+  --measure:34rem;
+  --step-0:1.0625rem; --step-1:1.25rem; --step-2:1.75rem;
+  --step-4:clamp(2.6rem,6.6vw,4.9rem);
+
+  /* Hero plate is dark in both themes, so it carries its own tokens. */
+  --plate:#0a0e1c; --plate-ink:#e9e4d8; --plate-soft:#a9a293;
+  --plate-rule:#2a3350; --plate-copper:#f6c81e; --plate-oxblood:#e0596c;
+  /* Scrim: navy in paper mode. --scrim-v is scaled live per scene (0.85-1.35). */
+  --scrim-rgb:10,14,28; --scrim-v:1;
+}
+/* --- SECTION 1b - night theme ------------------------------------------- */
+html.night{
+  --paper:#0a0e1c; --raised:#111729; --sunk:#070a18;
+  --ink:#e9e4d8; --ink-soft:#a9a293; --ink-faint:#797466;
+  --rule:#232c44; --rule-strong:#39456a;
+  --oxblood:#e0596c; --copper:#f6c81e; --on-accent:#070a18;
+  --live:#3ecf8e; --live-wash:#10261f;
+  --hold:#f6c81e; --hold-wash:#2a2311;
+  --dead-wash:#2b1a1d;
+  --scrim-rgb:7,10,24;
+}
+
+/* ==========================================================================
+   SECTION 2 - BASE
+   ========================================================================== */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Fraunces",Georgia,serif;
+  font-variation-settings:"SOFT" 0,"WONK" 0,"opsz" 14;
+  font-weight:400; font-size:var(--step-0); line-height:1.66;
+  transition:background .25s ease,color .25s ease;
+}
+:focus-visible{outline:2px solid var(--copper); outline-offset:3px}
+.wrap{width:min(100% - 2.5rem,62rem); margin-inline:auto}
+.skip{
+  position:absolute; left:-9999px; top:0; background:var(--oxblood);
+  color:var(--on-accent); padding:.6rem .9rem; z-index:80;
+  font-family:"Archivo",system-ui,sans-serif; font-size:.85rem;
+}
+.skip:focus{left:.75rem; top:.75rem}
+
+/* ==========================================================================
+   SECTION 3 - MARQUEE HERO
+   Full-bleed video plate with a timed three-phase story over it. Plays once
+   per visit, holds the payoff on the last frame, replay stays available.
+   If the video never arrives the plate falls back to a drawn paper field so
+   the page still reads as finished.
+   ========================================================================== */
+.hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  background:var(--plate);
+  min-height:min(86svh,760px);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:5.4rem 0 2.4rem;
+}
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  /* --scrim-v drives the readability wash; scene phases nudge it live. */
+  background:
+    linear-gradient(180deg,
+      rgba(var(--scrim-rgb),calc(.44 * var(--scrim-v))) 0%,
+      rgba(var(--scrim-rgb),calc(.06 * var(--scrim-v))) 26%,
+      rgba(var(--scrim-rgb),calc(.26 * var(--scrim-v))) 58%,
+      rgba(var(--scrim-rgb),calc(.82 * var(--scrim-v))) 100%),
+    linear-gradient(90deg,
+      rgba(var(--scrim-rgb),calc(.46 * var(--scrim-v))) 0%,
+      rgba(var(--scrim-rgb),calc(.08 * var(--scrim-v))) 46%,
+      transparent 74%);
+  transition:background .6s ease;
+}
+#bg,#poster{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:0;
+}
+#poster{z-index:1}
+.hero.playing #poster{opacity:0; transition:opacity .5s ease}
+/* Drawn fallback: shows only when the video and poster both fail to load. */
+.hero.noasset::before{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:
+    repeating-linear-gradient(180deg, rgba(233,228,216,.055) 0 1px, transparent 1px 13px),
+    radial-gradient(70% 90% at 78% 12%, rgba(246,200,30,.16) 0%, transparent 60%),
+    radial-gradient(80% 90% at 12% 88%, rgba(224,89,108,.20) 0%, transparent 62%),
+    var(--plate);
+}
+.htop{
+  position:absolute; top:0; left:0; right:0; z-index:3;
+  padding:.95rem 0 .8rem;
+  border-bottom:1px solid rgba(233,228,216,.14);
+}
+.htop .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem}
+.htop p,.htop a{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.64rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--plate-soft);
+  text-decoration:none;
+}
+.htop a{border-bottom:1px solid transparent}
+.htop a:hover{color:var(--plate-ink); border-bottom-color:var(--plate-copper)}
+.htop strong{
+  color:var(--plate-ink); font-family:"Archivo",system-ui,sans-serif;
+  font-weight:900; letter-spacing:.04em;
+}
+
+.story{position:relative; z-index:3}
+.line{
+  opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease;
+  position:absolute; bottom:0; left:0; right:0; pointer-events:none;
+}
+.line.on{opacity:1; transform:none; pointer-events:auto}
+.line[data-ph="2"].on{position:relative}
+.lkick{
+  margin:0 0 .55rem; font-family:"JetBrains Mono",monospace; font-size:.66rem;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--plate-copper);
+}
+.lbig{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+  color:var(--plate-ink); letter-spacing:-.03em; line-height:1.02;
+  font-size:clamp(1.9rem,4.6vw,3.2rem); max-width:22ch;
+}
+h1.lbig{font-size:var(--step-4); line-height:.95; letter-spacing:-.035em; max-width:20ch}
+.lsub{
+  margin:.9rem 0 0; max-width:52ch; color:var(--plate-soft);
+  font-size:var(--step-1); font-weight:300; line-height:1.45;
+}
+.cta{display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.4rem}
+.btn{
+  display:inline-block; text-decoration:none; padding:.62rem 1.1rem;
+  font-family:"JetBrains Mono",monospace; font-size:.66rem; letter-spacing:.16em;
+  text-transform:uppercase; border:1px solid var(--plate-rule);
+  color:var(--plate-ink); background:rgba(233,228,216,.06);
+  transition:background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.btn:hover{background:rgba(233,228,216,.12); border-color:var(--plate-copper); transform:translateY(-1px)}
+.btn.lead{background:var(--plate-oxblood); border-color:var(--plate-oxblood); color:#12060a; font-weight:700}
+.btn.lead:hover{background:var(--plate-copper); border-color:var(--plate-copper)}
+#replay{
+  position:absolute; right:1.1rem; bottom:1.1rem; z-index:4;
+  display:none; align-items:center; gap:.4rem; cursor:pointer;
+  background:rgba(10,14,28,.6); color:var(--plate-soft);
+  border:1px solid var(--plate-rule); padding:.4rem .7rem;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase;
+}
+#replay.show{display:inline-flex}
+#replay:hover{color:var(--plate-ink); border-color:var(--plate-copper)}
+
+/* --- SECTION 3a - PLATE FIDUCIALS ----------------------------------------
+   Corner registration marks and a film-edge code, so the held frame reads as
+   an archival plate from the future rather than a paused video. ------------ */
+.fids{position:absolute; inset:0; z-index:3; pointer-events:none}
+.fid{position:absolute; width:14px; height:14px; opacity:.5}
+.f-tl{top:3.7rem; left:1rem; border-top:1px solid var(--plate-ink); border-left:1px solid var(--plate-ink)}
+.f-tr{top:3.7rem; right:1rem; border-top:1px solid var(--plate-ink); border-right:1px solid var(--plate-ink)}
+.f-bl{bottom:1rem; left:1rem; border-bottom:1px solid var(--plate-ink); border-left:1px solid var(--plate-ink)}
+.fcode{
+  position:absolute; left:.45rem; top:50%;
+  transform:rotate(180deg) translateY(50%); writing-mode:vertical-rl;
+  font-family:"JetBrains Mono",monospace; font-size:.52rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--plate-soft); opacity:.55; white-space:nowrap;
+}
+@media (max-width:640px){.fcode{display:none}}
+
+/* ==========================================================================
+   SECTION 3b - HERO PULLQUOTE RAIL
+   One rotating line drawn from the six pieces, so the fold has one deliberate
+   moving element under the headline. Sits inside phase 2 only.
+   ========================================================================== */
+.pullrail{
+  margin-top:1.5rem; padding-top:1rem; border-top:1px solid rgba(233,228,216,.16);
+  min-height:3.4rem;
+}
+.pull{
+  margin:0; max-width:48ch;
+  opacity:0; transform:translateY(6px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.pull.on{opacity:1; transform:none}
+.pull q{
+  font-family:"Fraunces",Georgia,serif; font-style:italic; font-weight:300;
+  font-size:1.12rem; line-height:1.4; color:var(--plate-ink); quotes:none;
+}
+.pull q::before,.pull q::after{content:""}
+.pull cite{
+  display:block; margin-top:.4rem; font-style:normal;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--plate-copper);
+}
+
+/* ==========================================================================
+   SECTION 3c - DISPATCH THUMBNAILS
+   A tiny static SVG preview of each piece's signature module, seated beside
+   the monoline glyph so a plate previews the interactive inside it.
+   ========================================================================== */
+.thumb{
+  width:4.6rem; height:2.5rem; display:block;
+  background:var(--sunk); border:1px solid var(--rule);
+}
+.thumb svg{width:100%; height:100%; display:block}
+.thumb .tk-line{fill:none; stroke:var(--oxblood); stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round}
+.thumb .tk-soft{fill:none; stroke:var(--rule-strong); stroke-width:1}
+.thumb .tk-fill{fill:var(--copper); opacity:.85}
+.thumb .tk-ox{fill:var(--oxblood)}
+.entry:hover .thumb{border-color:var(--rule-strong)}
+
+/* ==========================================================================
+   SECTION 3d - STICKY NAV
+   Condensed bar that slides in once the hero has scrolled past. Scroll-spy
+   marks the year currently in view.
+   ========================================================================== */
+html{scroll-behavior:smooth}
+.topnav{
+  position:fixed; top:0; left:0; right:0; z-index:70;
+  background:color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--rule);
+  transform:translateY(-100%); transition:transform .28s ease;
+}
+.topnav.show{transform:none}
+.tn-in{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.6rem 0}
+.tn-brand{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:.85rem;
+  letter-spacing:.02em; text-transform:uppercase; color:var(--ink); text-decoration:none;
+}
+.tn-brand span{
+  font-family:"JetBrains Mono",monospace; font-weight:400; font-size:.62rem;
+  letter-spacing:.15em; color:var(--ink-faint);
+}
+.tn-links{display:flex; align-items:center; gap:.2rem}
+.tn-links a{
+  font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-faint); text-decoration:none;
+  padding:.35rem .55rem; border-bottom:2px solid transparent;
+}
+.tn-links a:hover{color:var(--ink)}
+.tn-links a.spy{color:var(--oxblood); border-bottom-color:var(--oxblood)}
+.tn-links a.tn-out{color:var(--copper)}
+#top{position:absolute; top:0}
+@media (max-width:640px){
+  .tn-brand{white-space:nowrap; font-size:.78rem}
+  .tn-brand span{display:none}
+  .tn-links a{padding:.35rem .4rem; white-space:nowrap}
+  .tn-links a[data-spy="note"]{display:none}
+}
+
+/* ==========================================================================
+   SECTION 3e - CARD REVEAL
+   Entries rise in as they enter the viewport. The rv-init class is added by
+   script, so without JS every card is simply visible.
+   ========================================================================== */
+.rv-init .entry{opacity:0; transform:translateY(14px)}
+.rv-init .entry.rv{opacity:1; transform:none; transition:opacity .5s ease, transform .5s ease}
+
+/* ==========================================================================
+   SECTION 4 - STANDING STRIP
+   The count line under the hero, in the manner of the site's status bars.
+   ========================================================================== */
+.standing{
+  border-bottom:1px solid var(--rule); background:var(--raised);
+}
+.standing .wrap{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.4rem; align-items:center;
+  padding:.75rem 0;
+  font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);
+}
+.standing b{color:var(--copper); font-weight:700}
+.standing .sright{margin-left:auto}
+
+/* ==========================================================================
+   SECTION 5 - THE FILE
+   Year rail, then one plate per dispatch. Each plate carries a bespoke
+   monoline glyph rather than an illustration, matching the site's glyph sets.
+   ========================================================================== */
+.filehead{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:1rem;
+  flex-wrap:wrap; margin:3rem 0 .2rem;
+}
+.filehead h2{
+  margin:0; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:var(--step-2); letter-spacing:-.025em; line-height:1.1;
+}
+.filehead p{
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.yearband{
+  margin-top:1.8rem; padding-top:.5rem; border-top:2px solid var(--ink);
+  display:flex; align-items:baseline; gap:.75rem;
+}
+.yearband span:first-child{
+  font-family:"Archivo",system-ui,sans-serif; font-weight:900; font-size:1.55rem;
+  letter-spacing:-.035em; color:var(--copper);
+}
+.yearband span:last-child{
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-faint);
+}
+.entries{list-style:none; margin:.7rem 0 0; padding:0; display:grid; gap:.7rem}
+.entry{
+  /* --tint is set per story below; the wash is a faint top-right corner only,
+     so the body text sits on near-flat raised paper. */
+  --tint:var(--copper);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 9%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 3%, transparent) 34%,
+      transparent 60%),
+    var(--raised);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--tint);
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.entry.t-charter { --tint:var(--copper); }
+.entry.t-deposit { --tint:var(--oxblood); }
+.entry.t-exam    { --tint:var(--live); }
+.entry.t-mortgage{ --tint:var(--rule-strong); }
+.entry.t-standard{ --tint:var(--live); }
+.entry.t-wallet  { --tint:var(--oxblood); }
+.entry:hover{
+  border-left-color:var(--oxblood); transform:translateY(-2px);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 14%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 5%, transparent) 34%,
+      transparent 60%),
+    var(--paper);
+}
+.entry > a{
+  display:grid; grid-template-columns:4.6rem 1fr; gap:1rem;
+  color:inherit; text-decoration:none; padding:1.05rem 1.15rem 1.1rem;
+}
+.media{display:flex; flex-direction:column; gap:.5rem; align-items:stretch}
+.gwrap{
+  width:4.6rem; height:4.6rem; display:grid; place-items:center;
+  background:var(--sunk); border:1px solid var(--rule); color:var(--oxblood);
+}
+.gwrap svg{width:2.5rem; height:2.5rem; display:block}
+.entry:hover .gwrap{color:var(--copper); border-color:var(--rule-strong)}
+.e-meta{
+  display:flex; flex-wrap:wrap; gap:.4rem .9rem; align-items:baseline;
+  margin:0; font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);
+}
+.e-topic{color:var(--oxblood); font-weight:700}
+.e-h{
+  margin:.35rem 0 .35rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:clamp(1.25rem,3.1vw,1.6rem); line-height:1.08; letter-spacing:-.028em;
+}
+.entry:hover .e-h{color:var(--oxblood)}
+.e-deck{margin:0 0 .75rem; font-size:.93rem; line-height:1.55; color:var(--ink-soft); max-width:62ch}
+.e-foot{
+  display:flex; flex-wrap:wrap; gap:.45rem .8rem; align-items:center; margin:0;
+  padding-top:.6rem; border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);
+}
+.chip{
+  display:inline-block; padding:.16rem .45rem; background:var(--sunk);
+  border:1px solid var(--rule); color:var(--ink-soft);
+}
+.e-open{margin-left:auto; color:var(--copper); font-weight:700}
+/* Keyboard reader path: arrow keys move a marker between plates. */
+.entry.kbd{
+  border-left-color:var(--copper);
+  background:
+    radial-gradient(150% 155% at 100% 0%,
+      color-mix(in srgb, var(--tint) 14%, transparent) 0%,
+      color-mix(in srgb, var(--tint) 5%, transparent) 34%,
+      transparent 60%),
+    var(--paper);
+}
+.entry.kbd .gwrap{color:var(--copper); border-color:var(--copper)}
+.kbdhint{
+  margin:1rem 0 0; font-family:"JetBrains Mono",monospace; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.kbdhint kbd{
+  font-family:inherit; background:var(--sunk); border:1px solid var(--rule);
+  border-radius:3px; padding:.05rem .35rem; color:var(--ink-soft);
+}
+@media (hover:none){.kbdhint{display:none}}
+
+/* ==========================================================================
+   SECTION 5c - THE THROUGH LINE
+   A vertical spine down the file: the reader's position on it is how far into
+   the future they have traveled. Year bands are stations, dispatches are
+   stops, and an oxblood thread draws down it with scroll. Desktop only.
+   ========================================================================== */
+#file{position:relative}
+.spine,.spine-fill{
+  position:absolute; top:2.1rem; bottom:.4rem; left:.55rem; width:2px;
+  background:var(--rule); display:none;
+}
+.spine-fill{background:var(--oxblood); bottom:auto; height:0; z-index:1}
+.origin{
+  display:none; margin:2.4rem 0 -1rem; position:relative;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-faint);
+}
+.o-dot{
+  position:absolute; width:9px; height:9px; border-radius:50%;
+  background:var(--ink); top:.05rem;
+}
+@media (min-width:900px){
+  #file{padding-left:2.6rem}
+  .spine,.spine-fill,.origin{display:block}
+  .origin{padding-left:0}
+  .o-dot{left:-2.34rem}
+  .yearband{position:relative}
+  .yearband::before{
+    content:""; position:absolute; left:-2.37rem; top:.62rem;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--copper); z-index:2;
+  }
+  .entry{position:relative}
+  .entry::before{
+    content:""; position:absolute; left:-2.3rem; top:1.55rem;
+    width:7px; height:7px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--tint); z-index:2;
+  }
+}
+
+/* ==========================================================================
+   SECTION 5d - GHOST NUMERALS
+   The dispatch number as a huge outlined archival numeral in the card's empty
+   right band, in the card's own tint. Desktop only; sits behind the content.
+   ========================================================================== */
+@media (min-width:900px){
+  .entry::after{
+    content:attr(data-no); position:absolute; right:1.4rem; top:50%;
+    transform:translateY(-52%);
+    font-family:"Archivo",system-ui,sans-serif; font-weight:900;
+    font-size:8.6rem; line-height:1; letter-spacing:-.04em;
+    color:transparent;
+    -webkit-text-stroke:2px color-mix(in srgb, var(--tint) 26%, transparent);
+    pointer-events:none; z-index:0;
+  }
+  .entry:hover::after{-webkit-text-stroke-color:color-mix(in srgb, var(--tint) 40%, transparent)}
+  .entry > a{position:relative; z-index:1}
+}
+
+/* ==========================================================================
+   SECTION 5e - SELF-DRAWING THUMBNAILS
+   The signature-module previews draw themselves once on hover or focus: the
+   instrument line strokes in, marks and bars arrive after it.
+   ========================================================================== */
+.thumb .tk-line{stroke-dasharray:1 0}
+@media (prefers-reduced-motion:no-preference){
+  .entry:hover .thumb .tk-line,
+  .entry:focus-within .thumb .tk-line{
+    stroke-dasharray:1; stroke-dashoffset:1;
+    animation:tkdraw .55s ease forwards;
+  }
+  .entry:hover .thumb circle,
+  .entry:focus-within .thumb circle{
+    opacity:0; animation:tkmark .25s ease .4s forwards;
+  }
+  .entry:hover .thumb rect,
+  .entry:focus-within .thumb rect{
+    transform-box:fill-box; transform-origin:bottom;
+    transform:scaleY(0); animation:tkrise .4s ease forwards;
+  }
+  .entry:hover .thumb rect:nth-of-type(2){animation-delay:.07s}
+  .entry:hover .thumb rect:nth-of-type(3){animation-delay:.14s}
+  .entry:hover .thumb rect:nth-of-type(4){animation-delay:.21s}
+  .entry:hover .thumb rect:nth-of-type(5){animation-delay:.28s}
+  .entry:hover .thumb rect:nth-of-type(6){animation-delay:.35s}
+}
+@keyframes tkdraw{to{stroke-dashoffset:0}}
+@keyframes tkmark{to{opacity:1}}
+@keyframes tkrise{to{transform:scaleY(1)}}
+
+/* ==========================================================================
+   SECTION 5f - READ MARKS
+   Dispatches the reader has opened get a small copper tag and, on desktop,
+   a filled node on the through line. Recorded per browser in localStorage.
+   ========================================================================== */
+.entry.read .e-meta::after{
+  content:"Read"; display:inline-block; padding:.1rem .4rem;
+  border:1px solid var(--copper); color:var(--copper); font-weight:700;
+}
+@media (min-width:900px){
+  .entry.read::before{background:var(--tint); border-color:var(--tint)}
+}
+
+/* ==========================================================================
+   SECTION 6 - READING NOTE + FOOTER
+   ========================================================================== */
+.note{
+  margin:2.8rem 0 0; padding:1.15rem 1.25rem; background:var(--sunk);
+  border-left:3px solid var(--copper);
+}
+.note h3{
+  margin:0 0 .45rem; font-family:"Archivo",system-ui,sans-serif; font-weight:800;
+  font-size:1rem; letter-spacing:-.01em;
+}
+.note p{margin:0; font-size:.92rem; line-height:1.6; color:var(--ink-soft); max-width:70ch}
+.note p + p{margin-top:.6rem}
+footer{
+  margin:3.2rem 0 0; padding:1.6rem 0 3.2rem; border-top:2px solid var(--ink);
+  font-size:.8rem; line-height:1.6; color:var(--ink-faint);
+}
+.fgrid{
+  display:grid; grid-template-columns:1.6fr 1fr .8fr; gap:2rem;
+}
+.fabout p{max-width:52ch}
+.fhead{
+  margin:0 0 .55rem; font-family:"JetBrains Mono",monospace; font-size:.62rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);
+}
+.flist{list-style:none; margin:0; padding:0; display:grid; gap:.35rem}
+.flist a{
+  color:var(--ink-soft); text-decoration:none; border-bottom:1px solid transparent;
+}
+.flist a:hover{color:var(--oxblood); border-bottom-color:var(--rule-strong)}
+.flist a span{
+  font-family:"JetBrains Mono",monospace; font-size:.66rem; color:var(--copper);
+  margin-right:.3rem;
+}
+.fbase{
+  margin:1.8rem 0 0; padding-top:.9rem; border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.15em;
+  text-transform:uppercase;
+}
+@media (max-width:760px){.fgrid{grid-template-columns:1fr; gap:1.4rem}}
+footer .sig{
+  font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-soft); margin:0 0 .6rem;
+}
+footer p{margin:0 0 .6rem}
+
+#theme{
+  position:fixed; right:1rem; bottom:1rem; z-index:60;
+  background:var(--raised); color:var(--ink-soft);
+  border:1px solid var(--rule-strong); padding:.42rem .7rem;
+  font-family:"JetBrains Mono",monospace; font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase; cursor:pointer;
+}
+#theme:hover{color:var(--ink); border-color:var(--oxblood)}
+
+/* ==========================================================================
+   SECTION 7 - RESPONSIVE + MOTION
+   ========================================================================== */
+@media (max-width:640px){
+  .hero{min-height:min(78svh,620px); padding-top:4.6rem}
+  .entry > a{grid-template-columns:3.4rem 1fr; gap:.85rem; padding:.9rem}
+  .gwrap{width:3.4rem; height:3.4rem}
+  .gwrap svg{width:1.9rem; height:1.9rem}
+  .thumb{width:3.4rem; height:1.9rem}
+  .e-open{margin-left:0}
+  .standing .sright{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition-duration:.01ms !important; animation-duration:.01ms !important}
+  .hero::after{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#file">Skip to the file</a>
+
+<!-- ===== SECTION A0 - STICKY NAV (appears after the hero) ===== -->
+<nav class="topnav" id="topnav" aria-label="File navigation">
+  <div class="wrap tn-in">
+    <a class="tn-brand" href="#top">The Ledger <span>&middot; Forward file</span></a>
+    <div class="tn-links">
+      <a href="#y2031" data-spy="y2031">2031</a>
+      <a href="#y2032" data-spy="y2032">2032</a>
+      <a href="#note" data-spy="note">How to read</a>
+      <a class="tn-out" href="https://bankregwire.com/">BankRegWire</a>
+    </div>
+  </div>
+</nav>
+<button type="button" id="theme">Night</button>
+
+<!-- ===== SECTION A - MARQUEE HERO ===== -->
+<section class="hero" id="hero">
+  <span id="top"></span>
+  <div class="fids" aria-hidden="true">
+    <i class="fid f-tl"></i><i class="fid f-tr"></i><i class="fid f-bl"></i>
+    <span class="fcode">LDGR &middot; FWD FILE &middot; PLATE I &middot; 2031&ndash;2032 &middot; 24 FPS</span>
+  </div>
+  <video id="bg" muted playsinline preload="auto" aria-hidden="true">
+    <source src="hero-ledger-1080.webm" type="video/webm">
+    <source src="hero-ledger-1080.mp4" type="video/mp4">
+  </video>
+  <img id="poster" src="hero-ledger-poster.jpg" alt="" aria-hidden="true">
+
+  <div class="htop">
+    <div class="wrap">
+      <p><strong>The Ledger</strong> &middot; Forward file</p>
+      <p><a href="https://bankregwire.com/">BankRegWire</a></p>
+    </div>
+  </div>
+
+  <div class="wrap story">
+    <div class="line" data-ph="0">
+      <p class="lkick">Every dispatch starts here</p>
+      <p class="lbig">Everything in this file is on the record.</p>
+    </div>
+    <div class="line" data-ph="1">
+      <p class="lkick">And then</p>
+      <p class="lbig">The record keeps running after the reporting stops.</p>
+    </div>
+    <div class="line" data-ph="2">
+      <p class="lkick">The Ledger &middot; Forward file</p>
+      <h1 class="lbig">Six dispatches from years that have not happened</h1>
+      <p class="lsub">American banking in 2031 and 2032, each piece reported from inside the year it is filed from. Every one begins with something already on the record in 2026 and follows it to where it plausibly ends.</p>
+      <div class="cta">
+        <a class="btn lead" href="#file">Open the file</a>
+        <a class="btn" href="ledger-press-start-to-pay.html">Start with the charter</a>
+      </div>
+      <div class="pullrail" aria-hidden="true">
+        <figure class="pull on">
+          <q>Nobody had decided to run. Several hundred thousand pieces of software had independently concluded that a better rate was available.</q>
+          <cite>Nothing sits still &middot; 2031</cite>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" id="replay" aria-label="Replay the opening">Replay</button>
+</section>
+
+<!-- ===== SECTION B - STANDING STRIP ===== -->
+<div class="standing">
+  <div class="wrap">
+    <span><b>Six</b> dispatches</span>
+    <span>Filed from 2031 and 2032</span>
+    <span>Vol. I</span>
+    <span class="sright">Read in any order</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== SECTION C - THE FILE ===== -->
+  <main id="file">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="spine-fill" id="spinefill" aria-hidden="true"></div>
+    <p class="origin"><span class="o-dot" aria-hidden="true"></span>2026 &middot; The record as it stands</p>
+    <div class="filehead">
+      <h2>The file, in sequence</h2>
+      <p>Ordered by the year each piece is filed from</p>
+    </div>
+    <p class="kbdhint">Read by keyboard: <kbd>&uarr;</kbd> <kbd>&darr;</kbd> to move, <kbd>Enter</kbd> to open</p>
+
+    <!-- --- 2031 ---------------------------------------------------------- -->
+    <div class="yearband" id="y2031"><span>2031</span><span>The machinery in place</span></div>
+    <ol class="entries">
+      <li class="entry t-charter" data-no="01">
+        <a href="ledger-press-start-to-pay.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="16" width="36" height="20" rx="8"></rect>
+              <path d="M13 22v8M9 26h8"></path>
+              <circle cx="33" cy="26" r="6"></circle>
+              <path d="M33 22v8M30.5 24.2h5M30.5 27.8h5"></path>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 12h72M10 25h72M10 38h72"></path>
+              <path class="tk-line" pathLength="1" d="M14 38C30 38 30 12 46 12S62 38 78 38"></path>
+              <circle class="tk-ox" cx="46" cy="12" r="3"></circle>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Chartering</span><span>Dispatch &#8470; 1</span><span>Tokyo, New York and Washington, D.C.</span><span>10 min</span></p>
+            <p class="e-h">Press start to pay</p>
+            <p class="e-deck">The OCC conditionally approved Sony's national trust charter in July 2026. Four years into operation, Connectia Trust has beaten the base rate that killed every merchant-issued wallet before it, by accepting the one condition that made approval possible.</p>
+            <p class="e-foot"><span class="chip">The loop</span><span class="chip">GENIUS Act</span><span class="chip">Verdict ledger</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+      <li class="entry t-deposit" data-no="02">
+        <a href="ledger-nothing-sits-still.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 18l10-6 10 6"></path>
+              <path d="M10 18v14M26 18v14M8 34h20"></path>
+              <path d="M14 22v8M22 22v8"></path>
+              <path d="M32 20l6 6-6 6M34 26h8"></path>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-line" pathLength="1" d="M10 12H54L82 42"></path>
+              <path class="tk-soft" d="M54 12v30"></path>
+              <circle class="tk-ox" cx="82" cy="42" r="3"></circle>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Deposits</span><span>Dispatch &#8470; 2</span><span>Columbus, Ohio, and Washington, D.C.</span><span>8 min</span></p>
+            <p class="e-h">Nothing sits still</p>
+            <p class="e-deck">Open banking handed the keys to software. Agentic commerce gave that software a reason to move money every day. What is left of the deposit franchise is a spot market, and the banks are bidding against machines.</p>
+            <p class="e-foot"><span class="chip">The drain clock</span><span class="chip">Liquidity</span><span class="chip">Open banking</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+      <li class="entry t-exam" data-no="03">
+        <a href="ledger-the-examiner-who-never-leaves.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 10h-4v28h4M34 10h4v28h-4"></path>
+              <path d="M15 24c3-5 6-7.5 9-7.5s6 2.5 9 7.5c-3 5-6 7.5-9 7.5s-6-2.5-9-7.5z"></path>
+              <circle cx="24" cy="24" r="3"></circle>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 40h72"></path>
+              <path class="tk-line" pathLength="1" d="M12 40C40 40 52 16 80 12"></path>
+              <circle class="tk-fill" cx="26" cy="35" r="2.6"></circle>
+              <circle class="tk-ox" cx="66" cy="16" r="2.6"></circle>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Supervision</span><span>Dispatch &#8470; 3</span><span>Washington, Topeka and Columbus, Ohio</span><span>13 min</span></p>
+            <p class="e-h">The examiner who never leaves</p>
+            <p class="e-deck">Continuous API supervision replaced the periodic exam. Detection is faster, burden is lighter, and almost everyone who fought it has come round. What nobody has resolved is what happens when four thousand banks are all managing to the same dashboard.</p>
+            <p class="e-foot"><span class="chip">The detection clock</span><span class="chip">Exam cycle</span><span class="chip">Model risk</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+      <li class="entry t-mortgage" data-no="04">
+        <a href="ledger-nobodys-on-the-file.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8h16l8 8v24H12z"></path>
+              <path d="M28 8v8h8"></path>
+              <path d="M17 24h14M17 29h14" stroke-dasharray="3 3"></path>
+              <path d="M17 34h6"></path>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <rect class="tk-ox" x="12" y="8" width="5" height="34"></rect>
+              <rect class="tk-fill" x="24" y="20" width="5" height="22"></rect>
+              <rect class="tk-fill" x="36" y="28" width="5" height="14"></rect>
+              <rect class="tk-fill" x="48" y="34" width="5" height="8"></rect>
+              <rect class="tk-fill" x="60" y="38" width="5" height="4"></rect>
+              <rect class="tk-fill" x="72" y="40" width="5" height="2"></rect>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Mortgage</span><span>Dispatch &#8470; 4</span><span>Fort Worth, Sacramento and Washington, D.C.</span><span>9 min</span></p>
+            <p class="e-h">Nobody's on the file</p>
+            <p class="e-deck">Automated underwriting took the cost of originating a mortgage from $8,400 to under $200 and the time from six weeks to an afternoon. It also took roughly two hundred and fifty thousand jobs, and left a licensing regime with nobody in it to license.</p>
+            <p class="e-foot"><span class="chip">Hands on the file</span><span class="chip">SAFE Act</span><span class="chip">State licensing</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+    </ol>
+
+    <!-- --- 2032 ---------------------------------------------------------- -->
+    <div class="yearband" id="y2032"><span>2032</span><span>What held and what did not</span></div>
+    <ol class="entries">
+      <li class="entry t-standard" data-no="05">
+        <a href="Standard_Setting.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="24" cy="24" r="5"></circle>
+              <circle cx="10" cy="12" r="2.4"></circle>
+              <circle cx="38" cy="12" r="2.4"></circle>
+              <circle cx="10" cy="36" r="2.4"></circle>
+              <circle cx="38" cy="36" r="2.4"></circle>
+              <path d="M12.1 13.8l8 7M35.9 13.8l-8 7M12.1 34.2l8-7M35.9 34.2l-8-7"></path>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M46 25 14 10M46 25 14 25M46 25 14 40M46 25 30 8M46 25 30 42"></path>
+              <circle class="tk-ox" cx="46" cy="25" r="4"></circle>
+              <circle class="tk-fill" cx="14" cy="10" r="2"></circle>
+              <circle class="tk-fill" cx="14" cy="25" r="2"></circle>
+              <circle class="tk-fill" cx="14" cy="40" r="2"></circle>
+              <circle class="tk-fill" cx="30" cy="8" r="2"></circle>
+              <circle class="tk-fill" cx="30" cy="42" r="2"></circle>
+              <path class="tk-line" pathLength="1" d="M58 25h22"></path>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Third-party risk</span><span>Dispatch &#8470; 5</span><span>Cedar Falls, Iowa, and Washington, D.C.</span><span>10 min</span></p>
+            <p class="e-h">Assessed once, trusted often</p>
+            <p class="e-deck">A modest standard-setting body, seeded by the FDIC in 2026, has done what a decade of guidance could not: made it economically rational for a small bank to try something new.</p>
+            <p class="e-foot"><span class="chip">The collapse</span><span class="chip">Vendor diligence</span><span class="chip">Community banks</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+      <li class="entry t-wallet" data-no="06">
+        <a href="ledger-the-wallet-woke-up.html">
+          <span class="media" aria-hidden="true">
+            <span class="gwrap"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="12" y="24" width="24" height="16" rx="2"></rect>
+              <path d="M18 24v-6a6 6 0 0 1 11-3.2"></path>
+              <path d="M24 30v4"></path>
+              <path d="M33 13l4 4M37 13l-4 4"></path>
+            </svg></span>
+            <span class="thumb"><svg viewBox="0 0 92 50" preserveAspectRatio="none" aria-hidden="true">
+              <path class="tk-soft" d="M10 38h72"></path>
+              <path class="tk-line" pathLength="1" d="M10 34v8M26 34v8M42 10v32M58 30v12M74 26v16"></path>
+              <circle class="tk-ox" cx="42" cy="10" r="3"></circle>
+            </svg></span>
+          </span>
+          <span>
+            <p class="e-meta"><span class="e-topic">Cryptography</span><span>Dispatch &#8470; 6</span><span>New York, Gaithersburg and Washington, D.C.</span><span>9 min</span></p>
+            <p class="e-h">The wallet woke up</p>
+            <p class="e-deck">At 3:14 in the morning, coins that had not moved since 2009 moved. More than a hundred billion dollars went to an exchange, and the transfer itself was the announcement: the mathematics protecting the financial system had stopped working, and somebody wanted that known.</p>
+            <p class="e-foot"><span class="chip">The first 72 hours</span><span class="chip">Post-quantum</span><span class="chip">Code signing</span><span class="e-open">Open &rarr;</span></p>
+          </span>
+        </a>
+      </li>
+    </ol>
+
+    <!-- ===== SECTION D - READING NOTE ===== -->
+    <div class="note" id="note">
+      <h3>How to read the file</h3>
+      <p>The pieces are independent. Each carries its own reporting, its own interactive modules and its own disclaimer, and none depends on the others for its argument.</p>
+      <p>They do share a world. The charter approved in 2026 is compounding by the time it sets the deposit market of 2031, and the supervisory framework built to catch the failures of 2023 is the thing still running when the cryptography gives way in 2032. Read in sequence, the file is one argument about how fast the plumbing changes and how slowly the rules follow.</p>
+    </div>
+  </main>
+
+  <!-- ===== SECTION E - FOOTER ===== -->
+  <footer class="ftr">
+    <div class="fgrid">
+      <div class="fcol fabout">
+        <p class="sig">The Ledger &middot; Forward file</p>
+        <p>Speculative pieces built from primary-source reporting, filed from a date that has not happened yet. Every dispatch is a work of narrative fiction; each identifies, in its own footer, which elements are drawn from the real record and which are extrapolation. Named institutions, individuals, figures and outcomes dated after 2026 are fictional constructs unless a piece says otherwise.</p>
+      </div>
+      <div class="fcol">
+        <p class="fhead">The dispatches</p>
+        <ul class="flist">
+          <li><a href="ledger-press-start-to-pay.html"><span>&#8470; 1</span> Press start to pay</a></li>
+          <li><a href="ledger-nothing-sits-still.html"><span>&#8470; 2</span> Nothing sits still</a></li>
+          <li><a href="ledger-the-examiner-who-never-leaves.html"><span>&#8470; 3</span> The examiner who never leaves</a></li>
+          <li><a href="ledger-nobodys-on-the-file.html"><span>&#8470; 4</span> Nobody's on the file</a></li>
+          <li><a href="Standard_Setting.html"><span>&#8470; 5</span> Assessed once, trusted often</a></li>
+          <li><a href="ledger-the-wallet-woke-up.html"><span>&#8470; 6</span> The wallet woke up</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <p class="fhead">Elsewhere</p>
+        <ul class="flist">
+          <li><a href="https://bankregwire.com/">BankRegWire</a></li>
+          <li><a href="https://bankregwire.com/catalogue.html">The catalogue</a></li>
+          <li><a href="https://bankregwire.com/navigator.html">The Navigator</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fbase">The Ledger is an instrument of BankRegWire.</p>
+  </footer>
+</div>
+
+<script>
+/* ==========================================================================
+   SECTION 1 - THEME
+   Site convention: bottom-right toggle, localStorage brw-theme.
+   ========================================================================== */
+(function(){
+  var btn = document.getElementById('theme');
+  var root = document.documentElement;
+  function apply(mode){
+    var night = mode === 'dark';
+    root.classList.toggle('night', night);
+    btn.textContent = night ? 'Paper' : 'Night';
+    btn.setAttribute('aria-label', night ? 'Switch to paper theme' : 'Switch to night theme');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('brw-theme'); } catch (e) { saved = null; }
+  apply(saved === 'dark' ? 'dark' : 'light');
+  btn.addEventListener('click', function(){
+    var next = root.classList.contains('night') ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('brw-theme', next); } catch (e) {}
+  });
+})();
+
+/* ==========================================================================
+   SECTION 2 - TIMED STORY
+   Plays once on every visit, holds the payoff on the last frame, and shows
+   the payoff immediately if autoplay is blocked or the asset is missing.
+   ========================================================================== */
+(function(){
+  var v = document.getElementById('bg');
+  var hero = document.getElementById('hero');
+  var poster = document.getElementById('poster');
+  var replay = document.getElementById('replay');
+  var lines = [].slice.call(document.querySelectorAll('.line'));
+  var cur = -1, done = false;
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+
+  /* Scrim intensity per scene. The workshop is already dim, so it needs little
+     wash; the transit blows out bright, so it needs the most; the city holds a
+     middle wash that keeps the payoff copy legible against the skyline. */
+  var SCRIM = { 0: 0.88, 1: 1.32, 2: 1.06 };
+  function ph(p){
+    if (p === cur) return;
+    cur = p;
+    lines.forEach(function(l){ l.classList.toggle('on', +l.dataset.ph === p); });
+    hero.style.setProperty('--scrim-v', SCRIM[p] != null ? SCRIM[p] : 1);
+  }
+  function tick(){
+    var t = v.currentTime || 0;
+    ph(done ? 2 : (t < 2.0 ? 0 : (t < 5.9 ? 1 : 2)));
+    requestAnimationFrame(tick);
+  }
+
+  /* Missing assets must not leave a black rectangle. */
+  var videoOk = false, posterOk = false;
+  function assetCheck(){
+    if (!videoOk && !posterOk) hero.classList.add('noasset');
+  }
+  v.addEventListener('loadeddata', function(){ videoOk = true; hero.classList.remove('noasset'); });
+  v.addEventListener('playing', function(){ hero.classList.add('playing'); });
+  v.addEventListener('error', function(){ done = true; assetCheck(); });
+  poster.addEventListener('load', function(){ posterOk = true; });
+  poster.addEventListener('error', function(){ poster.style.display = 'none'; assetCheck(); });
+  setTimeout(assetCheck, 2500);
+
+  /* On end the video holds its own last frame, so the poster must stay hidden.
+     Dropping the playing class here would fade the opening workshop back over
+     the city. Repoint the poster instead, so any later reveal is the city too. */
+  v.addEventListener('ended', function(){
+    done = true;
+    ph(2);
+    poster.src = 'hero-ledger-end.jpg';
+    replay.classList.add('show');
+  });
+  v.addEventListener('play', function(){
+    done = false;
+    replay.classList.remove('show');
+  });
+  /* When the clip cannot run, the page should rest on the frame it would have
+     ended on, so the payoff copy always sits over the city. */
+  function restOnEnd(){
+    poster.src = 'hero-ledger-end.jpg';
+    poster.style.display = '';
+    hero.classList.remove('playing');
+  }
+  /* A replay after a blocked first attempt has to put the video back on top. */
+  function showVideo(){
+    if (videoOk) hero.classList.add('playing');
+  }
+
+  /* play() returns undefined on older engines, so the promise is optional. */
+  function tryPlay(){
+    var p = null;
+    try { p = v.play ? v.play() : null; } catch (e) { p = null; }
+    if (p && p.catch){
+      p.catch(function(){ done = true; restOnEnd(); replay.classList.add('show'); });
+    }
+  }
+
+  replay.addEventListener('click', function(){
+    try { v.currentTime = 0; } catch (e) {}
+    done = false;
+    replay.classList.remove('show');
+    showVideo();
+    tryPlay();
+  });
+
+  if (reduce){
+    done = true;
+    ph(2);
+    restOnEnd();
+    replay.classList.add('show');
+  } else {
+    tryPlay();
+    requestAnimationFrame(tick);
+  }
+})();
+
+/* ==========================================================================
+   SECTION 3 - PULLQUOTE RAIL
+   Rotates one line from the six pieces under the headline. Pauses on hover or
+   focus of the hero, and holds still under reduced motion.
+   ========================================================================== */
+(function(){
+  var fig = document.querySelector('.pull');
+  var hero = document.getElementById('hero');
+  if (!fig || !hero) return;
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+
+  var quotes = [
+    ['Nobody had decided to run. Several hundred thousand pieces of software had independently concluded that a better rate was available.', 'Nothing sits still \u00b7 2031'],
+    ['The activity the licence was written to govern is now performed by software with a person nominally attached.', "Nobody's on the file \u00b7 2031"],
+    ['Nobody adopted a stablecoin. People kept doing exactly what they had been doing, and one day the balance started paying them for it.', 'Press start to pay \u00b7 2031'],
+    ['A liquidity run does not give the regime room, which is the finding the whole framework was built on.', 'The examiner who never leaves \u00b7 2031'],
+    ['The transfer itself was the announcement: the mathematics protecting the financial system had stopped working.', 'The wallet woke up \u00b7 2032'],
+    ['One assessment, refreshed on a cycle and published to a registry any bank can consult.', 'Assessed once, trusted often \u00b7 2032']
+  ];
+  var q = fig.querySelector('q');
+  var cite = fig.querySelector('cite');
+  var i = 0, timer = 0, paused = false;
+
+  function show(n){
+    fig.classList.remove('on');
+    setTimeout(function(){
+      q.textContent = quotes[n][0];
+      cite.textContent = quotes[n][1];
+      fig.classList.add('on');
+    }, reduce ? 0 : 500);
+  }
+  function step(){
+    if (paused) return;
+    i = (i + 1) % quotes.length;
+    show(i);
+  }
+  function play(){ if (!reduce && !timer) timer = setInterval(step, 5200); }
+  function halt(){ if (timer){ clearInterval(timer); timer = 0; } }
+
+  hero.addEventListener('mouseenter', function(){ paused = true; });
+  hero.addEventListener('mouseleave', function(){ paused = false; });
+  hero.addEventListener('focusin', function(){ paused = true; });
+  hero.addEventListener('focusout', function(){ paused = false; });
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) halt(); else play();
+  });
+  play();
+})();
+
+/* ==========================================================================
+   SECTION 4 - KEYBOARD READER PATH
+   Arrow keys move a marker between dispatch plates; Enter opens the marked one.
+   Ignored while typing in a field or when a modifier is held.
+   ========================================================================== */
+(function(){
+  var entries = [].slice.call(document.querySelectorAll('.entry'));
+  if (!entries.length) return;
+  var idx = -1;
+
+  function mark(n, scroll){
+    if (idx >= 0) entries[idx].classList.remove('kbd');
+    idx = (n + entries.length) % entries.length;
+    var el = entries[idx];
+    el.classList.add('kbd');
+    var link = el.querySelector('a');
+    if (link) { try { link.focus({ preventScroll: !scroll }); } catch (e) { link.focus(); } }
+    if (scroll && el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+
+    if (e.key === 'ArrowDown' || e.key === 'j'){
+      e.preventDefault(); mark(idx < 0 ? 0 : idx + 1, true);
+    } else if (e.key === 'ArrowUp' || e.key === 'k'){
+      e.preventDefault(); mark(idx < 0 ? entries.length - 1 : idx - 1, true);
+    } else if (e.key === 'Enter' && idx >= 0){
+      var link = entries[idx].querySelector('a');
+      if (link && document.activeElement !== link){ e.preventDefault(); link.click(); }
+    }
+  });
+
+  /* Keep the marker in step if the reader tabs to a plate directly. */
+  entries.forEach(function(el, n){
+    el.addEventListener('focusin', function(){
+      if (idx >= 0 && idx !== n) entries[idx].classList.remove('kbd');
+      idx = n; el.classList.add('kbd');
+    });
+  });
+})();
+
+/* ==========================================================================
+   SECTION 5 - STICKY NAV + SCROLL SPY
+   The bar slides in once the hero is mostly gone; the year link for the band
+   nearest the top of the viewport carries the marker.
+   ========================================================================== */
+(function(){
+  var nav = document.getElementById('topnav');
+  var hero = document.getElementById('hero');
+  if (!nav || !hero) return;
+
+  function onScroll(){
+    var gone = hero.getBoundingClientRect().bottom < 80;
+    nav.classList.toggle('show', gone);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var links = [].slice.call(nav.querySelectorAll('[data-spy]'));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.spy); }).filter(Boolean);
+  function spy(){
+    var pick = null;
+    targets.forEach(function(t){
+      if (t.getBoundingClientRect().top <= 140) pick = t.id;
+    });
+    links.forEach(function(a){ a.classList.toggle('spy', a.dataset.spy === pick); });
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  spy();
+})();
+
+/* ==========================================================================
+   SECTION 6 - CARD REVEAL
+   Entries rise in on first approach. Skipped under reduced motion and on
+   engines without IntersectionObserver, where cards are simply visible.
+   ========================================================================== */
+(function(){
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+  if (reduce || !('IntersectionObserver' in window)) return;
+
+  document.body.classList.add('rv-init');
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('rv'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+
+  [].slice.call(document.querySelectorAll('.entry')).forEach(function(el){ io.observe(el); });
+})();
+
+/* ==========================================================================
+   SECTION 7 - THE THROUGH LINE
+   The oxblood thread draws down the spine with scroll: reading depth is
+   travel depth. Skipped on small screens and under reduced motion, where the
+   static spine alone remains.
+   ========================================================================== */
+(function(){
+  var fill = document.getElementById('spinefill');
+  var file = document.getElementById('file');
+  if (!fill || !file) return;
+  var reduce = false, wide = false;
+  try {
+    reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wide = window.matchMedia('(min-width: 900px)').matches;
+  } catch (e) { return; }
+  if (reduce) return;
+
+  var spine = document.querySelector('.spine');
+  function update(){
+    if (!window.matchMedia('(min-width: 900px)').matches){ fill.style.height = '0px'; return; }
+    var r = spine.getBoundingClientRect();
+    if (r.height <= 0) return;
+    /* Anchor at 55% of the viewport: the thread reaches a stop as it reads. */
+    var anchor = window.innerHeight * 0.55;
+    var p = (anchor - r.top) / r.height;
+    p = Math.max(0, Math.min(1, p));
+    fill.style.height = (p * r.height) + 'px';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
+
+/* ==========================================================================
+   SECTION 8 - READ MARKS
+   Marks dispatches recorded as read by the pages themselves (localStorage).
+   ========================================================================== */
+(function(){
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem('ledger-read') || '[]'); } catch (e) { return; }
+  if (!list.length) return;
+  var links = document.querySelectorAll('.entry > a[href]');
+  for (var i = 0; i < links.length; i++){
+    var name = (links[i].getAttribute('href') || '').split('/').pop().split('#')[0].toLowerCase();
+    if (name && list.indexOf(name) !== -1){
+      links[i].parentElement.classList.add('read');
+    }
+  }
+})();
+
+</script>
+</body>
+</html>
